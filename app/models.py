@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 
 class DidCreateRequest(BaseModel):
     payload: Dict[str, Any]
+    collection: Optional[str] = None
 
 class DidUpdateRequest(BaseModel):
     did: str

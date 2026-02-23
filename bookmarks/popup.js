@@ -1,12 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     const bookmarkBtn = document.getElementById('bookmarkBtn');
     const apiUrlInput = document.getElementById('apiUrl');
+    const collectionInput = document.getElementById('collection');
     const statusDiv = document.getElementById('status');
 
     // Load saved API URL if any
-    chrome.storage.local.get(['apiUrl'], (result) => {
+    chrome.storage.local.get(['apiUrl', 'collection'], (result) => {
         if (result.apiUrl) {
             apiUrlInput.value = result.apiUrl;
+        }
+        if (result.collection) {
+            collectionInput.value = result.collection;
         }
     });
 
@@ -17,8 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
             apiUrlInput.value = apiUrl;
         }
 
+        let collection = collectionInput.value.trim();
+        if (!collection) {
+            collection = 'bookmarks';
+            collectionInput.value = collection;
+        }
+
         // Save API URL for future use
-        chrome.storage.local.set({ apiUrl: apiUrl });
+        chrome.storage.local.set({ apiUrl: apiUrl, collection: collection });
 
         bookmarkBtn.disabled = true;
         bookmarkBtn.textContent = 'Processing...';
@@ -37,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Send payload to background script to create DID
             chrome.runtime.sendMessage(
-                { action: 'createDID', payload: payload, apiUrl: apiUrl },
+                { action: 'createDID', payload: payload, apiUrl: apiUrl, collection: collection },
                 (response) => {
                     bookmarkBtn.disabled = false;
                     bookmarkBtn.textContent = 'Bookmark Page';

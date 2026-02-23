@@ -37,6 +37,24 @@ class QdrantService:
         # Determine collection if not explicitly provided
         if not collection:
             collection = self._determine_collection(payload)
+            
+        # Ensure collection exists
+        if collection not in self.collections:
+            try:
+                self.client.get_collection(collection)
+                self.collections.append(collection)
+            except Exception:
+                example_embedding = list(self.encoder.embed(["test"]))[0]
+                dimension = len(example_embedding)
+                self.client.create_collection(
+                    collection_name=collection,
+                    vectors_config=models.VectorParams(
+                        size=dimension,
+                        distance=models.Distance.COSINE
+                    )
+                )
+                self.collections.append(collection)
+                print(f"Created Qdrant collection dynamically: {collection}")
         
         # Convert payload to a text string for embedding
         text_content = self._extract_text_content(payload)
@@ -58,49 +76,54 @@ class QdrantService:
         )
         print(f"Upserted DID {did} to Qdrant collection: {collection}")
 
-    def search_documents(self, query_text: str, collection: str = "dids", limit: int = 5) -> List[Dict[str, Any]]:
-        # Ensure collection is valid
-        if collection not in self.collections:
-            collection = "dids"
+    def search_documents(self, query_text: str, collection: str = None, limit: int = 5) -> List[Dict[str, Any]]:
+        # If collection is "all" or None, search across all collections
+        collections_to_search = [collection] if collection and collection in self.collections else self.collections
 
         try:
             query_vector = list(self.encoder.embed([query_text]))[0]
+            all_results = []
             
-            # Use query_points which is the modern and more robust API
-            search_result = self.client.query_points(
-                collection_name=collection,
-                query=query_vector.tolist(),
-                limit=limit,
-                with_payload=True
-            ).points
+            for coll in collections_to_search:
+                try:
+                    # Use query_points which is the modern and more robust API
+                    search_result = self.client.query_points(
+                        collection_name=coll,
+                        query=query_vector.tolist(),
+                        limit=limit,
+                        with_payload=True
+                    ).points
+                    
+                    for hit in search_result:
+                        all_results.append({
+                            "did": hit.payload.get("did"),
+                            "json_ld": hit.payload.get("json_ld"),
+                            "score": hit.score,
+                            "collection": coll
+                        })
+                except AttributeError:
+                    # Fallback to search if query_points is missing
+                    if hasattr(self.client, "search"):
+                        search_result = self.client.search(
+                            collection_name=coll,
+                            query_vector=query_vector.tolist(),
+                            limit=limit,
+                            with_payload=True
+                        )
+                        for hit in search_result:
+                            all_results.append({
+                                "did": hit.payload.get("did"),
+                                "json_ld": hit.payload.get("json_ld"),
+                                "score": hit.score,
+                                "collection": coll
+                            })
+                            
+            # Sort by score descending and return top 'limit' results
+            all_results.sort(key=lambda x: x["score"], reverse=True)
+            return all_results[:limit]
             
-            results = []
-            for hit in search_result:
-                results.append({
-                    "did": hit.payload.get("did"),
-                    "json_ld": hit.payload.get("json_ld"),
-                    "score": hit.score
-                })
-            return results
-        except AttributeError as e:
-            # Diagnostic logging
-            print(f"ERROR: QdrantClient missing attribute. Available attributes: {dir(self.client)}")
-            # Fallback to search if query_points is somehow missing (unlikely but safe)
-            if hasattr(self.client, "search"):
-                search_result = self.client.search(
-                    collection_name=collection,
-                    query_vector=query_vector.tolist(),
-                    limit=limit,
-                    with_payload=True
-                )
-                results = []
-                for hit in search_result:
-                    results.append({
-                        "did": hit.payload.get("did"),
-                        "json_ld": hit.payload.get("json_ld"),
-                        "score": hit.score
-                    })
-                return results
+        except Exception as e:
+            print(f"ERROR in search_documents: {e}")
             raise e
 
     def _determine_collection(self, payload: Dict[str, Any]) -> str:

@@ -2,19 +2,24 @@
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'createDID') {
-        handleCreateDID(message.payload, message.apiUrl, sendResponse);
+        handleCreateDID(message.payload, message.apiUrl, message.collection, sendResponse);
         return true; // Keep the message channel open for async response
     }
 });
 
-async function handleCreateDID(payload, apiUrl, sendResponse) {
+async function handleCreateDID(payload, apiUrl, collection, sendResponse) {
     try {
+        const requestBody = { payload: payload };
+        if (collection) {
+            requestBody.collection = collection;
+        }
+
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ payload: payload })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {

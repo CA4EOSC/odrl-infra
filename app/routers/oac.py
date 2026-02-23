@@ -67,10 +67,8 @@ async def search_oac_policies(
     Returns both DID and JSON-LD with similarity measure.
     """
     try:
-        # If collection is not provided, we could search across all? 
-        # For now, default to 'policy' if accessed through OAC router, or 'dids' in the service.
-        search_collection = collection or "policy"
-        results = qdrant_service.search_documents(q, collection=search_collection)
+        # Search across all collections if not provided
+        results = qdrant_service.search_documents(q, collection=collection)
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")

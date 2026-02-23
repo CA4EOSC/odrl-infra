@@ -278,12 +278,16 @@ async def create_did(request: DidCreateRequest):
         raise HTTPException(status_code=400, detail=f"OYDID Error: {result.stderr}")
         
     try:
+        # If collection is explicitly provided, store it in the payload itself
+        if request.collection:
+            request.payload["collection"] = request.collection
+
         did_data = json.loads(result.stdout)
         did = did_data.get("did")
         
         # Store in Qdrant
         try:
-            qdrant_service.upsert_document(did, request.payload)
+            qdrant_service.upsert_document(did, request.payload, collection=request.collection)
         except Exception as e:
             print(f"Warning: Failed to store in Qdrant: {e}")
             
