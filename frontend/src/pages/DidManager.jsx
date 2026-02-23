@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Search, Plus, Bookmark, Hash, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../services/api';
-import ResolverLink from '../components/ResolverLink';
+import ResolverLink from '../components/ResolverLink.jsx';
 import { cn } from '../lib/utils';
 
 const Tabs = ({ active, onChange, options }) => (
