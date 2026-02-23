@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Users, Plus, CheckCircle, AlertCircle, Shield, Building, UserPlus, Info } from 'lucide-react';
 import api from '../services/api';
+import ResolverLink from '../components/ResolverLink';
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -27,20 +28,27 @@ export default function GroupsManager() {
 
     const createMutation = useMutation({
         mutationFn: async () => {
-            const orgDid = `did:oyd:${crypto.randomUUID()}`;
+            const data = {
+                name: orgName,
+                description: orgDesc,
+                members: members.filter(m => m.did.trim()).map(m => ({
+                    member: m.did,
+                    role: m.role
+                }))
+            };
+            const res = await api.post('/groups/create', data);
             const payload = {
                 "@context": "http://www.w3.org/ns/org#",
                 "type": "Organization",
                 "name": orgName,
                 "description": orgDesc,
-                "hasMember": members.filter(m => m.did.trim()).map(m => ({
+                "hasMember": data.members.map(m => ({
                     "type": "Membership",
-                    "member": m.did,
+                    "member": m.member,
                     "role": m.role
                 })),
                 "timestamp": new Date().toISOString()
             };
-            const res = await api.post('/did/create', { payload });
             return { ...res.data, originalContent: payload };
         },
         onSuccess: (data) => {
@@ -183,12 +191,7 @@ export default function GroupsManager() {
                             </h3>
                             <div className="bg-white border border-green-100 rounded-xl p-4 flex flex-col gap-2 dark:bg-black/20 dark:border-transparent">
                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Organization DID (Local Anchor)</label>
-                                <Link
-                                    to={`/dids?resolve=${createMutation.data.did}`}
-                                    className="font-mono text-sm text-indigo-600 dark:text-indigo-400 hover:underline break-all"
-                                >
-                                    {createMutation.data.did}
-                                </Link>
+                                <ResolverLink did={createMutation.data.did} />
                                 <p className="text-[10px] text-gray-500 mt-1 italic">Note: Locally anchored DIDs are resolvable via this application's DID Manager.</p>
                             </div>
                         </div>
@@ -252,12 +255,7 @@ export default function GroupsManager() {
                                                 </div>
                                             )}
                                         </div>
-                                        <Link
-                                            to={`/dids?resolve=${item.did}`}
-                                            className="text-xs text-indigo-600 font-bold hover:underline"
-                                        >
-                                            View DID
-                                        </Link>
+                                        <ResolverLink did={item.did} />
                                     </div>
                                 </div>
                             ))}

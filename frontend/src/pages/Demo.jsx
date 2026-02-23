@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Play, CheckCircle, Circle, ArrowRight, FileJson, Loader2, ExternalLink, ShieldCheck, MessageSquare, Database, Sparkles, Users } from 'lucide-react';
 import api from '../services/api';
+import ResolverLink from '../components/ResolverLink';
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -64,31 +65,7 @@ const SCENARIOS = {
     }
 };
 
-const ResolverLink = ({ did, local = true }) => {
-    if (!did) return null;
-    if (local) {
-        return (
-            <Link
-                to={`/dids?resolve=${did}`}
-                className="text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center gap-1 dark:text-indigo-400 dark:hover:text-indigo-300 break-all"
-                title="Resolve locally"
-            >
-                {did}
-            </Link>
-        );
-    }
-    return (
-        <a
-            href={`https://dev.uniresolver.io/#${did}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center gap-1 dark:text-blue-400 dark:hover:text-blue-300 break-all"
-            title="View on Universal Resolver"
-        >
-            {did} <ExternalLink size={12} className="shrink-0" />
-        </a>
-    );
-};
+// Internal ResolverLink removed - using shared ResolverLink from components
 
 export default function Demo() {
     const [activeScenario, setActiveScenario] = useState('group');

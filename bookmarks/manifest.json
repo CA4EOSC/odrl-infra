@@ -1,0 +1,28 @@
+{
+    "manifest_version": 3,
+    "name": "ODRL Bookmark Manager",
+    "version": "1.0",
+    "description": "Bookmark the open page, produce JSON-LD, and create a DID.",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "ODRL Bookmark Manager"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "odrl-bookmark@example.com",
+            "strict_min_version": "109.0"
+        }
+    }
+}

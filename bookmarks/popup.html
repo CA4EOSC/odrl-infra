@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Bookmark Manager</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>ODRL Bookmark</h2>
+        <p>Bookmark this page and create a DID.</p>
+
+        <div class="input-group">
+            <label for="apiUrl">API URL</label>
+            <input type="text" id="apiUrl" value="https://odrl.dev.codata.org/did/create" />
+        </div>
+
+        <button id="bookmarkBtn">Bookmark Page</button>
+
+        <div id="status" class="status-hidden"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

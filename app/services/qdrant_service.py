@@ -9,7 +9,7 @@ class QdrantService:
     def __init__(self):
         self.qdrant_host = os.getenv("QDRANT_HOST", "localhost")
         self.qdrant_port = int(os.getenv("QDRANT_PORT", 6333))
-        self.collections = ["policy", "prompts", "variables", "croissant", "dids", "groups"]
+        self.collections = ["policy", "prompts", "variables", "croissant", "dids", "groups", "bookmarks"]
         self.client = QdrantClient(host=self.qdrant_host, port=self.qdrant_port)
         self.encoder = TextEmbedding()
         self._ensure_collections()
@@ -128,6 +128,10 @@ class QdrantService:
         org_types = ["Organization", "Membership", "Role", "FormalOrganization", "OrganizationalUnit", "OrganizationalCollaboration"]
         if payload.get("type") in org_types or "org:" in str(payload.get("@context", "")).lower():
             return "groups"
+            
+        # 6. Bookmarks
+        if payload.get("@type") == "WebPage" or payload.get("type") == "WebPage" or "url" in payload:
+            return "bookmarks"
             
         # Default
         return "dids"

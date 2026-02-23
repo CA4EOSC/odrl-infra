@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 import os
-from .routers import dids, vcs, oac
+from .routers import dids, vcs, oac, variables, groups, croissants
 
 app = FastAPI(title="ODRL API", description="API wrapper for OYDID CLI with VC Capabilities")
 
@@ -10,6 +10,9 @@ app = FastAPI(title="ODRL API", description="API wrapper for OYDID CLI with VC C
 app.include_router(dids.router, prefix="/api")
 app.include_router(vcs.router, prefix="/api")
 app.include_router(oac.router, prefix="/api")
+app.include_router(variables.router, prefix="/api")
+app.include_router(groups.router, prefix="/api")
+app.include_router(croissants.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():

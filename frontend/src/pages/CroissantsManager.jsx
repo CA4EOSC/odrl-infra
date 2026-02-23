@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { FileJson, Plus, CheckCircle, AlertCircle, Sparkles, ExternalLink } from 'lucide-react';
 import api from '../services/api';
+import ResolverLink from '../components/ResolverLink';
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -21,25 +22,17 @@ export default function CroissantsManager() {
     const createMutation = useMutation({
         mutationFn: async () => {
             // Fetch the croissant data if URL is provided
-            let payload = {
+            const data = {
+                url: croissantUrl.trim() || null,
+                description: description
+            };
+            const res = await api.post('/croissants/create', data);
+            const payload = {
                 type: "Croissant",
                 description: description,
+                url: croissantUrl,
                 timestamp: new Date().toISOString()
             };
-
-            if (croissantUrl.trim()) {
-                try {
-                    // Use backend proxy to avoid CORS
-                    const fetchRes = await api.get(`/did/fetch_jsonld?url=${encodeURIComponent(croissantUrl)}`);
-                    const croissantJson = fetchRes.data;
-                    payload = { ...croissantJson, ...payload };
-                } catch (e) {
-                    console.error("Failed to fetch Croissant JSON-LD", e);
-                    payload.url = croissantUrl;
-                }
-            }
-
-            const res = await api.post('/did/create', { payload });
             return { ...res.data, originalContent: payload };
         },
         onSuccess: (data) => {
@@ -116,12 +109,7 @@ export default function CroissantsManager() {
                                 <CheckCircle size={20} /> Croissant Anchored Successfully
                             </h3>
                             <p className="font-mono text-sm break-all text-gray-900 bg-white border border-gray-200 p-3 rounded select-all dark:text-gray-300 dark:bg-black/20 dark:border-transparent">
-                                <Link
-                                    to={`/dids?resolve=${createMutation.data.did}`}
-                                    className="hover:underline text-orange-600 dark:text-orange-400"
-                                >
-                                    {createMutation.data.did}
-                                </Link>
+                                <ResolverLink did={createMutation.data.did} />
                             </p>
                             <p className="text-[10px] text-gray-500 mt-2 italic">Note: Locally anchored DIDs are resolvable via the internal DID Manager.</p>
                         </div>
@@ -153,15 +141,7 @@ export default function CroissantsManager() {
                                     </a>
                                 )}
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-mono text-orange-600 dark:text-orange-400 truncate max-w-[150px]">
-                                        {item.did}
-                                    </span>
-                                    <Link
-                                        to={`/dids?resolve=${item.did}`}
-                                        className="text-xs text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 font-medium"
-                                    >
-                                        View DID
-                                    </Link>
+                                    <ResolverLink did={item.did} />
                                 </div>
                             </div>
                         ))}

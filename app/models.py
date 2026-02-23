@@ -8,6 +8,35 @@ class DidUpdateRequest(BaseModel):
     did: str
     payload: Dict[str, Any]
 
+class VariableRequest(BaseModel):
+    name: str
+    description: Optional[str] = ""
+    unit: Optional[str] = ""
+    context: Optional[Dict[str, Any]] = {}
+
+class VariableUpdateRequest(VariableRequest):
+    did: str
+
+class Membership(BaseModel):
+    member: str
+    role: str
+
+class GroupRequest(BaseModel):
+    name: str
+    description: Optional[str] = ""
+    members: Optional[list[Membership]] = []
+
+class GroupUpdateRequest(GroupRequest):
+    did: str
+
+class CroissantRequest(BaseModel):
+    url: Optional[str] = None
+    description: Optional[str] = ""
+    payload: Optional[Dict[str, Any]] = {}
+
+class CroissantUpdateRequest(CroissantRequest):
+    did: str
+
 class GoogleVcRequest(BaseModel):
     token: str
     subject_did: str

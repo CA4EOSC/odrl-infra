@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Database, Plus, CheckCircle, AlertCircle, Variable } from 'lucide-react';
 import api from '../services/api';
+import ResolverLink from '../components/ResolverLink';
 import { Link } from 'react-router-dom';
 
 export default function VariablesManager() {
@@ -30,15 +31,14 @@ export default function VariablesManager() {
                 }
             }
 
-            const payload = {
-                type: "Variable",
+            const data = {
                 name,
                 description,
                 unit,
-                context: parsedContext,
-                timestamp: new Date().toISOString()
+                context: parsedContext
             };
-            const res = await api.post('/did/create', { payload });
+            const res = await api.post('/variables/create', data);
+            const payload = { ...data, type: "Variable", timestamp: new Date().toISOString() };
             return { ...res.data, originalContent: payload };
         },
         onSuccess: (data) => {
@@ -149,12 +149,7 @@ export default function VariablesManager() {
                                 <CheckCircle size={20} /> Variable Anchored Successfully
                             </h3>
                             <div className="font-mono text-sm break-all text-gray-900 bg-white border border-gray-200 p-3 rounded select-all dark:text-gray-300 dark:bg-black/20 dark:border-transparent">
-                                <Link
-                                    to={`/dids?resolve=${createMutation.data.did}`}
-                                    className="hover:underline text-blue-600 dark:text-blue-400"
-                                >
-                                    {createMutation.data.did}
-                                </Link>
+                                <ResolverLink did={createMutation.data.did} />
                             </div>
                             <p className="text-[10px] text-gray-500 mt-2 italic">Note: Locally anchored DIDs are resolvable via the internal DID Manager.</p>
                         </div>
@@ -189,15 +184,7 @@ export default function VariablesManager() {
                                     {item.description}
                                 </p>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 truncate max-w-[150px]">
-                                        {item.did}
-                                    </span>
-                                    <Link
-                                        to={`/dids?resolve=${item.did}`}
-                                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-                                    >
-                                        View DID
-                                    </Link>
+                                    <ResolverLink did={item.did} />
                                 </div>
                             </div>
                         ))}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Search, Plus, Bookmark, Hash, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../services/api';
+import ResolverLink from '../components/ResolverLink';
 import { cn } from '../lib/utils';
 
 const Tabs = ({ active, onChange, options }) => (
@@ -160,6 +161,7 @@ export default function DidManager() {
                                 <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2">
                                     <CheckCircle size={18} /> Resolved Document
                                 </h3>
+                                <ResolverLink did={didInput} className="block mb-2 text-sm" />
                                 <pre className="bg-gray-50 p-4 rounded-lg overflow-auto max-h-96 font-mono text-sm text-gray-900 dark:bg-black/30 dark:text-gray-300 border border-gray-100 dark:border-transparent custom-scrollbar">
                                     {JSON.stringify(resolveMutation.data, null, 2)}
                                 </pre>
@@ -177,7 +179,7 @@ export default function DidManager() {
                                     onClick={() => { setDidInput(item.did); setActiveTab('resolve'); resolveMutation.mutate(item.did); }}
                                     className="group flex flex-col gap-1 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-200 dark:hover:bg-white/5 dark:hover:border-white/5"
                                 >
-                                    <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 truncate w-full">{item.did}</span>
+                                    <ResolverLink did={item.did} icon={false} className="text-xs font-mono" />
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] uppercase bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 group-hover:bg-gray-200 dark:bg-white/10 dark:text-gray-400 dark:group-hover:bg-white/20">{item.type}</span>
                                         <span className="text-[10px] text-gray-400 dark:text-gray-600">{new Date(item.timestamp).toLocaleTimeString()}</span>
@@ -220,9 +222,7 @@ export default function DidManager() {
                             <h3 className="text-green-600 dark:text-green-400 font-semibold mb-2 flex items-center gap-2">
                                 <CheckCircle size={20} /> DID Created Successfully
                             </h3>
-                            <p className="font-mono text-sm break-all text-gray-900 bg-white border border-gray-200 p-3 rounded select-all dark:text-gray-300 dark:bg-black/20 dark:border-transparent">
-                                {createMutation.data.did}
-                            </p>
+                            <ResolverLink did={createMutation.data.did} />
                         </div>
                     )}
                 </div>
