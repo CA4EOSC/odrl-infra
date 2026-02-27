@@ -7,7 +7,7 @@ from datetime import datetime
 
 router = APIRouter(prefix="/variables", tags=["Variables"])
 
-@router.post("/create")
+@router.post("")
 async def create_variable(request: VariableRequest):
     """Create a new Variable DID"""
     payload = {
@@ -22,7 +22,8 @@ async def create_variable(request: VariableRequest):
     result = run_oydid_command(["create", "--json-output"], input_data=payload)
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"OYDID Error: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"OYDID Error: {error_detail}")
         
     try:
         did_data = json.loads(result.stdout)
@@ -38,7 +39,7 @@ async def create_variable(request: VariableRequest):
     except json.JSONDecodeError:
         return {"raw_output": result.stdout}
 
-@router.put("/update/{did}")
+@router.put("/{did}")
 async def update_variable(did: str, request: VariableRequest):
     """Update an existing Variable DID"""
     payload = {
@@ -54,7 +55,8 @@ async def update_variable(did: str, request: VariableRequest):
     result = run_oydid_command(["update", did, "--json-output"], input_data=payload)
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"Update failed: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"Update failed: {error_detail}")
         
     try:
         did_data = json.loads(result.stdout)

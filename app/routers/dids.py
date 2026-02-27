@@ -275,7 +275,8 @@ async def create_did(request: DidCreateRequest):
     result = run_oydid_command(["create", "--json-output"], input_data=request.payload)
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"OYDID Error: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"OYDID Error: {error_detail}")
         
     try:
         # If collection is explicitly provided, store it in the payload itself
@@ -310,7 +311,8 @@ async def read_did(did: str):
     print(f"DEBUG: OYDID Read Result: ReturnCode={result.returncode}, Stderr='{result.stderr}', StdoutLen={len(result.stdout)}")
     
     if result.returncode != 0:
-        raise HTTPException(status_code=404, detail=f"DID not found or error: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=404, detail=f"DID not found or error: {error_detail}")
         
     try:
         return json.loads(result.stdout)
@@ -328,7 +330,8 @@ async def update_did(request: DidUpdateRequest):
     result = run_oydid_command(["update", request.did, "--json-output"], input_data=request.payload)
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"Update failed: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"Update failed: {error_detail}")
         
     try:
         return json.loads(result.stdout)
@@ -341,7 +344,8 @@ async def revoke_did(did: str):
     result = run_oydid_command(["revoke", did, "--json-output"])
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"Revocation failed: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"Revocation failed: {error_detail}")
         
     try:
         return json.loads(result.stdout)

@@ -23,6 +23,21 @@ app.include_router(croissants_router, prefix="/api")
 async def health_check():
     return {"status": "ok", "service": "oydid-api"}
 
+@app.get("/api/oydid/health")
+async def oydid_health():
+    from .services.oydid import run_oydid_command
+    import json
+    try:
+        result = run_oydid_command(["--version"])
+        return {
+            "status": "ok" if result.returncode == 0 else "error",
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip()
+        }
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
 # Serve Frontend Static Files
 # Priority 1: Docker build location (outside bind mount)
 docker_static_dir = "/frontend_dist"

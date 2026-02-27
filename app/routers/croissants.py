@@ -8,7 +8,7 @@ from datetime import datetime
 
 router = APIRouter(prefix="/croissants", tags=["Croissants"])
 
-@router.post("/create")
+@router.post("")
 async def create_croissant(request: CroissantRequest):
     """Create a new Croissant DID"""
     payload = {
@@ -37,7 +37,8 @@ async def create_croissant(request: CroissantRequest):
     result = run_oydid_command(["create", "--json-output"], input_data=payload)
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"OYDID Error: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"OYDID Error: {error_detail}")
         
     try:
         did_data = json.loads(result.stdout)
@@ -53,7 +54,7 @@ async def create_croissant(request: CroissantRequest):
     except json.JSONDecodeError:
         return {"raw_output": result.stdout}
 
-@router.put("/update/{did}")
+@router.put("/{did}")
 async def update_croissant(did: str, request: CroissantRequest):
     """Update an existing Croissant DID"""
     payload = {
@@ -68,7 +69,8 @@ async def update_croissant(did: str, request: CroissantRequest):
     result = run_oydid_command(["update", did, "--json-output"], input_data=payload)
     
     if result.returncode != 0:
-        raise HTTPException(status_code=400, detail=f"Update failed: {result.stderr}")
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=400, detail=f"Update failed: {error_detail}")
         
     try:
         did_data = json.loads(result.stdout)

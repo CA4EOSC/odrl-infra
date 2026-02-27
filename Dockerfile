@@ -13,14 +13,17 @@ FROM ruby:3.2-slim
 RUN apt-get update && apt-get install -y \
     build-essential libsodium-dev libssl-dev zlib1g-dev pkg-config git jq bash curl python3 python3-pip openssh-client && \
     rm -rf /var/lib/apt/lists/* && \
-    gem install httparty ed25519 multibases multihashes multicodecs optparse rbnacl dag uri oydid && \
-    gem install json-canonicalization -v 0.2.1 && \
-    gem install securerandom -v 0.1.1 && \
+    gem install httparty ed25519 multibases multihashes multicodecs optparse rbnacl simple_dag uri 'json-canonicalization:1.0.0' 'securerandom:0.1.1' && \
     gem update
+
+# Copy and install local OYDID gem source
+COPY oydid/ruby-gem /usr/src/oydid-gem
+WORKDIR /usr/src/oydid-gem
+RUN gem build oydid.gemspec && gem install oydid-*.gem
 
 # Install Python dependencies
 # Added aiofiles for FastAPI StaticFiles
-RUN pip3 install --no-cache pytest fastapi uvicorn google-auth requests rdflib aiofiles qdrant-client fastembed --break-system-packages
+RUN pip3 install --no-cache-dir pytest fastapi uvicorn google-auth requests rdflib aiofiles qdrant-client fastembed --break-system-packages
 
 # Setup OYDID CLI
 COPY oydid/cli/oydid.rb /usr/local/bin/oydid
