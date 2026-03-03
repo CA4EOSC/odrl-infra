@@ -7,7 +7,7 @@ from datetime import datetime
 
 router = APIRouter(prefix="/variables", tags=["Variables"])
 
-@router.post("")
+@router.post("/create")
 async def create_variable(request: VariableRequest):
     """Create a new Variable DID"""
     payload = {

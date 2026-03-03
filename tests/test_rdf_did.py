@@ -2,7 +2,7 @@ import requests
 import json
 import time
 
-BASE_URL = "http://localhost:8001"
+BASE_URL = "http://localhost:8001/api"
 TURTLE_URL = "https://raw.githubusercontent.com/4tikhonov/the-minority-report/refs/heads/main/data/hips.ttl"
 
 def test_rdf_did():

@@ -7,7 +7,7 @@ from datetime import datetime
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
-@router.post("")
+@router.post("/create")
 async def create_group(request: GroupRequest):
     """Create a new Organization (Group) DID"""
     payload = {

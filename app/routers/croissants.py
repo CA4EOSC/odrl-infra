@@ -8,7 +8,7 @@ from datetime import datetime
 
 router = APIRouter(prefix="/croissants", tags=["Croissants"])
 
-@router.post("")
+@router.post("/create")
 async def create_croissant(request: CroissantRequest):
     """Create a new Croissant DID"""
     payload = {

@@ -12,7 +12,7 @@ services:
       - QDRANT_HOST=qdrant
     depends_on:
       - qdrant
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8001
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
   qdrant:
     image: qdrant/qdrant
