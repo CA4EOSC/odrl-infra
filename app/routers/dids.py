@@ -218,7 +218,7 @@ async def share_did(did: str, language: str = Query(None), token: str = Query(No
         target_payload = doc
         if not target_payload.get("url") and isinstance(log, list):
              for entry in log:
-                 if entry.get("op") == 0 or entry.get("op") == "create":
+                 if isinstance(entry, dict) and (entry.get("op") == 0 or entry.get("op") == "create"):
                       op_doc = entry.get("doc", {})
                       if op_doc.get("url"):
                           target_payload = op_doc
@@ -406,7 +406,7 @@ async def resolve_restricted_did(request: DidResolveRestrictedRequest):
             # Fallback check in log
             log = did_data.get("log", [])
             for entry in log:
-                if entry.get("op") == 0 or entry.get("op") == "create":
+                if isinstance(entry, dict) and (entry.get("op") == 0 or entry.get("op") == "create"):
                      encrypted_data = entry.get("doc", {}).get("encrypted_data")
                      break
         
