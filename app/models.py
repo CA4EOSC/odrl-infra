@@ -14,6 +14,11 @@ class DidUpdateRequest(BaseModel):
     did: str
     payload: Dict[str, Any]
 
+class DidResolveRestrictedRequest(BaseModel):
+    did: str
+    private_key: str  # The encrypted private key needed for decryption
+    key_pwd: Optional[str] = None  # Optional password if the key is double encrypted
+
 class VariableRequest(BaseModel):
     name: str
     description: Optional[str] = ""

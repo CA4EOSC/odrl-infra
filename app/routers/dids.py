@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from ..models import DidCreateRequest, DidCreateRestrictedRequest, DidUpdateRequest
+from ..models import DidCreateRequest, DidCreateRestrictedRequest, DidResolveRestrictedRequest, DidUpdateRequest
 from ..services.oydid import run_oydid_command
 from ..services.qdrant_service import qdrant_service
 import json
@@ -383,6 +383,71 @@ async def create_restricted_did(request: DidCreateRestrictedRequest):
         
     except json.JSONDecodeError:
         return {"raw_output": result.stdout}
+
+@router.post("/resolve/restricted")
+async def resolve_restricted_did(request: DidResolveRestrictedRequest):
+    """Resolve and decrypt a restricted DID using the provided private key."""
+    # 1. Resolve the DID to get the encrypted content
+    did = request.did
+    if "&" in did:
+        did = did.split("&")[0]
+
+    result = run_oydid_command(["read", did, "--json-output"])
+    if result.returncode != 0:
+        error_detail = getattr(result, "error_msg", result.stderr)
+        raise HTTPException(status_code=404, detail=f"DID not found or error: {error_detail}")
+
+    try:
+        did_data = json.loads(result.stdout)
+        doc = did_data.get("doc", {})
+        encrypted_data = doc.get("encrypted_data")
+        
+        if not encrypted_data:
+            # Fallback check in log
+            log = did_data.get("log", [])
+            for entry in log:
+                if entry.get("op") == 0 or entry.get("op") == "create":
+                     encrypted_data = entry.get("doc", {}).get("encrypted_data")
+                     break
+        
+        if not encrypted_data:
+             raise HTTPException(status_code=400, detail="DID does not appear to be restricted or encrypted_data is missing.")
+
+        # 2. Decrypt using oydid
+        # We need to pass the private key to oydid. 
+        # The oydid CLI 'decrypt' command reads input from stdin (the ciphertext)
+        # and options like --doc-enc for the private key.
+        
+        decrypt_args = ["decrypt"]
+        if request.key_pwd:
+             decrypt_args += ["--doc-pwd", request.key_pwd]
+        
+        # OYDID decrypt expects the key as --doc-enc or from a file. 
+        # We'll use --doc-enc to pass the multibase private key directly.
+        decrypt_args += ["--doc-enc", request.private_key]
+
+        decrypt_result = run_oydid_command(decrypt_args, input_data=encrypted_data)
+        
+        if decrypt_result.returncode != 0:
+            error_detail = getattr(decrypt_result, "error_msg", decrypt_result.stderr)
+            raise HTTPException(status_code=400, detail=f"Decryption failed: {error_detail}")
+            
+        try:
+            decrypted_payload = json.loads(decrypt_result.stdout)
+            return {
+                "did": did,
+                "decrypted_payload": decrypted_payload,
+                "restricted_to": doc.get("restricted_to")
+            }
+        except json.JSONDecodeError:
+            return {
+                "did": did,
+                "decrypted_raw": decrypt_result.stdout.strip(),
+                "restricted_to": doc.get("restricted_to")
+            }
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Invalid JSON from DID resolver")
 
 @router.get("/{did}")
 async def read_did(did: str):
