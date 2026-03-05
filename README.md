@@ -4,6 +4,8 @@ This repository implements a **DID-based Open Digital Resource Language (ODRL)**
 
 Built with **FastAPI** and **Docker**, utilizing [OYDID](https://github.com/OwnYourData/oydid) for the underlying DID operations.
 
+For more information on using the system as an AI agent, see [AGENTS.md](./AGENTS.md).
+
 ## Features
 
 ### 1. ODRL Access Control
@@ -12,7 +14,13 @@ Implements the ODRL Information Model using DIDs for identity and VCs for attrib
 -   **Policy Management**: Create and store ODRL policies (Offers, Agreements, Privacy Policies, Requests).
 -   **Verification**: Cryptographically verify that a requestor meets the requirements of a policy using Verifiable Credentials.
 
-### 2. Verifiable Credentials (VCs)
+### 2. Restricted DIDs (Encrypted Resources)
+Create and share resources that are cryptographically restricted to a specific recipient.
+-   **Targeted Encryption**: Resources are encrypted using the public key of a **Target DID**.
+-   **Recipient Decryption**: Only the holder of the **Target DID's Private Key** can decrypt and view the payload.
+-   **Resolution**: Restricted DIDs resolve to a W3C Document containing `encrypted_data` (JWE format).
+
+### 3. Verifiable Credentials (VCs)
 Issue and verify credentials to prove identity and attributes for ODRL policies.
 -   **Google Account**: Prove ownership of a Google email.
 -   **GitHub Account**: Prove ownership of a GitHub handle.
@@ -67,6 +75,7 @@ Manage the lifecycle of OYDID Data Resources.
 | `GET` | `/did/share/{did}` | **Resolve/Share**. Resolves a DID and returns its payload (e.g., bookmark data). | `?language=fr` (or `did:oyd:...@fr`) |
 | `GET` | `/did/{did}` | **Read DID**. Resolves the full DID Document. | Path: `did` |
 | `GET` | `/did/resolve/{did}` | **Resolve DID**. Resolves a DID to its full W3C DID Document. | Path: `did` |
+| `POST` | `/did/resolve/restricted` | **Decrypt Restricted DID**. Resolves and decrypts a restricted DID using a private key. | Body: `{"did": "...", "private_key": "..."}` |
 | `GET` | `/did/validate/{did}` | **Validate DID**. Validates a DID and optionally checks if a `public_key` is authorized for it. | `?public_key=...` |
 | `POST` | `/did/update` | **Update DID**. Updates the payload of an existing DID. | Body: `{"did": "...", "payload": {...}}` |
 | `DELETE` | `/did/revoke/{did}` | **Revoke DID**. Revokes a DID, making it invalid. | Path: `did` |
