@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from ..models import GoogleVcRequest, SshVcRequest, GitHubVcRequest, OrcidVcRequest
+from datetime import datetime, timedelta, timezone
+from typing import Dict, Any
+from ..models import GoogleVcRequest, SshVcRequest, GitHubVcRequest, OrcidVcRequest, GenericVcRequest
 from ..services.oydid import run_oydid_command
 from ..services.issuer import get_issuer_did
 import os
@@ -33,7 +35,6 @@ async def issue_google_vc(request: GoogleVcRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid Google Token: {str(e)}")
 
-    # 2. Create VC Payload
     vc_payload = {
         "sub": request.subject_did,
         "vc": {
@@ -46,6 +47,10 @@ async def issue_google_vc(request: GoogleVcRequest):
             }
         }
     }
+    
+    if request.ttl_hours:
+        expiration = datetime.now(timezone.utc) + timedelta(hours=request.ttl_hours)
+        vc_payload["vc"]["expirationDate"] = expiration.strftime("%Y-%m-%dT%H:%M:%SZ")
     
     # 3. Issue VC
     cmd = ["vc", "--issuer", issuer_did, "--json-output"]
@@ -86,7 +91,6 @@ async def issue_github_vc(request: GitHubVcRequest):
             raise e
         raise HTTPException(status_code=500, detail=f"GitHub verification failed: {str(e)}")
 
-    # 2. Create VC Payload
     vc_payload = {
         "sub": request.subject_did,
         "vc": {
@@ -100,6 +104,10 @@ async def issue_github_vc(request: GitHubVcRequest):
             }
         }
     }
+    
+    if request.ttl_hours:
+        expiration = datetime.now(timezone.utc) + timedelta(hours=request.ttl_hours)
+        vc_payload["vc"]["expirationDate"] = expiration.strftime("%Y-%m-%dT%H:%M:%SZ")
     
     # 3. Issue VC
     cmd = ["vc", "--issuer", issuer_did, "--json-output"]
@@ -141,7 +149,6 @@ async def issue_orcid_vc(request: OrcidVcRequest):
             raise e
         raise HTTPException(status_code=500, detail=f"ORCID verification failed: {str(e)}")
 
-    # 2. Create VC Payload
     vc_payload = {
         "sub": request.subject_did,
         "vc": {
@@ -155,6 +162,10 @@ async def issue_orcid_vc(request: OrcidVcRequest):
             }
         }
     }
+    
+    if request.ttl_hours:
+        expiration = datetime.now(timezone.utc) + timedelta(hours=request.ttl_hours)
+        vc_payload["vc"]["expirationDate"] = expiration.strftime("%Y-%m-%dT%H:%M:%SZ")
     
     # 3. Issue VC
     cmd = ["vc", "--issuer", issuer_did, "--json-output"]
@@ -233,6 +244,10 @@ async def issue_ssh_vc(request: SshVcRequest):
             }
         }
     }
+
+    if request.ttl_hours:
+        expiration = datetime.now(timezone.utc) + timedelta(hours=request.ttl_hours)
+        vc_payload["vc"]["expirationDate"] = expiration.strftime("%Y-%m-%dT%H:%M:%SZ")
     
     cmd = ["vc", "--issuer", issuer_did, "--json-output"]
     result = run_oydid_command(cmd, input_data=vc_payload["vc"])
@@ -244,3 +259,86 @@ async def issue_ssh_vc(request: SshVcRequest):
         return json.loads(result.stdout)
     except json.JSONDecodeError:
         return {"raw_output": result.stdout}
+
+@router.post("/issue")
+async def issue_generic_vc(request: GenericVcRequest):
+    """Issue a generic VC with custom claims"""
+    issuer_did = get_issuer_did()
+    if not issuer_did:
+        raise HTTPException(status_code=500, detail="Issuer DID not initialized")
+
+    vc_payload = {
+        "@context": ["https://www.w3.org/2018/credentials/v1"],
+        "type": [request.type] if not isinstance(request.type, list) else request.type,
+        "credentialSubject": {
+            "id": request.subject_did,
+            **request.claims
+        }
+    }
+
+    # OYDID needs an identifier to be present in the doc for some internal lookups
+    # But it must be a valid URI for JSON-LD normalization to work properly
+    vc_payload["id"] = f"did:oyd:tmp-id-{datetime.now().timestamp()}"
+
+    if request.ttl_hours:
+        expiration = datetime.now(timezone.utc) + timedelta(hours=request.ttl_hours)
+        vc_payload["expirationDate"] = expiration.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    cmd = ["vc", "--issuer", issuer_did, "--json-output"]
+    result = run_oydid_command(cmd, input_data=vc_payload)
+    
+    if result.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"Failed to issue VC: {result.stderr}")
+        
+    try:
+        # oydid CLI returns the VC directy as a JSON object
+        vc = json.loads(result.stdout)
+        return {"vc": vc}
+    except json.JSONDecodeError:
+        return {"raw_output": result.stdout}
+
+@router.post("/verify")
+async def verify_vc(vc: Dict[str, Any]):
+    """Verify a Verifiable Credential and check expirationDate"""
+    # If the input is wrapped in {"vc": ...}, unwrap it
+    actual_vc = vc.get("vc", vc)
+    
+    # 1. Standard OYDID verification (signatures, etc.)
+    cmd = ["vc-verify", "--json-output"]
+    result = run_oydid_command(cmd, input_data=actual_vc)
+    
+    if result.returncode != 0:
+        # Some errors might be returned as JSON even with non-zero exit code or just stderr
+        try:
+             err_json = json.loads(result.stdout)
+             return {"valid": False, "error": err_json.get("error", result.stderr)}
+        except:
+             return {"valid": False, "error": result.stderr or result.stdout}
+
+    try:
+        verification_result = json.loads(result.stdout)
+        # OYDID CLI might return {"VerifiableCredential": "...", "valid": true} 
+        # or a different structure depending on errors.
+        if not verification_result.get("valid") and "VerifiableCredential" not in verification_result:
+             return {"valid": False, "error": verification_result.get("error", "Signature verification failed")}
+    except json.JSONDecodeError:
+        return {"valid": False, "error": "Could not parse verification output"}
+
+    # 2. Check expirationDate if present
+    expiration_date_str = vc.get("expirationDate")
+    if expiration_date_str:
+        try:
+            # Handle standard formats: 2026-03-08T22:15:18Z or 2026-03-08T22:15:18+00:00
+            # Python's fromisoformat handles +00:00 well, but 'Z' needs replacing for older versions 
+            # or just use and strip carefully.
+            
+            # Simple approach for Z
+            clean_date = expiration_date_str.replace("Z", "+00:00")
+            expiration_date = datetime.fromisoformat(clean_date)
+            
+            if datetime.now(timezone.utc) > expiration_date:
+                return {"valid": False, "error": "Credential has expired", "expirationDate": expiration_date_str}
+        except Exception as e:
+            return {"valid": False, "error": f"Invalid expirationDate format: {str(e)}"}
+
+    return {"valid": True, "verification": verification_result}

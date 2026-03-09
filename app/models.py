@@ -51,18 +51,28 @@ class CroissantUpdateRequest(CroissantRequest):
 class GoogleVcRequest(BaseModel):
     token: str
     subject_did: str
+    ttl_hours: Optional[int] = None
 
 class SshVcRequest(BaseModel):
     public_key: str
     signature: str
     subject_did: str
     username: Optional[str] = "oydid-user" # Principal for ssh-keygen -I
+    ttl_hours: Optional[int] = None
 
 class GitHubVcRequest(BaseModel):
     token: str
     subject_did: str
+    ttl_hours: Optional[int] = None
 
 class OrcidVcRequest(BaseModel):
     token: str
     orcid: str
     subject_did: str
+    ttl_hours: Optional[int] = None
+
+class GenericVcRequest(BaseModel):
+    subject_did: str
+    claims: Dict[str, Any]
+    type: Optional[str] = "VerifiableCredential"
+    ttl_hours: Optional[int] = None

@@ -1,20 +1,38 @@
 import os
 import json
-from qdrant_client import QdrantClient
-from qdrant_client.http import models
-from fastembed import TextEmbedding
+try:
+    from qdrant_client import QdrantClient
+    from qdrant_client.http import models
+    from fastembed import TextEmbedding
+    HAS_QDRANT = True
+except ImportError:
+    HAS_QDRANT = False
+
 from typing import List, Dict, Any
 
 class QdrantService:
     def __init__(self):
+        if not HAS_QDRANT:
+            print("Warning: Qdrant or FastEmbed not installed. QdrantService will be disabled.")
+            self.client = None
+            self.encoder = None
+            return
+            
         self.qdrant_host = os.getenv("QDRANT_HOST", "localhost")
         self.qdrant_port = int(os.getenv("QDRANT_PORT", 6333))
         self.collections = ["policy", "prompts", "variables", "croissant", "dids", "groups", "bookmarks"]
-        self.client = QdrantClient(host=self.qdrant_host, port=self.qdrant_port)
-        self.encoder = TextEmbedding()
-        self._ensure_collections()
+        try:
+            self.client = QdrantClient(host=self.qdrant_host, port=self.qdrant_port)
+            self.encoder = TextEmbedding()
+            self._ensure_collections()
+        except Exception as e:
+            print(f"Warning: Could not connect to Qdrant: {e}. QdrantService will be limited.")
+            self.client = None
+            self.encoder = None
 
     def _ensure_collections(self):
+        if not self.client or not self.encoder:
+            return
         # Get embedding dimension once
         example_embedding = list(self.encoder.embed(["test"]))[0]
         dimension = len(example_embedding)

@@ -26,6 +26,7 @@ Issue and verify credentials to prove identity and attributes for ODRL policies.
 -   **GitHub Account**: Prove ownership of a GitHub handle.
 -   **SSH Keys**: Link an SSH public key to a DID.
 -   **ORCID**: Link an ORCID iD to a DID.
+-   **Generic/Temporary**: Issue custom VCs with a **TTL (Time-To-Live)** for 1-24 hour restricted access.
 
 ### 3. DID Management
 Full lifecycle management for OYDID (Listen-to-Yourself) DIDs.
@@ -62,6 +63,8 @@ Issue W3C Verifiable Credentials to prove identity or properties.
 | `POST` | `/vc/github` | **GitHub Account VC**. Proves ownership of a GitHub username. | `{"token": "access_token", "subject_did": "did:oyd:..."}` |
 | `POST` | `/vc/orcid` | **ORCID VC**. Proves ownership of an ORCID iD. | `{"token": "access_token", "orcid": "...", "subject_did": "did:oyd:..."}` |
 | `POST` | `/vc/ssh` | **SSH Key VC**. Links an SSH public key to a DID. | `{"username": "...", "public_key": "...", "signature": "...", "subject_did": "..."}` |
+| `POST` | `/vc/issue` | **Issue Generic VC**. Create custom credentials with an optional **TTL**. | `{"subject_did": "...", "claims": {...}, "ttl_hours": 24}` |
+| `POST` | `/vc/verify` | **Verify VC**. Cryptographically validates a VC and checks for **expirationDate**. | `{"vc": { ... }}` |
 
 ### 3. DID Operations (`/did`)
 
