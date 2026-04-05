@@ -1,0 +1,21 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:odrl.dev.codata.org",
+  "verificationMethod": [
+    {
+      "id": "did:web:odrl.dev.codata.org#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:odrl.dev.codata.org",
+      "publicKeyPem": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAwyrQ0Q9QMd/k4HaogmaupX+H41cJ9b5HQKg2eLoPgBw4wutlZr7+\nhdOGhplhQMX4dfN/JB7pqoIwDKXa46O4UCgZA2L9VrP3Dhj5XrESuqxy38TMGuho\n0zCMcziznz7iaScpUA94K0IT3zJF/qYAJDTOvFsaUOyTAj4kieUVa3yUclFqF5W+\nAfjujykHJawbSKzBggGapppWYTZbviCNNBnhWwZ61uwii1S723g5lW2exZ+lebTf\nlJwkDd4BAMEWY9xwPrEA3HbLxcK2+zHFvNMBV2FFsXxlgt5EPqGtC3S+keNjn/oe\nnQWcZfiBtbwHyYh+RfKrt6J4JK3laLXKTQIDAQAB\n-----END RSA PUBLIC KEY-----\n"
+    }
+  ],
+  "authentication": [
+    "did:web:odrl.dev.codata.org#key-1"
+  ],
+  "assertionMethod": [
+    "did:web:odrl.dev.codata.org#key-1"
+  ]
+}
