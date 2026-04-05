@@ -63,3 +63,12 @@ Before performing an action, a service verifies the agent's credential.
 -   **Immutability**: Once a DID is created, its history is immutable. Use `update` for state changes.
 -   **Key Management**: Never leak the `private_key` of a Restricted DID.
 -   **TTL Strategy**: Use short-lived VCs (1-4 hours) for high-risk operations and longer-lived ones (24 hours) for routine tasks.
+
+## References
+
+-   Vyacheslav Tykhonov, Anton Polishko, Artur Kiulian, and Maksym Komar. (2020). **CoronaWhy: Building a Distributed, Credible and Scalable Research and Data Infrastructure for Open Science**. SciNLP workshop at AKBC 2020. [https://doi.org/10.5281/zenodo.3922256](https://doi.org/10.5281/zenodo.3922256)
+-   Vyacheslav Tykhonov. (2023, July 11). **Decentralized research data infrastructure and knowledge graphs**. Zenodo. [https://doi.org/10.5281/zenodo.8134041](https://doi.org/10.5281/zenodo.8134041)
+-   Tykhonov, V. (2023). **Sustaining Controlled Vocabularies and Ontologies with Decentralization and DIDs**. In Convention Loi & Commun. edited by: Danièle Bourcier, Paul Bourgine, and Salma Mesmoudi. Association Française de Science des Systèmes (AFSCET), 2024. Zenodo. [https://doi.org/10.5281/zenodo.10375766](https://doi.org/10.5281/zenodo.10375766)
+-   Andrey Vukolov, Erik van Winkle, Vyacheslav Tykhonov, Roberto Pugliese. (2024). **Decentralised Persistent Identification - an Emerging Technology for Sustainability Maintenance and Knowledge-driven Processes**. IFAC-PapersOnLine, Volume 58, Issue 8, Pages 371-376. [https://doi.org/10.1016/j.ifacol.2024.08.149](https://doi.org/10.1016/j.ifacol.2024.08.149)
+-   Tykhonov, V. (2024, November 29). **Pros and Cons of Decentralized Identifiers (DIDs) in Dataverse**. "Dataverse and AI" workshop, FORS, Lausanne, Switzerland. Zenodo. [https://doi.org/10.5281/zenodo.14623002](https://doi.org/10.5281/zenodo.14623002)
+-   Tykhonov, V. (2025, June 23). **Decentralized identifiers (DIDs) for sustainable AI in the Dataverse data network**. Semantic Croissant regular meeting. Zenodo. [https://doi.org/10.5281/zenodo.15723145](https://doi.org/10.5281/zenodo.15723145)
