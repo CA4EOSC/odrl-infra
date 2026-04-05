@@ -5,35 +5,60 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-const DashboardCard = ({ to, title, description, icon: Icon, color, delay }) => (
-    <Link
-        to={to}
-        className={cn(
-            "group p-6 rounded-2xl bg-white border border-gray-200 dark:bg-[#242424] dark:border-white/10 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden",
-            `hover:border-${color}-500/50`
-        )}
-        style={{ animationDelay: `${delay}ms` }}
-    >
-        <div className={cn(
-            "w-12 h-12 rounded-xl mb-4 flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
-            `bg-${color}-500/10 text-${color}-600 dark:text-${color}-400`
-        )}>
-            <Icon size={24} />
-        </div>
-        <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-            {title}
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-            {description}
-        </p>
-        <div className={cn(
-            "absolute top-0 right-0 p-4 opacity-5 transition-opacity group-hover:opacity-10 dark:text-white",
-            `text-${color}-600`
-        )}>
-            <Icon size={80} />
-        </div>
-    </Link>
-);
+const DashboardCard = ({ to, title, description, icon: Icon, color, delay }) => {
+    const isStatic = to.startsWith('/.well-known');
+    const content = (
+        <>
+            <div className={cn(
+                "w-12 h-12 rounded-xl mb-4 flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
+                `bg-${color}-500/10 text-${color}-600 dark:text-${color}-400`
+            )}>
+                <Icon size={24} />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                {title}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                {description}
+            </p>
+            <div className={cn(
+                "absolute top-0 right-0 p-4 opacity-5 transition-opacity group-hover:opacity-10 dark:text-white",
+                `text-${color}-600`
+            )}>
+                <Icon size={80} />
+            </div>
+        </>
+    );
+
+    const commonClasses = cn(
+        "group p-6 rounded-2xl bg-white border border-gray-200 dark:bg-[#242424] dark:border-white/10 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden",
+        `hover:border-${color}-500/50`
+    );
+
+    if (isStatic) {
+        return (
+            <a
+                href={to}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={commonClasses}
+                style={{ animationDelay: `${delay}ms` }}
+            >
+                {content}
+            </a>
+        );
+    }
+
+    return (
+        <Link
+            to={to}
+            className={commonClasses}
+            style={{ animationDelay: `${delay}ms` }}
+        >
+            {content}
+        </Link>
+    );
+};
 
 export default function Dashboard() {
     return (
@@ -119,6 +144,14 @@ export default function Dashboard() {
                     icon={FileJson}
                     color="orange"
                     delay={350}
+                />
+                <DashboardCard
+                    to="/.well-known/did.json"
+                    title="System Identity"
+                    description="Explore the W3C DID document for the ODRL protocol infrastructure."
+                    icon={LayoutDashboard}
+                    color="red"
+                    delay={400}
                 />
             </div>
         </div>
