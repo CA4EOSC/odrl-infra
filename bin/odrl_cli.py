@@ -651,7 +651,15 @@ def test_connection(args):
         print(f"Failed to connect to API. Error: {e}")
 
 def main():
-    parser = argparse.ArgumentParser(description="ODRL Infrastructure CLI")
+    description = """
+ODRL Infrastructure CLI
+Open Digital Rights Language (ODRL) infrastructure created by CODATA https://codata.org
+Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe Framework Programme under grant agreement N° 101188248
+"""
+    parser = argparse.ArgumentParser(
+        description=description,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # select
