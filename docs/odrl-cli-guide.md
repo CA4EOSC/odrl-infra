@@ -12,6 +12,20 @@ The `odrl-cli` is a powerful command-line interface for interacting with the ODR
   - [Deleting Resources](#deleting-resources)
 - [Policy Generation](#policy-generation)
 - [Restricted Resources (Encryption & Decryption)](#restricted-resources-encryption--decryption)
+- [Installation](#installation)
+
+---
+
+## Installation
+
+You can install the ODRL CLI globally using `pip`:
+
+```bash
+cd odrl-infra
+pip install -e .
+```
+
+After installation, the `odrl-cli` command will be available in your terminal.
 
 ---
 

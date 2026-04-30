@@ -114,12 +114,17 @@ See the [ODRL CLI Guide](./docs/odrl-cli-guide.md) for full documentation.
     docker compose up --build
     ```
 
-    The service will start on `http://localhost:8001`:
-    -   **Frontend**: [http://localhost:8001/](http://localhost:8001/)
-    -   **API Docs**: [http://localhost:8001/api/docs](http://localhost:8001/api/docs)
-    -   **Health Check**: [http://localhost:8001/api/health](http://localhost:8001/api/health)
-
     *Note: The frontend is built and served directly by the FastAPI container.*
+
+### 3. Install ODRL CLI
+You can install the CLI tool directly using `pip`:
+```bash
+pip install -e .
+```
+This adds the `odrl-cli` command to your terminal. Verify with:
+```bash
+odrl-cli test
+```
 
 ## Architecture
 -   **FastAPI**: Provides the REST API layer.
