@@ -652,7 +652,7 @@ def test_connection(args):
 
 def main():
     parser = argparse.ArgumentParser(description="ODRL Infrastructure CLI")
-    subparsers = parser.add_subparsers(dest="command", required=True, help="Available commands")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # select
     parser_select = subparsers.add_parser("select", help="Select active group")
@@ -754,6 +754,10 @@ def main():
     parser_test = subparsers.add_parser("test", help="Test connection to ODRL APIs")
 
     args = parser.parse_args()
+
+    if args.command is None:
+        parser.print_help()
+        sys.exit(0)
 
     if args.command == "select":
         select_group(args)
