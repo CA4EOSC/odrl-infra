@@ -5,27 +5,102 @@ import sys
 import requests
 import configparser
 import os
+import json
 from urllib.parse import urlparse
+from pathlib import Path
 
-def get_base_url():
-    config = configparser.ConfigParser()
+# Paths for local wallet (compatible with croissant-toolkit)
+WALLET_DIR = Path.home() / ".odrl"
+WALLET_FILE = WALLET_DIR / "did.json"
+
+def get_wallet_data():
+    if WALLET_FILE.exists():
+        try:
+            with open(WALLET_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return None
+    return None
+
+def get_config_path():
     config_path = "odrl.config"
     script_dir_config = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "odrl.config")
-    
     if os.path.exists(config_path):
-        config.read(config_path)
+        return config_path
     elif os.path.exists(script_dir_config):
-        config.read(script_dir_config)
-        
-    if "odrl" in config and "url" in config["odrl"]:
-        return config["odrl"]["url"]
-        
-    return "http://10.147.18.90:8001/demo"
+        return script_dir_config
+    return config_path
+
+def get_config():
+    config = configparser.ConfigParser()
+    path = get_config_path()
+    if os.path.exists(path):
+        config.read(path)
+    if "odrl" not in config:
+        config["odrl"] = {}
+    return config, path
+
+def get_base_url():
+    config, _ = get_config()
+    return config["odrl"].get("url", "http://10.147.18.90:8001/demo")
+
+def get_active_group():
+    config, _ = get_config()
+    return config["odrl"].get("active_group", None)
+
+def set_active_group(group_did):
+    config, path = get_config()
+    config["odrl"]["active_group"] = group_did
+    with open(path, "w") as f:
+        config.write(f)
+
+def get_user_did():
+    config, _ = get_config()
+    return config["odrl"].get("user_did", None)
+
+def set_user_did(did):
+    config, path = get_config()
+    config["odrl"]["user_did"] = did
+    with open(path, "w") as f:
+        config.write(f)
 
 def get_api_base():
     url = get_base_url()
     parsed = urlparse(url)
     return f"{parsed.scheme}://{parsed.netloc}"
+
+def parse_group_and_file(args_list):
+    group_did = get_active_group()
+    file_path = None
+    if len(args_list) >= 2:
+        group_did = args_list[0]
+        file_path = args_list[1]
+    elif len(args_list) == 1:
+        arg = args_list[0]
+        if os.path.exists(arg):
+            file_path = arg
+        elif not group_did:
+            group_did = arg
+        else:
+            if arg.startswith("did:"):
+                group_did = arg
+            else:
+                file_path = arg
+    return group_did, file_path
+
+def select_group(args):
+    api_base = get_api_base()
+    group_did = args.group
+    print(f"Selecting group: {group_did}")
+    try:
+        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        if res.status_code == 200:
+            set_active_group(group_did)
+            print(f"Successfully activated group {group_did}")
+        else:
+            print(f"Failed to fetch group {group_did}: {res.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"API connection error: {e}")
 
 def create_group(args):
     print(f"Creating new group: {args.group}")
@@ -50,7 +125,10 @@ def create_group(args):
 
 def join_group(args):
     api_base = get_api_base()
-    group_did = args.group
+    group_did = args.group or get_active_group()
+    if not group_did:
+        print("Error: No group provided and no active group selected.")
+        return
     
     print(f"Joining group: {group_did}")
     try:
@@ -66,6 +144,9 @@ def join_group(args):
         
         member_did = input("Enter your DID to join: ").strip()
         role = input("Enter role (default: Member): ").strip() or "Member"
+        
+        if member_did:
+            set_user_did(member_did)
         
         members.append({"member": member_did, "role": role})
         
@@ -87,7 +168,10 @@ def join_group(args):
 
 def list_peers(args):
     api_base = get_api_base()
-    group_did = args.group
+    group_did = args.group or get_active_group()
+    if not group_did:
+        print("Error: No group provided and no active group selected.")
+        return
     print(f"Listing peers in group: {group_did}")
     try:
         res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
@@ -150,7 +234,10 @@ def list_datasets(args):
 
 def list_policy(args):
     api_base = get_api_base()
-    group = args.group
+    group = args.group or get_active_group()
+    if not group:
+        print("Error: No group provided and no active group selected.")
+        return
     print(f"Listing policy for group: {group}")
     try:
         res = requests.get(f"{api_base}/api/oac/search", params={"q": group, "collection": "policy"}, timeout=10)
@@ -168,13 +255,15 @@ def list_policy(args):
 
 def add_resource(args):
     api_base = get_api_base()
-    group_did = args.group
     resource_type = args.resource_type
-    
+    group_did, file_path = parse_group_and_file(args.args)
+    if not group_did:
+        print("Error: No group provided and no active group selected.")
+        return
+        
     print(f"Adding new {resource_type} to group {group_did}")
     
     if resource_type == "file":
-        file_path = getattr(args, "file", None)
         name = input("Enter file name: ").strip()
         if file_path and os.path.exists(file_path):
             with open(file_path, "r") as f:
@@ -186,7 +275,6 @@ def add_resource(args):
         url = f"{api_base}/api/did/create"
         
     elif resource_type == "dataset":
-        file_path = getattr(args, "file", None)
         url_input = input("Enter dataset URL (optional): ").strip()
         if file_path and os.path.exists(file_path):
             with open(file_path, "r") as f:
@@ -206,7 +294,6 @@ def add_resource(args):
         url = f"{api_base}/api/groups/create"
         
     elif resource_type == "prompt":
-        file_path = getattr(args, "file", None)
         name = input("Enter prompt name: ").strip()
         if file_path and os.path.exists(file_path):
             with open(file_path, "r") as f:
@@ -218,7 +305,6 @@ def add_resource(args):
         url = f"{api_base}/api/did/create"
         
     elif resource_type == "variable":
-        file_path = getattr(args, "file", None)
         name = input("Enter variable name: ").strip()
         if file_path and os.path.exists(file_path):
             with open(file_path, "r") as f:
@@ -265,8 +351,11 @@ def add_resource(args):
 
 def delete_resource(args):
     api_base = get_api_base()
-    group_did = args.group
     resource_type = args.resource_type
+    group_did, _ = parse_group_and_file(args.args)
+    if not group_did:
+        print("Error: No group provided and no active group selected.")
+        return
     
     print(f"Deleting {resource_type} from group {group_did}")
     try:
@@ -324,6 +413,231 @@ def delete_resource(args):
     except requests.exceptions.RequestException as e:
         print(f"API connection error: {e}")
 
+def whoami(args):
+    active_group = get_active_group()
+    user_did = get_user_did()
+    api_base = get_api_base()
+    
+    wallet = get_wallet_data()
+    master_did = wallet.get("did") if wallet else "Not initialized"
+    print(f"Master DID (Wallet): {master_did}")
+
+    if user_did:
+        print(f"User DID (Session):  {user_did}")
+        try:
+            res = requests.get(f"{api_base}/api/did/resolve/{user_did}", timeout=10)
+            if res.status_code == 200:
+                data = res.json()
+                name = data.get("service", [{}])[0].get("payload", {}).get("name")
+                if name:
+                    print(f"User Name:    {name}")
+        except Exception:
+            pass
+    else:
+        print("User DID:     Not set (join a group or configure 'user_did' in odrl.config)")
+        
+    if active_group:
+        print(f"Active Group: {active_group}")
+        try:
+            res = requests.get(f"{api_base}/api/did/resolve/{active_group}", timeout=10)
+            if res.status_code == 200:
+                data = res.json()
+                name = data.get("service", [{}])[0].get("payload", {}).get("name")
+                if name:
+                    print(f"Group Name:   {name}")
+        except Exception:
+            pass
+    else:
+        print("Active Group: None selected (use 'odrl-cli select <group_did>')")
+
+def info_resource(args):
+    api_base = get_api_base()
+    did = args.did or get_active_group()
+    if not did:
+        print("Error: Please provide a DID or select an active group.")
+        return
+        
+    try:
+        res = requests.get(f"{api_base}/api/did/resolve/{did}", timeout=10)
+        if res.status_code == 200:
+            data = res.json()
+            payload = data.get("service", [{}])[0].get("payload")
+            
+            if payload:
+                for key, value in payload.items():
+                    if isinstance(value, list):
+                        print(f"{key.capitalize()}:")
+                        for item in value:
+                            if isinstance(item, dict):
+                                print(f"  - {', '.join(f'{k}={v}' for k,v in item.items())}")
+                            else:
+                                print(f"  - {item}")
+                    elif isinstance(value, dict):
+                        print(f"{key.capitalize()}:")
+                        for k, v in value.items():
+                            print(f"  {k}: {v}")
+                    else:
+                        print(f"{key.capitalize()}: {value}")
+            else:
+                print("No standard payload found. Raw data:")
+                print(json.dumps(data, indent=2))
+        else:
+            print(f"Failed to fetch info for {did}. Status: {res.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"API connection error: {e}")
+
+def generate_policy(args):
+    api_base = get_api_base()
+    group_did = args.group or get_active_group()
+    if not group_did:
+        print("Error: No group provided and no active group selected.")
+        return
+
+    try:
+        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        if res.status_code != 200:
+            print(f"Failed to fetch group {group_did}: {res.status_code}")
+            return
+
+        data = res.json()
+        payload = data.get("service", [{}])[0].get("payload", {})
+        members = payload.get("members", payload.get("hasMember", []))
+
+        policy = {
+            "@context": [
+                "http://www.w3.org/ns/odrl.jsonld",
+                {
+                    "dcterms": "http://purl.org/dc/terms/"
+                }
+            ],
+            "@type": "odrl:Agreement",
+            "@id": f"https://odrl.dev.codata.org/policy/{group_did}",
+            "odrl:permission": []
+        }
+
+        for m in members:
+            member_did = m.get("member")
+            if member_did:
+                policy["odrl:permission"].append({
+                    "odrl:target": group_did,
+                    "odrl:assigner": group_did,
+                    "odrl:assignee": member_did,
+                    "odrl:action": "odrl:use"
+                })
+
+        print(json.dumps(policy, indent=2))
+    except requests.exceptions.RequestException as e:
+        print(f"API connection error: {e}")
+
+def restrict_prompt(args):
+    api_base = get_api_base()
+    
+    arg1 = args.target_did
+    arg2 = args.file
+    
+    target_did = None
+    content_file = None
+    
+    # Smart detection: if arg1 looks like a file and arg2 is None, use arg1 as file
+    if arg1 and not arg2:
+        if os.path.exists(arg1) or "." in arg1 or "/" in arg1:
+            content_file = arg1
+        else:
+            target_did = arg1
+    else:
+        target_did = arg1
+        content_file = arg2
+    
+    if not target_did:
+        wallet = get_wallet_data()
+        if wallet:
+            target_did = wallet.get("did")
+            print(f"Using Master DID from wallet as recipient: {target_did}")
+        else:
+            print("Error: No recipient DID provided and no local wallet found.")
+            return
+    
+    if content_file and os.path.exists(content_file):
+        with open(content_file, "r") as f:
+            content = f.read()
+    else:
+        content = input("Enter restricted prompt content: ").strip()
+        
+    payload = {
+        "payload": {
+            "type": "Prompt",
+            "content": content
+        },
+        "target_did": target_did,
+        "collection": "prompts"
+    }
+    
+    try:
+        # Note: /api/did/create/restricted is usually at the base API level
+        # We'll use the base URL (without /demo) as in other resolution calls
+        parsed_base = urlparse(get_base_url())
+        api_root = f"{parsed_base.scheme}://{parsed_base.netloc}"
+        
+        res = requests.post(f"{api_root}/api/did/create/restricted", json=payload, timeout=10)
+        if res.status_code == 200:
+            data = res.json()
+            print(f"Created restricted prompt!")
+            print(f"DID:         {data.get('did')}")
+            
+            keys = data.get('keys', {})
+            print(f"Private Key: {keys.get('private_key')}")
+            print(f"Target DID:  {target_did}")
+            print("\nIMPORTANT: Securely share the Private Key with the recipient.")
+        else:
+            print(f"Failed to create restricted prompt: {res.status_code}")
+            print(res.text)
+    except Exception as e:
+        print(f"Error: {e}")
+
+def decrypt_resource(args):
+    did = args.did
+    private_key = args.private_key
+    
+    if not private_key:
+        wallet = get_wallet_data()
+        if wallet:
+            private_key = wallet.get("keys", {}).get("private_key")
+            print("Using private key from local wallet...")
+        else:
+            print("Error: No private key provided and no local wallet found.")
+            return
+            
+    payload = {
+        "did": did,
+        "private_key": private_key
+    }
+    
+    try:
+        parsed_base = urlparse(get_base_url())
+        api_root = f"{parsed_base.scheme}://{parsed_base.netloc}"
+        
+        res = requests.post(f"{api_root}/api/did/resolve/restricted", json=payload, timeout=10)
+        if res.status_code == 200:
+            print("Successfully decrypted resource!")
+            data = res.json()
+            decrypted = data.get("decrypted_payload", {})
+            
+            # The payload might be a string or a dict
+            if isinstance(decrypted, dict):
+                content = decrypted.get("content") or decrypted.get("secret")
+                if content:
+                    print(f"\nDecrypted Content:\n{content}")
+                else:
+                    print("\nDecrypted Data:")
+                    print(json.dumps(decrypted, indent=2))
+            else:
+                print(f"\nDecrypted Data: {decrypted}")
+        else:
+            print(f"Decryption failed: {res.status_code}")
+            print(res.text)
+    except Exception as e:
+        print(f"Error: {e}")
+
 def test_connection(args):
     url = get_base_url()
     print(f"Testing connection to ODRL API at {url} ...")
@@ -340,17 +654,50 @@ def main():
     parser = argparse.ArgumentParser(description="ODRL Infrastructure CLI")
     subparsers = parser.add_subparsers(dest="command", required=True, help="Available commands")
 
+    # select
+    parser_select = subparsers.add_parser("select", help="Select active group")
+    parser_select.add_argument("group", help="Group DID")
+
+    # whoami
+    parser_whoami = subparsers.add_parser("whoami", help="Show current user DID and active group")
+
+    # info
+    parser_info = subparsers.add_parser("info", help="Show information about a specific resource")
+    parser_info.add_argument("did", nargs="?", help="DID of the resource")
+
+    # policy
+    parser_policy = subparsers.add_parser("policy", help="Generate ODRL policy for a group")
+    parser_policy.add_argument("group", nargs="?", help="Group DID")
+
+    # restrict
+    parser_restrict = subparsers.add_parser("restrict", help="Manage restricted (encrypted) resources")
+    restrict_subparsers = parser_restrict.add_subparsers(dest="subcommand", help="Resource type to restrict")
+    
+    parser_restrict_prompt = restrict_subparsers.add_parser("prompt", help="Create a restricted prompt")
+    parser_restrict_prompt.add_argument("target_did", nargs="?", help="Recipient DID who can decrypt the content (defaults to wallet DID)")
+    parser_restrict_prompt.add_argument("file", nargs="?", help="Local file containing prompt content")
+
+    # encrypt (alias for restrict prompt)
+    parser_encrypt = subparsers.add_parser("encrypt", help="Encrypt a prompt for a recipient (alias for restrict prompt)")
+    parser_encrypt.add_argument("target_did", nargs="?", help="Recipient DID who can decrypt the content (defaults to wallet DID)")
+    parser_encrypt.add_argument("file", nargs="?", help="Local file containing prompt content")
+
+    # decrypt
+    parser_decrypt = subparsers.add_parser("decrypt", help="Decrypt a restricted resource")
+    parser_decrypt.add_argument("did", help="DID of the restricted resource")
+    parser_decrypt.add_argument("private_key", nargs="?", help="Recipient's private key (defaults to wallet key)")
+
     # create
     parser_create = subparsers.add_parser("create", help="Create new group")
     parser_create.add_argument("group", help="Name of the group to create")
     
     # join
     parser_join = subparsers.add_parser("join", help="Join group")
-    parser_join.add_argument("group", help="Name of the group to join")
+    parser_join.add_argument("group", nargs="?", help="Name of the group to join")
 
     # peers
     parser_peers = subparsers.add_parser("peers", help="Show peers in group")
-    parser_peers.add_argument("group", help="Name of the group")
+    parser_peers.add_argument("group", nargs="?", help="Name of the group")
 
     # listgroups
     parser_listgroups = subparsers.add_parser("listgroups", help="Show all groups")
@@ -363,56 +710,69 @@ def main():
 
     # listpolicy
     parser_listpolicy = subparsers.add_parser("listpolicy", help="Show policy for a specific group")
-    parser_listpolicy.add_argument("group", help="Name of the group")
+    parser_listpolicy.add_argument("group", nargs="?", help="Name of the group")
 
     # add
     parser_add = subparsers.add_parser("add", help="Add a resource to a group")
     add_subparsers = parser_add.add_subparsers(dest="resource_type", required=True, help="Type of resource to add")
 
     add_file = add_subparsers.add_parser("file", help="Add a file to group")
-    add_file.add_argument("group", help="Group DID")
-    add_file.add_argument("file", nargs="?", help="Optional file to read content from")
+    add_file.add_argument("args", nargs="*", help="[group] [file]")
 
     add_dataset = add_subparsers.add_parser("dataset", help="Add a dataset to group")
-    add_dataset.add_argument("group", help="Group DID")
-    add_dataset.add_argument("file", nargs="?", help="Optional file to read description from")
+    add_dataset.add_argument("args", nargs="*", help="[group] [file]")
 
     add_group = add_subparsers.add_parser("group", help="Add a subgroup to group")
-    add_group.add_argument("group", help="Group DID")
+    add_group.add_argument("args", nargs="*", help="[group]")
 
     add_prompt = add_subparsers.add_parser("prompt", help="Add a prompt to group")
-    add_prompt.add_argument("group", help="Group DID")
-    add_prompt.add_argument("file", nargs="?", help="Optional file to read content from")
+    add_prompt.add_argument("args", nargs="*", help="[group] [file]")
 
     add_variable = add_subparsers.add_parser("variable", help="Add a variable to group")
-    add_variable.add_argument("group", help="Group DID")
-    add_variable.add_argument("file", nargs="?", help="Optional file to read description from")
+    add_variable.add_argument("args", nargs="*", help="[group] [file]")
 
     # delete
     parser_delete = subparsers.add_parser("delete", help="Delete a resource from a group")
     delete_subparsers = parser_delete.add_subparsers(dest="resource_type", required=True, help="Type of resource to delete")
 
     delete_file = delete_subparsers.add_parser("file", help="Delete a file from group")
-    delete_file.add_argument("group", help="Group DID")
+    delete_file.add_argument("args", nargs="*", help="[group]")
 
     delete_dataset = delete_subparsers.add_parser("dataset", help="Delete a dataset from group")
-    delete_dataset.add_argument("group", help="Group DID")
+    delete_dataset.add_argument("args", nargs="*", help="[group]")
 
     delete_group = delete_subparsers.add_parser("group", help="Delete a subgroup from group")
-    delete_group.add_argument("group", help="Group DID")
+    delete_group.add_argument("args", nargs="*", help="[group]")
 
     delete_prompt = delete_subparsers.add_parser("prompt", help="Delete a prompt from group")
-    delete_prompt.add_argument("group", help="Group DID")
+    delete_prompt.add_argument("args", nargs="*", help="[group]")
 
     delete_variable = delete_subparsers.add_parser("variable", help="Delete a variable from group")
-    delete_variable.add_argument("group", help="Group DID")
+    delete_variable.add_argument("args", nargs="*", help="[group]")
 
     # test
     parser_test = subparsers.add_parser("test", help="Test connection to ODRL APIs")
 
     args = parser.parse_args()
 
-    if args.command == "create":
+    if args.command == "select":
+        select_group(args)
+    elif args.command == "whoami":
+        whoami(args)
+    elif args.command == "info":
+        info_resource(args)
+    elif args.command == "policy":
+        generate_policy(args)
+    elif args.command == "restrict":
+        if args.subcommand == "prompt":
+            restrict_prompt(args)
+        else:
+            parser_restrict.print_help()
+    elif args.command == "encrypt":
+        restrict_prompt(args)
+    elif args.command == "decrypt":
+        decrypt_resource(args)
+    elif args.command == "create":
         create_group(args)
     elif args.command == "join":
         join_group(args)

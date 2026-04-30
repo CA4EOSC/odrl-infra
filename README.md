@@ -80,8 +80,16 @@ Manage the lifecycle of OYDID Data Resources.
 | `POST` | `/did/update` | **Update DID**. Updates the payload of an existing DID. | Body: `{"did": "...", "payload": {...}}` |
 | `DELETE` | `/did/revoke/{did}` | **Revoke DID**. Revokes a DID, making it invalid. | Path: `did` |
 
-### 4. Utilities
+### 4. ODRL CLI
+A powerful command-line interface to interact with the infrastructure.
+- **Identity Context**: Automatically detects local wallet from `~/.odrl/did.json`.
+- **Encryption**: Smart `encrypt` command for creating restricted resources.
+- **Decryption**: `decrypt` command using local private keys.
+- **Policy Builder**: Command-line `policy` generation in ODRL JSON-LD format.
 
+See the [ODRL CLI Guide](./docs/odrl-cli-guide.md) for full documentation.
+
+### 5. Utilities
 -   `GET /health`: Service health check.
 
 ## Getting Started
