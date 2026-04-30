@@ -1,0 +1,134 @@
+# ODRL CLI Comprehensive Guide
+
+The `odrl-cli` is a powerful command-line interface for interacting with the ODRL infrastructure. It allows you to manage groups, peers, policies, and various resources such as files, datasets, prompts, and variables via Decentralized Identifiers (DIDs).
+
+## Table of Contents
+- [Configuration](#configuration)
+- [General Commands](#general-commands)
+- [Group Management](#group-management)
+- [Resource Management](#resource-management)
+  - [Adding Resources](#adding-resources)
+  - [Deleting Resources](#deleting-resources)
+
+---
+
+## Configuration
+
+The CLI relies on a configuration file named `odrl.config` to connect to the correct backend API. This file can be located in your current working directory or the parent directory of the script.
+
+**Example `odrl.config`:**
+```ini
+[odrl]
+url = http://10.147.18.90:8001/demo
+```
+
+If the configuration file is missing, it will automatically fall back to the default URL `http://10.147.18.90:8001/demo`.
+
+---
+
+## General Commands
+
+### Test Connection
+Test if the CLI can successfully connect to the configured ODRL API.
+```bash
+./bin/odrl-cli test
+```
+
+### Listing Global Resources
+List all entities of a specific type registered on the network.
+
+- **List Groups:** Shows all organizations/groups and their DIDs.
+  ```bash
+  ./bin/odrl-cli listgroups
+  ```
+- **List Files:** Shows all variables mapped as files.
+  ```bash
+  ./bin/odrl-cli listfiles
+  ```
+- **List Datasets:** Shows all registered datasets (Croissants).
+  ```bash
+  ./bin/odrl-cli listdatasets
+  ```
+- **List Policies:** Shows all policies associated with a specific group.
+  ```bash
+  ./bin/odrl-cli listpolicy <group_name_or_did>
+  ```
+
+---
+
+## Group Management
+
+### Create Group
+Create a new ODRL group. This will prompt you for an optional description and generate a new Organization DID.
+```bash
+./bin/odrl-cli create <group_name>
+```
+
+### Join Group
+Join an existing group using its DID. You will be prompted for your DID and the role you are assuming.
+```bash
+./bin/odrl-cli join <group_did>
+```
+
+### List Peers
+List all the current members (peers and resources) assigned to a group.
+```bash
+./bin/odrl-cli peers <group_did>
+```
+
+---
+
+## Resource Management
+
+The CLI supports managing various resources within a group, including `file`, `dataset`, `prompt`, `variable`, and nested `group` entities. Adding a resource generates a fresh DID on the network and links it securely to the parent group.
+
+### Adding Resources
+
+You can add resources interactively, or you can supply a text file to upload its contents directly.
+
+**Syntax:**
+```bash
+./bin/odrl-cli add <resource_type> <group_did> [file_path]
+```
+
+**Resource Types:**
+- `file`: Adds a file resource to the group. If `[file_path]` is provided, the file's content is used as the file description.
+- `dataset`: Adds a dataset (Croissant). If `[file_path]` is provided, the file's content is used as the dataset description.
+- `prompt`: Adds an LLM prompt. If `[file_path]` is provided, the file's content is injected directly as the prompt content.
+- `variable`: Adds a variable. If `[file_path]` is provided, the file's content is used as the variable description.
+- `group`: Nests a subgroup into the parent group.
+
+**Examples:**
+```bash
+# Interactively add a prompt
+./bin/odrl-cli add prompt did:oyd:example123
+
+# Add a prompt by uploading a local text file
+./bin/odrl-cli add prompt did:oyd:example123 ./tests/prompt.txt
+
+# Add a dataset definition
+./bin/odrl-cli add dataset did:oyd:example123
+```
+
+### Deleting Resources
+
+You can safely detach resources from a group and destroy their associated DIDs. The CLI will search the group for all items matching the requested resource type and present an interactive menu so you can select exactly which one to delete.
+
+**Syntax:**
+```bash
+./bin/odrl-cli delete <resource_type> <group_did>
+```
+
+**Resource Types:**
+- `file`, `dataset`, `prompt`, `variable`, `group`
+
+**Example Workflow:**
+```bash
+$ ./bin/odrl-cli delete prompt did:oyd:example123
+Deleting prompt from group did:oyd:example123
+Available resources to delete:
+1. did:oyd:zQmYa8T...
+Enter the number of the prompt to delete (or 0 to cancel): 1
+Successfully removed prompt from group!
+Successfully deleted the prompt DID: did:oyd:zQmYa8T...
+```
