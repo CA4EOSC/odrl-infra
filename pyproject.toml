@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odrl-infra-cli"
+version = "0.1.0"
+description = "ODRL Infrastructure CLI for AI Agents"
+authors = [
+    { name="CODATA" }
+]
+dependencies = [
+    "requests>=2.25.0",
+]
+requires-python = ">=3.8"
+
+[project.scripts]
+odrl-cli = "bin.odrl_cli:main"

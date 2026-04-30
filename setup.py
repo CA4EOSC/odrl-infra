@@ -11,9 +11,9 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "odrl-cli=bin.odrl_cli_wrapper:main",
+            "odrl-cli=bin.odrl_cli:main",
         ],
     },
-    scripts=['bin/odrl-cli'],
+    scripts=['bin/odrl_cli.py'],
     python_requires=">=3.8",
 )
