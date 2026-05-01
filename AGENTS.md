@@ -13,22 +13,22 @@ Restricted DIDs allow you to share sensitive data that only a specific recipient
     curl -X 'POST' 'https://odrl.dev.codata.org/api/did/create/restricted' \
     -d '{"payload": {"secret": "data"}, "target_did": "did:oyd:zQmRecipient..."}'
     ```
-    Or via JSON body:
-    ```json
-    POST /api/did/create/restricted
-    {
-      "payload": { "secret_key": "ABC-123", "instructions": "Move to sector 7" },
-      "target_did": "did:oyd:RecipientDID"
-    }
+    Alternatively, using the CLI:
+    ```bash
+    ./bin/odrl-cli encrypt <recipient_did> ./tests/prompt
     ```
-3.  **Secure the Keys**: The response includes the `private_key`. **This must be shared securely with the recipient** (e.g., via a secure channel).
+3.  **Management Keys**: The response includes a `private_key` which is used for **managing** (updating/revoking) the new DID. **Decryption** requires the private key of the **Recipient DID**.
 
 ### Workflow: Resolving a Restricted Resource
-1.  **Receive DID and Key**: The agent receives a Restricted DID and the corresponding private key (the `z1S5...` multibase string).
-2.  **Decrypt**: Post the DID and your private key to `/api/did/resolve/restricted`.
+1.  **Identity**: The recipient uses their own DID's private key.
+2.  **Decrypt**: Call `POST /api/did/resolve/restricted`.
     ```bash
     curl -X 'POST' 'https://odrl.dev.codata.org/api/did/resolve/restricted' \
-    -d '{"did": "did:oyd:zQmRestricted...", "private_key": "z1S5..."}'
+    -d '{"did": "did:oyd:zQmRestricted...", "private_key": "RECIPIENT_PRIVATE_KEY"}'
+    ```
+    Alternatively, using the CLI (automatically uses local wallet key):
+    ```bash
+    ./bin/odrl-cli decrypt <restricted_did>
     ```
 3.  **Error Handling**: 
     - **400 Bad Request: "Ciphertext failed verification"**: This typically means the private key provided belongs to a different DID than the one specified as the `target_did` during encryption.
