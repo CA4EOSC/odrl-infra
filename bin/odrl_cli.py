@@ -8,6 +8,7 @@ import os
 import json
 from urllib.parse import urlparse
 from pathlib import Path
+import time
 
 # Paths for local wallet (compatible with croissant-toolkit)
 WALLET_DIR = Path.home() / ".odrl"
@@ -315,6 +316,30 @@ def add_resource(args):
         unit = input("Enter unit: ").strip()
         payload = {"name": name, "description": desc, "unit": unit}
         url = f"{api_base}/api/variables/create"
+
+    elif resource_type == "agent":
+        name = input("Enter agent name: ").strip()
+        role = input("Enter agent role (e.g., Researcher, Transcriber): ").strip()
+        
+        wallet = get_wallet_data()
+        default_owner = wallet.get("did") if wallet else ""
+        owner_did = input(f"Enter owner's DID [{default_owner}]: ").strip() or default_owner
+        
+        if not owner_did:
+            print("Error: Owner's DID is required for an agent.")
+            return
+            
+        payload = {
+            "payload": {
+                "type": "Agent",
+                "name": name,
+                "role": role,
+                "owner": owner_did,
+                "created_at": hex(int(time.time()))[2:] if 'time' in globals() else ""
+            },
+            "collection": "agents"
+        }
+        url = f"{api_base}/api/did/create"
 
     try:
         res = requests.post(url, json=payload, timeout=10)
@@ -739,6 +764,9 @@ Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe
     add_variable = add_subparsers.add_parser("variable", help="Add a variable to group")
     add_variable.add_argument("args", nargs="*", help="[group] [file]")
 
+    add_agent = add_subparsers.add_parser("agent", help="Add an AI agent to group")
+    add_agent.add_argument("args", nargs="*", help="[group]")
+
     # delete
     parser_delete = subparsers.add_parser("delete", help="Delete a resource from a group")
     delete_subparsers = parser_delete.add_subparsers(dest="resource_type", required=True, help="Type of resource to delete")
@@ -757,6 +785,9 @@ Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe
 
     delete_variable = delete_subparsers.add_parser("variable", help="Delete a variable from group")
     delete_variable.add_argument("args", nargs="*", help="[group]")
+
+    delete_agent = delete_subparsers.add_parser("agent", help="Delete an agent from group")
+    delete_agent.add_argument("args", nargs="*", help="[group]")
 
     # test
     parser_test = subparsers.add_parser("test", help="Test connection to ODRL APIs")
