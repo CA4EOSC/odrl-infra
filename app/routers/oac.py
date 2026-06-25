@@ -60,7 +60,8 @@ async def get_oac_policy(uid: str):
 @router.get("/search")
 async def search_oac_policies(
     q: str, 
-    collection: Optional[str] = Query(None, description="Qdrant collection to search in (policy, prompts, variables, croissant, dids)")
+    collection: Optional[str] = Query(None, description="Qdrant collection to search in (policy, prompts, variables, croissant, dids)"),
+    limit: int = Query(5, description="Number of results to return")
 ):
     """
     Search for DIDs in Qdrant based on keywords.
@@ -68,7 +69,7 @@ async def search_oac_policies(
     """
     try:
         # Search across all collections if not provided
-        results = qdrant_service.search_documents(q, collection=collection)
+        results = qdrant_service.search_documents(q, collection=collection, limit=limit)
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")

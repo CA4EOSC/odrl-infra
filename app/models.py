@@ -37,6 +37,7 @@ class GroupRequest(BaseModel):
     description: Optional[str] = ""
     members: Optional[list[Membership]] = []
     private_key: Optional[str] = None
+    revocation_key: Optional[str] = None
 
 class GroupUpdateRequest(GroupRequest):
     did: str

@@ -144,7 +144,7 @@ class QdrantService:
             return "policy"
             
         # 4. Croissant
-        if "recordSet" in payload or "@dataset" in payload or payload.get("dataset") == "Croissant":
+        if "recordSet" in payload or "@dataset" in payload or payload.get("dataset") == "Croissant" or payload.get("type") == "Croissant":
             return "croissant"
             
         # 5. Organizations / Groups (Organization Ontology)

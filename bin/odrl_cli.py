@@ -23,6 +23,21 @@ def get_wallet_data():
             return None
     return None
 
+def get_group_keys(group_did):
+    users_dir = WALLET_DIR / "users"
+    if not users_dir.exists():
+        return None, None
+    for f in users_dir.glob("*_package.json"):
+        try:
+            with open(f, "r") as fp:
+                data = json.load(fp)
+                if data.get("did") == group_did:
+                    keys = data.get("keys", {})
+                    return keys.get("private_key"), keys.get("revocation_key")
+        except:
+            pass
+    return None, None
+
 def get_config_path():
     config_path = "odrl.config"
     script_dir_config = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "odrl.config")
@@ -94,7 +109,7 @@ def select_group(args):
     group_did = args.group
     print(f"Selecting group: {group_did}")
     try:
-        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
         if res.status_code == 200:
             set_active_group(group_did)
             print(f"Successfully activated group {group_did}")
@@ -115,7 +130,7 @@ def create_group(args):
         payload["description"] = description
         
     try:
-        response = requests.post(url, json=payload, timeout=10)
+        response = requests.post(url, json=payload, timeout=30)
         if response.status_code in [200, 201]:
             print(f"Group created successfully:")
             print(response.json())
@@ -133,7 +148,7 @@ def join_group(args):
     
     print(f"Joining group: {group_did}")
     try:
-        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
         if res.status_code != 200:
             print(f"Failed to fetch group: {res.status_code}")
             return
@@ -151,8 +166,11 @@ def join_group(args):
         
         members.append({"member": member_did, "role": role})
         
-        wallet = get_wallet_data()
-        private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+        private_key, revocation_key = get_group_keys(group_did)
+        if not private_key:
+            wallet = get_wallet_data()
+            private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+            revocation_key = wallet.get("keys", {}).get("revocation_key") if wallet else None
 
         update_payload = {
             "name": group_name,
@@ -161,8 +179,10 @@ def join_group(args):
         }
         if private_key:
             update_payload["private_key"] = private_key
+        if revocation_key:
+            update_payload["revocation_key"] = revocation_key
         
-        update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=10)
+        update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=30)
         if update_res.status_code == 200:
             print("Successfully joined group!")
             print(update_res.json())
@@ -180,7 +200,7 @@ def list_peers(args):
         return
     print(f"Listing peers in group: {group_did}")
     try:
-        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
         if res.status_code == 200:
             payload = res.json().get("service", [{}])[0].get("payload", {})
             members = payload.get("members", payload.get("hasMember", []))
@@ -198,7 +218,7 @@ def list_groups(args):
     api_base = get_api_base()
     print("Listing all groups...")
     try:
-        res = requests.get(f"{api_base}/api/oac/search", params={"q": "Organization", "collection": "dids"}, timeout=10)
+        res = requests.get(f"{api_base}/api/oac/search", params={"q": "Organization", "collection": "groups", "limit": 100}, timeout=30)
         if res.status_code == 200:
             groups = res.json()
             for g in groups:
@@ -212,7 +232,7 @@ def list_files(args):
     api_base = get_api_base()
     print("Listing all files (variables)...")
     try:
-        res = requests.get(f"{api_base}/api/oac/search", params={"q": "", "collection": "variables"}, timeout=10)
+        res = requests.get(f"{api_base}/api/oac/search", params={"q": "", "collection": "variables"}, timeout=30)
         if res.status_code == 200:
             files = res.json()
             for f in files:
@@ -227,12 +247,31 @@ def list_datasets(args):
     api_base = get_api_base()
     print("Listing all datasets (croissants)...")
     try:
-        res = requests.get(f"{api_base}/api/oac/search", params={"q": "", "collection": "croissant"}, timeout=10)
+        res = requests.get(f"{api_base}/api/oac/search", params={"q": "dataset", "collection": "croissant", "limit": 100}, timeout=30)
         if res.status_code == 200:
             datasets = res.json()
             for d in datasets:
-                name = d.get('json_ld', {}).get('name', 'Unknown')
-                print(f"- {name} (DID: {d.get('did')})")
+                did = d.get("did")
+                payload = d.get("json_ld", {})
+                
+                # Extract name, possibly from nested JSON in description
+                desc = payload.get("description", "")
+                if isinstance(desc, str) and desc.strip().startswith("{"):
+                    try:
+                        inner_json = json.loads(desc)
+                        if "title" in inner_json:
+                            payload["title"] = inner_json["title"]
+                        elif "name" in inner_json:
+                            payload["name"] = inner_json["name"]
+                    except json.JSONDecodeError:
+                        pass
+
+                name = payload.get("title", payload.get("name", "Unknown"))
+                # Handle JSON-LD localized strings e.g. {"@language": "en", "@value": "NAME"}
+                if isinstance(name, dict) and "@value" in name:
+                    name = name["@value"]
+
+                print(f"- {name} (DID: {did})")
         else:
             print(f"Failed to list datasets: {res.text}")
     except requests.exceptions.RequestException as e:
@@ -246,7 +285,7 @@ def list_policy(args):
         return
     print(f"Listing policy for group: {group}")
     try:
-        res = requests.get(f"{api_base}/api/oac/search", params={"q": group, "collection": "policy"}, timeout=10)
+        res = requests.get(f"{api_base}/api/oac/search", params={"q": group, "collection": "policy"}, timeout=30)
         if res.status_code == 200:
             policies = res.json()
             if not policies:
@@ -347,12 +386,12 @@ def add_resource(args):
         url = f"{api_base}/api/did/create"
 
     try:
-        res = requests.post(url, json=payload, timeout=10)
+        res = requests.post(url, json=payload, timeout=30)
         if res.status_code in [200, 201]:
             new_did = res.json().get("did")
             print(f"Created new {resource_type} with DID: {new_did}")
             
-            group_res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+            group_res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
             if group_res.status_code == 200:
                 data = group_res.json()
                 group_payload = data.get("service", [{}])[0].get("payload", {})
@@ -361,8 +400,11 @@ def add_resource(args):
                 
                 members.append({"member": new_did, "role": resource_type.capitalize()})
                 
-                wallet = get_wallet_data()
-                private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+                private_key, revocation_key = get_group_keys(group_did)
+                if not private_key:
+                    wallet = get_wallet_data()
+                    private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+                    revocation_key = wallet.get("keys", {}).get("revocation_key") if wallet else None
 
                 update_payload = {
                     "name": group_name,
@@ -371,8 +413,10 @@ def add_resource(args):
                 }
                 if private_key:
                     update_payload["private_key"] = private_key
+                if revocation_key:
+                    update_payload["revocation_key"] = revocation_key
                 
-                update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=10)
+                update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=30)
                 if update_res.status_code == 200:
                     print(f"Successfully included {resource_type} in group!")
                 else:
@@ -394,7 +438,7 @@ def delete_resource(args):
     
     print(f"Deleting {resource_type} from group {group_did}")
     try:
-        group_res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        group_res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
         if group_res.status_code != 200:
             print(f"Failed to fetch group {group_did}: {group_res.status_code}")
             return
@@ -436,7 +480,7 @@ def delete_resource(args):
         if private_key:
             update_payload["private_key"] = private_key
         
-        update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=10)
+        update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=30)
         if update_res.status_code == 200:
             print(f"Successfully removed {resource_type} from group!")
         else:
@@ -444,7 +488,7 @@ def delete_resource(args):
             return
             
         # 2. Delete the DID completely
-        delete_res = requests.delete(f"{api_base}/api/did/{resource_did}", timeout=10)
+        delete_res = requests.delete(f"{api_base}/api/did/{resource_did}", timeout=30)
         if delete_res.status_code in [200, 204]:
             print(f"Successfully deleted the {resource_type} DID: {resource_did}")
         else:
@@ -465,7 +509,7 @@ def whoami(args):
     if user_did:
         print(f"User DID (Session):  {user_did}")
         try:
-            res = requests.get(f"{api_base}/api/did/resolve/{user_did}", timeout=10)
+            res = requests.get(f"{api_base}/api/did/resolve/{user_did}", timeout=30)
             if res.status_code == 200:
                 data = res.json()
                 name = data.get("service", [{}])[0].get("payload", {}).get("name")
@@ -479,7 +523,7 @@ def whoami(args):
     if active_group:
         print(f"Active Group: {active_group}")
         try:
-            res = requests.get(f"{api_base}/api/did/resolve/{active_group}", timeout=10)
+            res = requests.get(f"{api_base}/api/did/resolve/{active_group}", timeout=30)
             if res.status_code == 200:
                 data = res.json()
                 name = data.get("service", [{}])[0].get("payload", {}).get("name")
@@ -498,7 +542,7 @@ def info_resource(args):
         return
         
     try:
-        res = requests.get(f"{api_base}/api/did/resolve/{did}", timeout=10)
+        res = requests.get(f"{api_base}/api/did/resolve/{did}", timeout=30)
         if res.status_code == 200:
             data = res.json()
             payload = data.get("service", [{}])[0].get("payload")
@@ -534,7 +578,7 @@ def generate_policy(args):
         return
 
     try:
-        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=10)
+        res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
         if res.status_code != 200:
             print(f"Failed to fetch group {group_did}: {res.status_code}")
             return
@@ -618,7 +662,7 @@ def restrict_prompt(args):
         parsed_base = urlparse(get_base_url())
         api_root = f"{parsed_base.scheme}://{parsed_base.netloc}"
         
-        res = requests.post(f"{api_root}/api/did/create/restricted", json=payload, timeout=10)
+        res = requests.post(f"{api_root}/api/did/create/restricted", json=payload, timeout=30)
         if res.status_code == 200:
             data = res.json()
             print(f"Created restricted prompt!")
@@ -656,7 +700,7 @@ def decrypt_resource(args):
         parsed_base = urlparse(get_base_url())
         api_root = f"{parsed_base.scheme}://{parsed_base.netloc}"
         
-        res = requests.post(f"{api_root}/api/did/resolve/restricted", json=payload, timeout=10)
+        res = requests.post(f"{api_root}/api/did/resolve/restricted", json=payload, timeout=30)
         if res.status_code == 200:
             print("Successfully decrypted resource!")
             data = res.json()
@@ -682,7 +726,7 @@ def test_connection(args):
     url = get_base_url()
     print(f"Testing connection to ODRL API at {url} ...")
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=30)
         if response.status_code == 200:
             print(f"Successfully connected! (Status Code: {response.status_code} at {url})")
         else:

@@ -68,6 +68,9 @@ async def update_group(did: str, request: GroupRequest):
     if getattr(request, "private_key", None):
         args.extend(["--old-doc-enc", request.private_key])
         args.extend(["--doc-enc", request.private_key])
+    if getattr(request, "revocation_key", None):
+        args.extend(["--old-rev-enc", request.revocation_key])
+        args.extend(["--rev-enc", request.revocation_key])
         
     result = run_oydid_command(args, input_data=payload)
     
