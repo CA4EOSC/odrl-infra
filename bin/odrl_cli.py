@@ -151,11 +151,16 @@ def join_group(args):
         
         members.append({"member": member_did, "role": role})
         
+        wallet = get_wallet_data()
+        private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+
         update_payload = {
             "name": group_name,
             "description": payload.get("description", ""),
             "members": members
         }
+        if private_key:
+            update_payload["private_key"] = private_key
         
         update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=10)
         if update_res.status_code == 200:
@@ -356,11 +361,16 @@ def add_resource(args):
                 
                 members.append({"member": new_did, "role": resource_type.capitalize()})
                 
+                wallet = get_wallet_data()
+                private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+
                 update_payload = {
                     "name": group_name,
                     "description": group_payload.get("description", ""),
                     "members": members
                 }
+                if private_key:
+                    update_payload["private_key"] = private_key
                 
                 update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=10)
                 if update_res.status_code == 200:
@@ -415,11 +425,16 @@ def delete_resource(args):
         
         # 1. Remove from group
         members.remove(member_to_remove)
+        wallet = get_wallet_data()
+        private_key = wallet.get("keys", {}).get("private_key") if wallet else None
+
         update_payload = {
             "name": group_name,
             "description": group_payload.get("description", ""),
             "members": members
         }
+        if private_key:
+            update_payload["private_key"] = private_key
         
         update_res = requests.put(f"{api_base}/api/groups/{group_did}", json=update_payload, timeout=10)
         if update_res.status_code == 200:

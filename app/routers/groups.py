@@ -64,7 +64,12 @@ async def update_group(did: str, request: GroupRequest):
         "updated_at": datetime.now().isoformat()
     }
     
-    result = run_oydid_command(["update", did, "--json-output"], input_data=payload)
+    args = ["update", did, "--json-output"]
+    if getattr(request, "private_key", None):
+        args.extend(["--old-doc-enc", request.private_key])
+        args.extend(["--doc-enc", request.private_key])
+        
+    result = run_oydid_command(args, input_data=payload)
     
     if result.returncode != 0:
         error_detail = getattr(result, "error_msg", result.stderr)
