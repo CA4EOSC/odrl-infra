@@ -757,6 +757,41 @@ def resolve_did(args):
     except requests.exceptions.RequestException as e:
         print(f"Connection error: {e}")
 
+def search_qdrant(args):
+    import urllib.parse
+    query = urllib.parse.quote(args.query)
+    url = f"{get_base_url()}/api/oac/search?q={query}&limit={args.limit}"
+    print(f"Searching for '{args.query}' (limit {args.limit}) ...")
+    try:
+        res = requests.get(url, timeout=30)
+        if res.status_code == 200:
+            results = res.json()
+            if not results:
+                print("No results found.")
+                return
+            
+            print(f"Found {len(results)} results:\n")
+            for i, r in enumerate(results, 1):
+                did = r.get("did", "Unknown DID")
+                score = r.get("score", 0.0)
+                collection = r.get("collection", "unknown")
+                json_ld = r.get("json_ld", {})
+                
+                title = json_ld.get("title") or json_ld.get("name") or "Untitled Resource"
+                if isinstance(title, dict):
+                    title = title.get("en", list(title.values())[0] if title else "Untitled Resource")
+                if isinstance(title, list) and title:
+                    title = title[0]
+                    
+                print(f"{i}. {title}")
+                print(f"   DID: {did}")
+                print(f"   Collection: {collection} | Score: {score:.4f}\n")
+        else:
+            print(f"Search failed: {res.status_code}")
+            print(res.text)
+    except requests.exceptions.RequestException as e:
+        print(f"Connection error: {e}")
+
 def test_connection(args):
     url = get_base_url()
     print(f"Testing connection to ODRL API at {url} ...")
@@ -887,6 +922,10 @@ Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe
     parser_resolve = subparsers.add_parser("resolve", help="Resolve a DID using uniresolver.io")
     parser_resolve.add_argument("did", help="The DID to resolve")
 
+    parser_search = subparsers.add_parser("search", help="Search the knowledge base via Qdrant")
+    parser_search.add_argument("query", help="Keywords to search for")
+    parser_search.add_argument("--limit", type=int, default=5, help="Limit number of results")
+
     parser_test = subparsers.add_parser("test", help="Test connection to ODRL APIs")
 
     args = parser.parse_args()
@@ -932,6 +971,8 @@ Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe
         delete_resource(args)
     elif args.command == "resolve":
         resolve_did(args)
+    elif args.command == "search":
+        search_qdrant(args)
     elif args.command == "test":
         test_connection(args)
 
