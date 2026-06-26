@@ -132,8 +132,18 @@ def create_group(args):
     try:
         response = requests.post(url, json=payload, timeout=30)
         if response.status_code in [200, 201]:
+            data = response.json()
             print(f"Group created successfully:")
-            print(response.json())
+            print(data)
+            did = data.get("did")
+            keys = data.get("keys")
+            if did and keys:
+                package_name = args.group.lower().replace(" ", "_") + "_package.json"
+                package_path = os.path.join(os.path.expanduser("~"), ".odrl", "users", package_name)
+                os.makedirs(os.path.dirname(package_path), exist_ok=True)
+                with open(package_path, "w") as f:
+                    json.dump({"did": did, "operation": "create", "keys": keys}, f, indent=2)
+                print(f"Saved private keys to {package_path}")
         else:
             print(f"Failed to create group. Status: {response.status_code}, Response: {response.text}")
     except requests.exceptions.RequestException as e:
@@ -388,8 +398,20 @@ def add_resource(args):
     try:
         res = requests.post(url, json=payload, timeout=30)
         if res.status_code in [200, 201]:
-            new_did = res.json().get("did")
+            data = res.json()
+            new_did = data.get("did")
             print(f"Created new {resource_type} with DID: {new_did}")
+            
+            # Save keys for subgroups
+            if resource_type == "group":
+                keys = data.get("keys")
+                if new_did and keys and "name" in payload:
+                    package_name = payload["name"].lower().replace(" ", "_") + "_package.json"
+                    package_path = os.path.join(os.path.expanduser("~"), ".odrl", "users", package_name)
+                    os.makedirs(os.path.dirname(package_path), exist_ok=True)
+                    with open(package_path, "w") as f:
+                        json.dump({"did": new_did, "operation": "create", "keys": keys}, f, indent=2)
+                    print(f"Saved private keys for subgroup to {package_path}")
             
             group_res = requests.get(f"{api_base}/api/did/resolve/{group_did}", timeout=30)
             if group_res.status_code == 200:
@@ -722,6 +744,19 @@ def decrypt_resource(args):
     except Exception as e:
         print(f"Error: {e}")
 
+def resolve_did(args):
+    url = f"https://dev.uniresolver.io/1.0/identifiers/{args.did}"
+    print(f"Resolving {args.did} via dev.uniresolver.io ...")
+    try:
+        res = requests.get(url, timeout=30)
+        if res.status_code == 200:
+            print(json.dumps(res.json(), indent=2))
+        else:
+            print(f"Failed to resolve DID: {res.status_code}")
+            print(res.text)
+    except requests.exceptions.RequestException as e:
+        print(f"Connection error: {e}")
+
 def test_connection(args):
     url = get_base_url()
     print(f"Testing connection to ODRL API at {url} ...")
@@ -849,6 +884,9 @@ Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe
     delete_agent.add_argument("args", nargs="*", help="[group]")
 
     # test
+    parser_resolve = subparsers.add_parser("resolve", help="Resolve a DID using uniresolver.io")
+    parser_resolve.add_argument("did", help="The DID to resolve")
+
     parser_test = subparsers.add_parser("test", help="Test connection to ODRL APIs")
 
     args = parser.parse_args()
@@ -892,6 +930,8 @@ Funding: CLIMATE-ADAPT4EOSC project has received funding from the Horizon Europe
         add_resource(args)
     elif args.command == "delete":
         delete_resource(args)
+    elif args.command == "resolve":
+        resolve_did(args)
     elif args.command == "test":
         test_connection(args)
 
