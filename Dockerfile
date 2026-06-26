@@ -14,14 +14,15 @@ RUN npm run build
 FROM ruby:3.2-slim
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libsodium-dev libssl-dev zlib1g-dev pkg-config git jq bash curl python3 python3-pip openssh-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    gem install httparty ed25519 multibases multihashes multicodecs optparse rbnacl simple_dag uri 'json-canonicalization:1.0.0' 'securerandom:0.1.1' && \
-    gem update
+    rm -rf /var/lib/apt/lists/*
+
+RUN gem install httparty ed25519 multibases multihashes multicodecs optparse rbnacl simple_dag uri 'json-canonicalization:1.0.0' 'securerandom:0.1.1'
 
 # Copy and install local OYDID gem source
 COPY oydid/ruby-gem /usr/src/oydid-gem
+COPY oydid/LICENSE /usr/src/oydid-gem/LICENSE
 WORKDIR /usr/src/oydid-gem
 RUN gem build oydid.gemspec && gem install oydid-*.gem
 
