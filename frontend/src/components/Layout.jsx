@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Wallet, ScrollText, PlayCircle, Sun, Moon, LogOut, CheckCircle, Menu, X, FileText, Database, ShieldCheck, FileKey, Play, MessageSquare, FileJson, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ThemeToggle } from './ThemeToggle';
+import { useUser } from '../context/UserContext';
 
 const NavItem = ({ to, icon: Icon, label, description, isActive }) => {
     return (
@@ -54,6 +55,7 @@ const NavItem = ({ to, icon: Icon, label, description, isActive }) => {
 
 export default function Layout({ children }) {
     const location = useLocation();
+    const { user } = useUser();
 
     return (
         <div className="flex h-screen bg-white text-gray-900 dark:bg-[#050505] dark:text-white overflow-hidden selection:bg-indigo-500/30">
@@ -103,13 +105,29 @@ export default function Layout({ children }) {
             <main className="flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar bg-[#fdfdfd] dark:bg-[#0a0a0a] relative h-full flex flex-col">
                 {/* Top Bar */}
                 <header className="sticky top-0 z-30 flex items-center justify-end gap-4 p-4 md:px-8 glass border-b border-gray-200 dark:border-white/5 animate-in slide-in-from-top-4 duration-500">
-                    <Link
-                        to="/vcs"
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95 group"
-                    >
-                        <Wallet size={16} className="group-hover:rotate-12 transition-transform" />
-                        Login
-                    </Link>
+                    {user ? (
+                        <Link
+                            to="/profile"
+                            className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm dark:bg-[#242424] dark:border-white/10 dark:hover:bg-white/5"
+                        >
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user.name || 'Profile'}</span>
+                            {user.picture ? (
+                                <img src={user.picture} alt="Profile" className="w-7 h-7 rounded-full object-cover" />
+                            ) : (
+                                <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                    <Users size={14} />
+                                </div>
+                            )}
+                        </Link>
+                    ) : (
+                        <Link
+                            to="/vcs"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95 group"
+                        >
+                            <Wallet size={16} className="group-hover:rotate-12 transition-transform" />
+                            Login
+                        </Link>
+                    )}
                     <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-1" />
                     <ThemeToggle />
                 </header>

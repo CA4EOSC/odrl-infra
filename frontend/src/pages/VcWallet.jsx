@@ -35,11 +35,19 @@ export default function VcWallet() {
                 if (provider === 'google') {
                     try {
                         const payload = JSON.parse(atob(token.split('.')[1]));
-                        setGoogleProfile({
+                        const profile = {
                             name: payload.name,
                             email: payload.email,
                             picture: payload.picture
-                        });
+                        };
+                        setGoogleProfile(profile);
+
+                        const registry = JSON.parse(localStorage.getItem('odrl_did_registry') || '{}');
+                        if (registry[profile.email]) {
+                            const existingDid = registry[profile.email];
+                            setFormData(prev => ({ ...prev, subject_did: existingDid }));
+                            login(profile, existingDid);
+                        }
                     } catch (e) {
                         console.error("Failed to parse Google JWT token", e);
                     }
@@ -79,8 +87,15 @@ export default function VcWallet() {
                 
                 const res = await api.post('/did/create', { payload });
                 if (res.data && res.data.did) {
-                    submitData.subject_did = res.data.did;
-                    setFormData(prev => ({ ...prev, subject_did: res.data.did }));
+                    const newDid = res.data.did;
+                    submitData.subject_did = newDid;
+                    setFormData(prev => ({ ...prev, subject_did: newDid }));
+                    
+                    if (googleProfile?.email) {
+                        const registry = JSON.parse(localStorage.getItem('odrl_did_registry') || '{}');
+                        registry[googleProfile.email] = newDid;
+                        localStorage.setItem('odrl_did_registry', JSON.stringify(registry));
+                    }
                 } else {
                     throw new Error("Invalid response from DID creation");
                 }
