@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Mail, Github, Terminal, Fingerprint, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../lib/utils';
+import { useUser } from '../context/UserContext';
 
 import { OAUTH_CONFIG } from '../config';
 
@@ -17,20 +18,79 @@ export default function VcWallet() {
     const [selectedType, setSelectedType] = useState(null);
     const [formData, setFormData] = useState({ token: '', subject_did: '', username: '', public_key: '', signature: '', orcid: '' });
     const [result, setResult] = useState(null);
+    const [googleProfile, setGoogleProfile] = useState(null);
+    const { login } = useUser();
+
+    useEffect(() => {
+        const handleMessage = (event) => {
+            if (event.data?.type === 'OAUTH_CALLBACK') {
+                const { provider, token, orcid } = event.data;
+                
+                setFormData(prev => {
+                    const newData = { ...prev, token };
+                    if (provider === 'orcid' && orcid) newData.orcid = orcid;
+                    return newData;
+                });
+
+                if (provider === 'google') {
+                    try {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        setGoogleProfile({
+                            name: payload.name,
+                            email: payload.email,
+                            picture: payload.picture
+                        });
+                    } catch (e) {
+                        console.error("Failed to parse Google JWT token", e);
+                    }
+                }
+            }
+        };
+        
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
 
     const issueMutation = useMutation({
         mutationFn: async (data) => {
             const endpoint = VC_TYPES.find(t => t.id === selectedType).endpoint;
             const res = await api.post(endpoint, data);
-            return res.data;
+            return { data: res.data, submittedData: data };
         },
-        onSuccess: (data) => setResult(data),
+        onSuccess: ({ data, submittedData }) => {
+            setResult(data);
+            
+            // Log the user in context to display profile
+            const profile = googleProfile || { name: submittedData.username || 'User' };
+            login(profile, submittedData.subject_did);
+        },
         onError: (err) => alert(err.response?.data?.detail || "Failed to issue VC")
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        issueMutation.mutate(formData);
+        let submitData = { ...formData };
+
+        if (!submitData.subject_did) {
+            try {
+                const payload = googleProfile 
+                    ? { name: googleProfile.name, email: googleProfile.email } 
+                    : { purpose: "vc-subject" };
+                
+                const res = await api.post('/did/create', { payload });
+                if (res.data && res.data.did) {
+                    submitData.subject_did = res.data.did;
+                    setFormData(prev => ({ ...prev, subject_did: res.data.did }));
+                } else {
+                    throw new Error("Invalid response from DID creation");
+                }
+            } catch (err) {
+                alert("Failed to auto-generate DID: " + (err.response?.data?.detail || err.message));
+                return;
+            }
+        }
+
+        issueMutation.mutate(submitData);
     };
 
     const handleChange = (e) => {
@@ -111,11 +171,10 @@ export default function VcWallet() {
                                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Subject DID</label>
                                     <input
                                         name="subject_did"
-                                        placeholder="did:oyd:..."
+                                        placeholder="Leave empty to auto-generate"
                                         className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors dark:bg-black/20 dark:border-white/10 dark:text-white"
                                         value={formData.subject_did}
                                         onChange={handleChange}
-                                        required
                                     />
                                 </div>
 
@@ -123,14 +182,34 @@ export default function VcWallet() {
                                     <div>
                                         <div className="flex justify-between items-center mb-1">
                                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Google ID Token</label>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleSocialLogin('google')}
-                                                className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-2 py-1 rounded border border-red-200 transition-colors dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
-                                            >
-                                                Connect Google Account
-                                            </button>
+                                            {!googleProfile && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSocialLogin('google')}
+                                                    className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-2 py-1 rounded border border-red-200 transition-colors dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
+                                                >
+                                                    Connect Google Account
+                                                </button>
+                                            )}
                                         </div>
+                                        {googleProfile && (
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg mb-3 dark:bg-white/5 dark:border-white/10">
+                                                {googleProfile.picture && (
+                                                    <img src={googleProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
+                                                )}
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{googleProfile.name}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{googleProfile.email}</div>
+                                                </div>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setGoogleProfile(null) || setFormData({...formData, token: ''})}
+                                                    className="ml-auto text-xs text-red-500 hover:text-red-700 underline"
+                                                >
+                                                    Disconnect
+                                                </button>
+                                            </div>
+                                        )}
                                         <textarea
                                             name="token"
                                             rows={4}
