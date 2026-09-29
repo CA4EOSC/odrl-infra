@@ -18,7 +18,7 @@ export default function VcWallet() {
     const [selectedType, setSelectedType] = useState(null);
     const [formData, setFormData] = useState({ token: '', subject_did: '', username: '', public_key: '', signature: '', orcid: '' });
     const [result, setResult] = useState(null);
-    const [googleProfile, setGoogleProfile] = useState(null);
+    const [socialProfile, setSocialProfile] = useState(null);
     const { login } = useUser();
 
     useEffect(() => {
@@ -32,18 +32,42 @@ export default function VcWallet() {
                     return newData;
                 });
 
-                if (provider === 'google') {
+                if (provider === 'google' || provider === 'orcid') {
                     try {
-                        const payload = JSON.parse(atob(token.split('.')[1]));
-                        const profile = {
-                            name: payload.name,
-                            email: payload.email,
-                            picture: payload.picture
-                        };
-                        setGoogleProfile(profile);
+                        const base64Url = token.split('.')[1];
+                        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                        const padLength = (4 - (base64.length % 4)) % 4;
+                        base64 += '='.repeat(padLength);
+                        
+                        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(''));
+                        const payload = JSON.parse(jsonPayload);
+                        let profile = {};
+                        
+                        if (provider === 'google') {
+                            profile = {
+                                name: payload.name,
+                                email: payload.email,
+                                picture: payload.picture,
+                                provider: 'google'
+                            };
+                        } else if (provider === 'orcid') {
+                            const name = payload.given_name ? `${payload.given_name} ${payload.family_name || ''}`.trim() : 'ORCID User';
+                            const userOrcid = payload.sub || orcid;
+                            profile = {
+                                name: name,
+                                orcid: userOrcid,
+                                email: payload.email || `${userOrcid}@orcid.org`, // Use a dummy email for registry if none provided
+                                provider: 'orcid'
+                            };
+                        }
+                        
+                        setSocialProfile(profile);
 
                         try {
-                            const res = await api.get(`/registry/${encodeURIComponent(profile.email)}`);
+                            const registryKey = profile.email; // We use email as the registry key for both (dummy one for ORCID if missing)
+                            const res = await api.get(`/registry/${encodeURIComponent(registryKey)}`);
                             if (res.data && res.data.did) {
                                 const existingDid = res.data.did;
                                 setFormData(prev => ({ ...prev, subject_did: existingDid }));
@@ -56,7 +80,7 @@ export default function VcWallet() {
                             }
                         }
                     } catch (e) {
-                        console.error("Failed to parse Google JWT token", e);
+                        console.error(`Failed to parse ${provider} JWT token`, e);
                     }
                 }
             }
@@ -76,7 +100,7 @@ export default function VcWallet() {
             setResult(data);
             
             // Log the user in context to display profile
-            const profile = googleProfile || { name: submittedData.username || 'User' };
+            const profile = socialProfile || { name: submittedData.username || 'User' };
             login(profile, submittedData.subject_did);
         },
         onError: (err) => alert(err.response?.data?.detail || "Failed to issue VC")
@@ -88,8 +112,8 @@ export default function VcWallet() {
 
         if (!submitData.subject_did) {
             try {
-                const payload = googleProfile 
-                    ? { name: googleProfile.name, email: googleProfile.email } 
+                const payload = socialProfile 
+                    ? { name: socialProfile.name, email: socialProfile.email, orcid: socialProfile.orcid } 
                     : { purpose: "vc-subject" };
                 
                 const res = await api.post('/did/create', { payload });
@@ -98,10 +122,10 @@ export default function VcWallet() {
                     submitData.subject_did = newDid;
                     setFormData(prev => ({ ...prev, subject_did: newDid }));
                     
-                    if (googleProfile?.email) {
+                    if (socialProfile?.email) {
                         try {
                             await api.post('/registry', {
-                                email: googleProfile.email,
+                                email: socialProfile.email,
                                 did: newDid
                             });
                         } catch (err) {
@@ -136,8 +160,9 @@ export default function VcWallet() {
             state: 'random_state_string', // Should be random for security
         });
 
-        // Google uses 'response_type=id_token' for OIDC if not using code flow
-        if (provider === 'google') {
+        // Google and ORCID use OIDC implicit flow returning an id_token
+        if (provider === 'google' || provider === 'orcid') {
+            // ORCID requires 'token id_token' or 'id_token'
             params.set('response_type', 'id_token');
             params.set('nonce', 'random_nonce');
         }
@@ -209,7 +234,7 @@ export default function VcWallet() {
                                     <div>
                                         <div className="flex justify-between items-center mb-1">
                                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Google ID Token</label>
-                                            {!googleProfile && (
+                                            {!socialProfile && (
                                                 <button
                                                     type="button"
                                                     onClick={() => handleSocialLogin('google')}
@@ -219,18 +244,18 @@ export default function VcWallet() {
                                                 </button>
                                             )}
                                         </div>
-                                        {googleProfile && (
+                                        {socialProfile && (
                                             <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg mb-3 dark:bg-white/5 dark:border-white/10">
-                                                {googleProfile.picture && (
-                                                    <img src={googleProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
+                                                {socialProfile.picture && (
+                                                    <img src={socialProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
                                                 )}
                                                 <div>
-                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{googleProfile.name}</div>
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{googleProfile.email}</div>
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{socialProfile.name}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{socialProfile.email}</div>
                                                 </div>
                                                 <button 
                                                     type="button" 
-                                                    onClick={() => setGoogleProfile(null) || setFormData({...formData, token: ''})}
+                                                    onClick={() => setSocialProfile(null) || setFormData({...formData, token: ''})}
                                                     className="ml-auto text-xs text-red-500 hover:text-red-700 underline"
                                                 >
                                                     Disconnect
