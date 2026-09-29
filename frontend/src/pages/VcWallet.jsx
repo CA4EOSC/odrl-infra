@@ -22,7 +22,7 @@ export default function VcWallet() {
     const { login } = useUser();
 
     useEffect(() => {
-        const handleMessage = (event) => {
+        const handleMessage = async (event) => {
             if (event.data?.type === 'OAUTH_CALLBACK') {
                 const { provider, token, orcid } = event.data;
                 
@@ -42,11 +42,18 @@ export default function VcWallet() {
                         };
                         setGoogleProfile(profile);
 
-                        const registry = JSON.parse(localStorage.getItem('odrl_did_registry') || '{}');
-                        if (registry[profile.email]) {
-                            const existingDid = registry[profile.email];
-                            setFormData(prev => ({ ...prev, subject_did: existingDid }));
-                            login(profile, existingDid);
+                        try {
+                            const res = await api.get(`/registry/${encodeURIComponent(profile.email)}`);
+                            if (res.data && res.data.did) {
+                                const existingDid = res.data.did;
+                                setFormData(prev => ({ ...prev, subject_did: existingDid }));
+                                login(profile, existingDid);
+                            }
+                        } catch (apiErr) {
+                            // If 404, it means it's not in the registry yet, which is fine
+                            if (apiErr.response?.status !== 404) {
+                                console.error("Failed to fetch DID from registry", apiErr);
+                            }
                         }
                     } catch (e) {
                         console.error("Failed to parse Google JWT token", e);
@@ -92,9 +99,14 @@ export default function VcWallet() {
                     setFormData(prev => ({ ...prev, subject_did: newDid }));
                     
                     if (googleProfile?.email) {
-                        const registry = JSON.parse(localStorage.getItem('odrl_did_registry') || '{}');
-                        registry[googleProfile.email] = newDid;
-                        localStorage.setItem('odrl_did_registry', JSON.stringify(registry));
+                        try {
+                            await api.post('/registry', {
+                                email: googleProfile.email,
+                                did: newDid
+                            });
+                        } catch (err) {
+                            console.error("Failed to save to server registry", err);
+                        }
                     }
                 } else {
                     throw new Error("Invalid response from DID creation");
