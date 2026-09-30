@@ -8,19 +8,31 @@ export default function OAuthCallback() {
     // Parse token from hash (implicit flow) or search params
     const hash = new URLSearchParams(window.location.hash.substring(1));
     const search = new URLSearchParams(window.location.search);
-    
-    let token = hash.get('id_token') || hash.get('access_token') || search.get('access_token');
+
+    // id_token is the JWT (contains sub = ORCID iD); access_token is for API calls
+    const idToken = hash.get('id_token') || search.get('id_token');
+    const accessToken = hash.get('access_token') || search.get('access_token');
+    let token = idToken || accessToken;
     let orcid = search.get('orcid'); // Sometimes ORCID returns it in search params
 
     if (token) {
-      if (window.opener) {
+      // Always save to localStorage as a robust fallback
+      localStorage.setItem('oauth_fallback', JSON.stringify({ provider, token, accessToken, orcid }));
+
+      if (window.opener && window.opener !== window) {
         window.opener.postMessage({
           type: 'OAUTH_CALLBACK',
           provider,
-          token,
+          token,          // id_token JWT (used to decode name/ORCID iD)
+          accessToken,    // raw access_token (used for API calls)
           orcid
         }, window.location.origin);
         window.close();
+        
+        // If window didn't close after 1 second, fallback to redirect
+        setTimeout(() => {
+          window.location.href = '/vcs';
+        }, 1000);
       } else {
         // Fallback if not opened in a popup
         window.location.href = '/vcs';

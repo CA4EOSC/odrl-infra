@@ -56,19 +56,46 @@ else:
     static_dir = None
     print("Warning: Static files not found")
 
+def get_index_html():
+    """Return the index.html path from whichever static dir is available."""
+    if os.path.exists(docker_static_dir):
+        index = os.path.join(docker_static_dir, "index.html")
+    elif os.path.exists(local_static_dir):
+        index = os.path.join(local_static_dir, "index.html")
+    else:
+        return None
+    return index if os.path.exists(index) else None
+
+# Explicit SPA routes — these must be declared BEFORE the static mount catch-all
+# so the server returns 200 + index.html instead of 502/404 for client-side routes.
+SPA_ROUTES = [
+    "/auth/{provider}/callback",
+    "/dids",
+    "/vcs",
+    "/policies",
+    "/prompts",
+    "/variables",
+    "/croissants",
+    "/groups",
+    "/demo",
+    "/profile",
+]
+
+for _route in SPA_ROUTES:
+    @app.get(_route, include_in_schema=False)
+    async def _spa_route():
+        index = get_index_html()
+        if index:
+            return FileResponse(index)
+        return JSONResponse(status_code=503, content={"detail": "Frontend not built"})
+
 # Catch-all route for SPA (React Router)
 @app.exception_handler(404)
 async def custom_404_handler(request, __):
     if request.url.path.startswith("/api"):
         return JSONResponse(status_code=404, content={"detail": "Not Found"})
 
-    # Re-evaluate static_dir in case it wasn't set globally or to be safe
-    current_static_dir = None
-    if os.path.exists(docker_static_dir):
-        current_static_dir = docker_static_dir
-    elif os.path.exists(local_static_dir):
-        current_static_dir = local_static_dir
-        
-    if current_static_dir and os.path.exists(os.path.join(current_static_dir, "index.html")):
-        return FileResponse(os.path.join(current_static_dir, "index.html"))
-    return {"detail": "Not Found"}
+    index = get_index_html()
+    if index:
+        return FileResponse(index)
+    return JSONResponse(status_code=404, content={"detail": "Not Found"})

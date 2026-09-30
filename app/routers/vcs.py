@@ -131,7 +131,7 @@ async def issue_orcid_vc(request: OrcidVcRequest):
     # 1. Verify ORCID Token
     try:
         headers = {"Authorization": f"Bearer {request.token}", "Accept": "application/json"}
-        url = f"https://pub.orcid.org/v3.0/{request.orcid}/record"
+        url = "https://orcid.org/oauth/userinfo"
         
         response = requests.get(url, headers=headers)
         
@@ -139,10 +139,15 @@ async def issue_orcid_vc(request: OrcidVcRequest):
              raise HTTPException(status_code=400, detail=f"Invalid ORCID Token or ID: {response.text}")
         
         data = response.json()
-        try:
-            name = data.get("person", {}).get("name", {}).get("credit-name", {}).get("value")
-        except:
-            name = None
+        if data.get("sub") != request.orcid:
+            raise HTTPException(status_code=400, detail="Token does not match the provided ORCID iD")
+            
+        name = data.get("name")
+        if not name:
+            given = data.get("given_name", "")
+            family = data.get("family_name", "")
+            name = f"{given} {family}".strip() or None
+            
             
     except Exception as e:
         if isinstance(e, HTTPException):

@@ -24,27 +24,20 @@ export default function VcWallet() {
     useEffect(() => {
         const handleMessage = async (event) => {
             if (event.data?.type === 'OAUTH_CALLBACK') {
-                const { provider, token, orcid } = event.data;
-                
-                setFormData(prev => {
-                    const newData = { ...prev, token };
-                    if (provider === 'orcid' && orcid) newData.orcid = orcid;
-                    return newData;
-                });
+                const { provider, token, accessToken, orcid } = event.data;
 
                 if (provider === 'google' || provider === 'orcid') {
                     try {
+                        // Decode the id_token JWT to get user info
                         const base64Url = token.split('.')[1];
                         let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                        const padLength = (4 - (base64.length % 4)) % 4;
-                        base64 += '='.repeat(padLength);
-                        
-                        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                        }).join(''));
+                        base64 += '='.repeat((4 - (base64.length % 4)) % 4);
+                        const jsonPayload = decodeURIComponent(
+                            atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+                        );
                         const payload = JSON.parse(jsonPayload);
                         let profile = {};
-                        
+
                         if (provider === 'google') {
                             profile = {
                                 name: payload.name,
@@ -52,31 +45,41 @@ export default function VcWallet() {
                                 picture: payload.picture,
                                 provider: 'google'
                             };
+                            setFormData(prev => ({ ...prev, token }));
                         } else if (provider === 'orcid') {
-                            const name = payload.given_name ? `${payload.given_name} ${payload.family_name || ''}`.trim() : 'ORCID User';
+                            // payload.sub is the ORCID iD (e.g. "0000-0001-9447-9830")
                             const userOrcid = payload.sub || orcid;
+                            const name = payload.given_name
+                                ? `${payload.given_name} ${payload.family_name || ''}`.trim()
+                                : 'ORCID User';
                             profile = {
-                                name: name,
+                                name,
                                 orcid: userOrcid,
-                                email: payload.email || `${userOrcid}@orcid.org`, // Use a dummy email for registry if none provided
+                                email: payload.email || `${userOrcid}@orcid.org`,
                                 provider: 'orcid'
                             };
+                            // Fill the ORCID iD field from JWT sub, and token field from access_token
+                            setFormData(prev => ({
+                                ...prev,
+                                orcid: userOrcid || '',
+                                token: accessToken || token,
+                            }));
                         }
-                        
+
                         setSocialProfile(profile);
 
+                        // Check registry for an existing DID
                         try {
-                            const registryKey = profile.email; // We use email as the registry key for both (dummy one for ORCID if missing)
+                            const registryKey = profile.email;
                             const res = await api.get(`/registry/${encodeURIComponent(registryKey)}`);
-                            if (res.data && res.data.did) {
+                            if (res.data?.did) {
                                 const existingDid = res.data.did;
                                 setFormData(prev => ({ ...prev, subject_did: existingDid }));
                                 login(profile, existingDid);
                             }
                         } catch (apiErr) {
-                            // If 404, it means it's not in the registry yet, which is fine
                             if (apiErr.response?.status !== 404) {
-                                console.error("Failed to fetch DID from registry", apiErr);
+                                console.error('Failed to fetch DID from registry', apiErr);
                             }
                         }
                     } catch (e) {
@@ -85,8 +88,24 @@ export default function VcWallet() {
                 }
             }
         };
-        
+
         window.addEventListener('message', handleMessage);
+        
+        // Check for fallback from redirect
+        const fallback = localStorage.getItem('oauth_fallback');
+        if (fallback) {
+            localStorage.removeItem('oauth_fallback');
+            try {
+                const data = JSON.parse(fallback);
+                // Simulate message event
+                handleMessage({ data: { type: 'OAUTH_CALLBACK', ...data } });
+                // Switch to the correct VC type tab automatically
+                setSelectedType(data.provider);
+            } catch (e) {
+                console.error("Failed to parse fallback oauth data", e);
+            }
+        }
+
         return () => window.removeEventListener('message', handleMessage);
     }, []);
 
@@ -303,14 +322,34 @@ export default function VcWallet() {
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
                                                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">ORCID iD</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleSocialLogin('orcid')}
-                                                    className="text-xs bg-green-50 text-green-600 hover:bg-green-100 px-2 py-1 rounded border border-green-200 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30"
-                                                >
-                                                    Connect ORCID
-                                                </button>
+                                                {!socialProfile && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSocialLogin('orcid')}
+                                                        className="text-xs bg-green-50 text-green-600 hover:bg-green-100 px-2 py-1 rounded border border-green-200 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30"
+                                                    >
+                                                        Connect ORCID
+                                                    </button>
+                                                )}
                                             </div>
+                                            {socialProfile && socialProfile.provider === 'orcid' && (
+                                                <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg mb-3 dark:bg-green-900/10 dark:border-green-700/30">
+                                                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center dark:bg-green-900/30">
+                                                        <Fingerprint size={16} className="text-green-600 dark:text-green-400" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{socialProfile.name}</div>
+                                                        <div className="text-xs text-green-600 dark:text-green-400 font-mono">{socialProfile.orcid}</div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setSocialProfile(null); setFormData(prev => ({ ...prev, orcid: '', token: '' })); }}
+                                                        className="text-xs text-red-500 hover:text-red-700 underline flex-shrink-0"
+                                                    >
+                                                        Disconnect
+                                                    </button>
+                                                </div>
+                                            )}
                                             <input
                                                 name="orcid"
                                                 placeholder="0000-0000-0000-0000"
