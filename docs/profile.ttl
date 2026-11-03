@@ -1,0 +1,74 @@
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX odrl: <http://www.w3.org/ns/odrl/2/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX profile: <http://www.w3.org/ns/dx/prof/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX role: <http://www.w3.org/ns/dx/prof/role/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sw: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+PREFIX vann: <http://purl.org/vocab/vann/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+PREFIX cdif-access: <https://w3id.org/cdif/access#>
+
+# ------------ Ontology Metadata ------------------ #
+
+<https://w3id.org/cdif/access> a owl:Ontology, profile:Profile ;
+	profile:isProfileOf <http://www.w3.org/ns/odrl/2/core> ;
+	profile:hasResource cdif-access:html, cdif-access:ttl ;
+	dcterms:title "ODRL Profile for CDIF Access"@en ;
+	vann:preferredNamespacePrefix "cdif-access" ;
+    vann:preferredNamespaceUri "https://w3id.org/cdif/access#"^^xsd:string ;
+	rdfs:label "ODRL Profile for CDIF Access"@en ;
+	owl:versionInfo "0.1"^^xsd:string ;
+	owl:versionIRI <https://w3id.org/cdif//access/0.1> ;
+	# owl:priorVersion <https://w3id.org/cdif/0.1> ;
+	dcterms:created "2026-11-03"^^xsd:date ;
+	# dcterms:modified "2023-10-09"^^xsd:date ;
+	dcterms:issued "2026-11-03"^^xsd:date ;
+	dcterms:creator "Author/Contributor" ;
+	dcterms:publisher "Publisher" ;
+	dcterms:abstract "Abstract TBD"@en ;
+	dcterms:description "Abstract TBD"@en ;
+	dcterms:bibliographicCitation "Cite this vocabulary as: "@en ;
+	bibo:doi ""@en ;
+	foaf:logo <path/to/your/logo> ;
+	sw:term_status "draft"@en ;
+	# dcterms:source <http://www.w3.org/ns/odrl/2/> ;
+	dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+cdif-access:html a profile:ResourceDescriptor ;
+    profile:hasRole role:specification ;
+    profile:hasArtifact <path/to/the/profile/html> ;
+    dcterms:title "ODRL Profile for CDIF Access HTML specification"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/html> ;
+    dcterms:conformsTo <https://www.w3.org/TR/html/> .
+
+cdif-access:ttl a profile:ResourceDescriptor ;
+    profile:hasRole role:vocabulary ;
+    profile:hasArtifact <path/to/the/profile/turtle> ;
+    dcterms:title "ODRL Profile for CDIF Access Turtle vocabulary"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:conformsTo <https://www.w3.org/TR/turtle/> .
+
+<https://w3id.org/cdif/access#>
+    a skos:Collection ;
+    skos:prefLabel "ODRL CDIF Access profile concepts"@en ;
+    skos:scopeNote ""@en ;
+    skos:member odrl:count ;
+    skos:member odrl:dateTime ;
+    skos:member odrl:purpose ;
+    skos:member odrl:spatial ;
+    skos:member cdif-access:download .
+
+
+cdif-access:download a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label "download"@en ;
+	skos:definition "define downloan"@en ;
+	skos:note "for usage notes"@en .
+
+
