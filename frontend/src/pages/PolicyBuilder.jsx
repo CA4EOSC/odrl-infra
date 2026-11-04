@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
     ShieldCheck,
@@ -25,6 +25,210 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../lib/utils';
+import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
+import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, ruleGroupLabel } from '../lib/vocabTree';
+
+// ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
+const ODRL_OPERATORS = [
+    { value: 'odrl:eq', label: 'eq (=)', description: 'equal to' },
+    { value: 'odrl:neq', label: 'neq (≠)', description: 'not equal to' },
+    { value: 'odrl:gt', label: 'gt (>)', description: 'greater than' },
+    { value: 'odrl:gteq', label: 'gteq (≥)', description: 'greater than or equal' },
+    { value: 'odrl:lt', label: 'lt (<)', description: 'less than' },
+    { value: 'odrl:lteq', label: 'lteq (≤)', description: 'less than or equal' },
+    { value: 'odrl:isA', label: 'isA', description: 'is an instance of' },
+    { value: 'odrl:hasPart', label: 'hasPart', description: 'contains' },
+    { value: 'odrl:isPartOf', label: 'isPartOf', description: 'is contained in' },
+    { value: 'odrl:isAllOf', label: 'isAllOf', description: 'is all of' },
+    { value: 'odrl:isAnyOf', label: 'isAnyOf', description: 'is any of' },
+    { value: 'odrl:isNoneOf', label: 'isNoneOf', description: 'is none of' },
+];
+
+// ODRL 2.2 left operands (instances of odrl:LeftOperand) — https://www.w3.org/TR/odrl-vocab/#term-LeftOperand
+const ODRL_LEFT_OPERANDS = [
+    { value: 'odrl:absolutePosition', label: 'absolutePosition', description: 'absolute position of the asset' },
+    { value: 'odrl:absoluteSize', label: 'absoluteSize', description: 'absolute size of the asset' },
+    { value: 'odrl:absoluteSpatialPosition', label: 'absoluteSpatialPosition', description: 'absolute spatial position (e.g. pixels)' },
+    { value: 'odrl:absoluteTemporalPosition', label: 'absoluteTemporalPosition', description: 'absolute temporal position in a media stream' },
+    { value: 'odrl:count', label: 'count', description: 'number of times the action may be exercised' },
+    { value: 'odrl:dateTime', label: 'dateTime', description: 'date and time of exercising the action' },
+    { value: 'odrl:delayPeriod', label: 'delayPeriod', description: 'delay before exercising the action' },
+    { value: 'odrl:deliveryChannel', label: 'deliveryChannel', description: 'delivery channel used' },
+    { value: 'odrl:device', label: 'device', description: 'device used (deprecated: use systemDevice)' },
+    { value: 'odrl:elapsedTime', label: 'elapsedTime', description: 'elapsed time of exercising the action' },
+    { value: 'odrl:event', label: 'event', description: 'identified event' },
+    { value: 'odrl:fileFormat', label: 'fileFormat', description: 'file format' },
+    { value: 'odrl:industry', label: 'industry', description: 'industry sector' },
+    { value: 'odrl:language', label: 'language', description: 'natural language' },
+    { value: 'odrl:media', label: 'media', description: 'media type or category' },
+    { value: 'odrl:meteredTime', label: 'meteredTime', description: 'accumulated time of exercising the action' },
+    { value: 'odrl:payAmount', label: 'payAmount', description: 'amount of a financial payment' },
+    { value: 'odrl:percentage', label: 'percentage', description: 'percentage of the asset' },
+    { value: 'odrl:product', label: 'product', description: 'product or service category' },
+    { value: 'odrl:purpose', label: 'purpose', description: 'purpose of exercising the action' },
+    { value: 'odrl:recipient', label: 'recipient', description: 'party receiving the result' },
+    { value: 'odrl:relativePosition', label: 'relativePosition', description: 'relative position within the asset' },
+    { value: 'odrl:relativeSize', label: 'relativeSize', description: 'relative size of the asset' },
+    { value: 'odrl:relativeSpatialPosition', label: 'relativeSpatialPosition', description: 'relative spatial position' },
+    { value: 'odrl:relativeTemporalPosition', label: 'relativeTemporalPosition', description: 'relative temporal position' },
+    { value: 'odrl:resolution', label: 'resolution', description: 'rendering resolution' },
+    { value: 'odrl:spatial', label: 'spatial', description: 'named geospatial area' },
+    { value: 'odrl:spatialCoordinates', label: 'spatialCoordinates', description: 'geospatial coordinates' },
+    { value: 'odrl:system', label: 'system', description: 'system used (deprecated: use systemDevice)' },
+    { value: 'odrl:systemDevice', label: 'systemDevice', description: 'system or device used' },
+    { value: 'odrl:timeInterval', label: 'timeInterval', description: 'recurring period of time' },
+    { value: 'odrl:unitOfCount', label: 'unitOfCount', description: 'unit of measure for count' },
+    { value: 'odrl:version', label: 'version', description: 'version of the asset' },
+    { value: 'odrl:virtualLocation', label: 'virtualLocation', description: 'virtual (IT) location' },
+];
+
+// Defaults for new rules and rows: a new permission starts as "download" for academic research.
+const DEFAULT_PERMISSION_ACTION = 'cv1:download';
+const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // CDIF CV2 cv2:AcademicResearch
+const newPurposeConstraint = () => ({ title: '', leftOperand: 'oac:Purpose', operator: 'odrl:isA', rightOperand: DEFAULT_PURPOSE });
+
+// Semantic categories for the ODRL 2.2 left operands in the browse window.
+const LEFT_OPERAND_CATEGORIES = {
+    Time: ['dateTime', 'delayPeriod', 'elapsedTime', 'meteredTime', 'timeInterval'],
+    Location: ['spatial', 'spatialCoordinates', 'virtualLocation'],
+    'Quantity & payment': ['count', 'unitOfCount', 'percentage', 'payAmount'],
+    'Part of the asset': ['absolutePosition', 'absoluteSize', 'absoluteSpatialPosition', 'absoluteTemporalPosition',
+        'relativePosition', 'relativeSize', 'relativeSpatialPosition', 'relativeTemporalPosition'],
+    'Usage context': ['purpose', 'recipient', 'industry', 'language', 'product', 'event', 'deliveryChannel'],
+    Technical: ['fileFormat', 'media', 'resolution', 'systemDevice', 'version', 'device', 'system'],
+};
+const ODRL_LEFT_OPERAND_TERMS = ODRL_LEFT_OPERANDS.map(t => ({
+    ...t,
+    group: Object.keys(LEFT_OPERAND_CATEGORIES).find(k => LEFT_OPERAND_CATEGORIES[k].includes(t.label)) || 'Other',
+    deprecated: t.description.includes('deprecated'),
+}));
+
+// Compact select for ODRL terms: short names in the list, the description as tooltip.
+// Select for vocabulary terms: shows the prefixed term (e.g. odrl:isA), description as tooltip.
+// "groups" adds labelled sections, e.g. CDIF CV3 terms before the ODRL left operands.
+function TermSelect({ value, terms, groups = [], name, placeholder, ...props }) {
+    const all = [...groups.flatMap(g => g.terms), ...terms];
+    const selected = all.find(o => o.value === value);
+    const option = (o) => <option key={o.value} value={o.value} title={o.description}>{o.value}</option>;
+    return (
+        <select
+            value={value || ''}
+            title={selected ? `${selected.value} — ${selected.description}` : value || name}
+            {...props}
+        >
+            {placeholder && <option value="" disabled>{placeholder}</option>}
+            {!selected && value && <option value={value}>{value}</option>}
+            {groups.map(g => <optgroup key={g.label} label={g.label}>{g.terms.map(option)}</optgroup>)}
+            {groups.length > 0 ? <optgroup label="ODRL 2.2">{terms.map(option)}</optgroup> : terms.map(option)}
+        </select>
+    );
+}
+
+// Left operand select with a browse icon that opens the hierarchical browser.
+function LeftOperandSelect({ className, groups = [], onChange, ...props }) {
+    const browse = useBrowse();
+    const select = (
+        <TermSelect terms={ODRL_LEFT_OPERANDS} groups={groups} name="Left operand" placeholder="Left Operand"
+            onChange={onChange} className={cn(className, browse && 'flex-1 min-w-0')} {...props} />
+    );
+    if (!browse) return select;
+    return (
+        <div className="flex gap-1 min-w-0">
+            {select}
+            <BrowseIconButton
+                title="Browse left operands"
+                onClick={() => browse.openLeftOperands({ value: props.value, groups, onSelect: v => onChange({ target: { value: v } }) })}
+            />
+        </div>
+    );
+}
+const OperatorSelect = (props) => <TermSelect terms={ODRL_OPERATORS} name="Operator" {...props} />;
+
+
+// Group CDIF CV2 purposes for the dropdown: each top-level purpose that has narrower purposes
+// becomes a heading (itself + its descendants); top-level leaves go under "Other purposes".
+// A purpose with several parents is listed once, under the parent with the most children
+// (e.g. Commercial Research under Research And Development).
+function purposeGroups(concepts) {
+    const children = {};
+    concepts.forEach(c => (c.broader || []).forEach(b => { (children[b] ||= []).push(c); }));
+    const primaryParent = (c) => [...(c.broader || [])]
+        .sort((a, b) => (children[b]?.length || 0) - (children[a]?.length || 0))[0];
+    const kidsOf = (c) => (children[c.id] || [])
+        .filter(k => primaryParent(k) === c.id)
+        .sort((a, b) => a.label.localeCompare(b.label));
+    const descendants = (c) => kidsOf(c).flatMap(k => [k, ...descendants(k)]);
+
+    const roots = concepts.filter(c => !(c.broader || []).length);
+    const tops = roots.flatMap(kidsOf);
+    const groups = tops.filter(t => kidsOf(t).length > 0)
+        .map(t => ({ label: humanize(t.label), items: [{ c: t, text: `${humanize(t.label)} (any)` },
+            ...descendants(t).map(c => ({ c, text: humanize(c.label) }))] }));
+    const leaves = tops.filter(t => kidsOf(t).length === 0);
+    if (leaves.length) groups.push({ label: 'Other purposes', items: leaves.map(c => ({ c, text: humanize(c.label) })) });
+    return { roots, groups };
+}
+
+const OTHER_PURPOSE = '__other__';
+
+// Purpose (right operand) picker backed by CDIF CV2; "Other" allows any IRI.
+function PurposeSelect({ value, concepts, onChange, className }) {
+    const { roots, groups } = useMemo(() => purposeGroups(concepts), [concepts]);
+    const known = concepts.find(c => c.value === value);
+    const [customMode, setCustomMode] = useState(false);
+    const showCustom = customMode;
+    const browse = useBrowse();
+    return (
+        <div className="space-y-1 min-w-0">
+            <div className="flex gap-1 min-w-0">
+            <select
+                value={showCustom ? OTHER_PURPOSE : (value || '')}
+                title={known ? `${known.value} — ${known.definition || humanize(known.label)}` : 'Right operand: purpose (CDIF CV2)'}
+                onChange={(e) => {
+                    if (e.target.value === OTHER_PURPOSE) {
+                        setCustomMode(true);
+                    } else {
+                        setCustomMode(false);
+                        onChange(e.target.value);
+                    }
+                }}
+                className={cn(className, 'flex-1 min-w-0')}
+            >
+                <option value="" disabled>{concepts.length ? 'Right Operand' : 'Loading purposes…'}</option>
+                {!known && value && !showCustom && <option value={value}>{value}</option>}
+                {roots.map(c => (
+                    <option key={c.id} value={c.value} title={c.definition || ''}>{c.value}</option>
+                ))}
+                {groups.map(g => (
+                    <optgroup key={g.label} label={g.label}>
+                        {g.items.map(({ c }) => (
+                            <option key={c.id} value={c.value} title={c.definition || ''}>{c.value}</option>
+                        ))}
+                    </optgroup>
+                ))}
+                <option value={OTHER_PURPOSE}>Other (enter an IRI)…</option>
+            </select>
+            {browse && (
+                <BrowseIconButton
+                    title="Browse purposes"
+                    onClick={() => browse.openPurposes({ value, onSelect: (v) => { setCustomMode(false); onChange(v); } })}
+                />
+            )}
+            </div>
+            {showCustom && (
+                <input
+                    type="text"
+                    autoFocus={customMode}
+                    placeholder="e.g. dpv:IdentityVerification"
+                    title="Not a CDIF CV2 purpose; validation will show a warning"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className={cn(className, "border-amber-300 dark:border-amber-700")}
+                />
+            )}
+        </div>
+    );
+}
 
 export default function PolicyBuilder() {
     // Basic Policy Metadata
@@ -89,7 +293,8 @@ export default function PolicyBuilder() {
     // Action Vocabulary Profile Selection: W3C ODRL 2.2 vs CDIF ODRL v2.3
     const [actionVocabProfile, setActionVocabProfile] = useState('https://www.w3.org/TR/odrl-vocab/#actionConcepts');
     const [actionPickerTarget, setActionPickerTarget] = useState(null); // { type: 'permission'|'prohibition'|'duty', index: number } | null
-    const [actionPickerSearch, setActionPickerSearch] = useState('');
+    // Hierarchical browse window for purposes / left operands: { title, subtitle, nodes, value, selectLabel, onSelect } | null
+    const [browser, setBrowser] = useState(null);
     // Main Tabs: 'specification' | 'permissions' | 'prohibitions' | 'duodrl'
     const [activeTab, setActiveTab] = useState('specification');
     // Modal views triggered from Policy Operations menu
@@ -113,8 +318,40 @@ export default function PolicyBuilder() {
         }
     });
 
-    // Custom CDIF v2.3 Profile Actions
-    const cdifActions = [
+    // CDIF access vocabularies (SKOS, config/*.ttl): CV1 actions, CV2 purposes, CV3 other constraints
+    const { data: cdifVocab } = useQuery({
+        queryKey: ['vocab-cdif'],
+        queryFn: async () => {
+            const res = await api.get('/policy/vocab/cdif');
+            return res.data;
+        }
+    });
+    const cdifPurposes = cdifVocab?.purposes?.concepts || [];
+    const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
+    const cv3LeftOperandGroups = cdifConstraintTypes.length > 0 ? [{
+        label: 'CDIF other constraints (CV3)',
+        terms: cdifConstraintTypes.map(c => ({ value: c.id, description: c.notes?.[0] || humanize(c.label) }))
+    }] : [];
+
+    // CV1 actions; "value" is the ODRL/CC term when the CDIF action maps to one, else cv1:<name>
+    const ruleTypesOf = (c) => (c.collections || [])
+        .map(l => (l.match(/ODRL (Duty|Prohibition|Permission)/) || [])[1])
+        .filter(Boolean);
+    const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(c => ({
+        iri: c.value,
+        name: c.label,
+        category: c.deprecated
+            ? 'Deprecated'
+            : (ruleTypesOf(c).join(' / ') || (c.value.startsWith('cv1:') ? 'CDIF extension' : 'ODRL Common')),
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ')
+            + (c.replacedBy ? ` Use ${c.replacedBy} instead.` : ''),
+        deprecated: c.deprecated,
+        id: c.id,
+        collections: c.collections || []
+    }));
+
+    // Fallback CDIF actions, used only until/if the CV1 vocabulary cannot be loaded
+    const cdifFallbackActions = [
         { iri: "odrl:read", name: "read", category: "Data Access & Ingestion", description: "Read digital objects or record streams across domain gateways." },
         { iri: "odrl:use", name: "use", category: "Data Access & Ingestion", description: "General use of digital cross-domain assets." },
         { iri: "odrl:distribute", name: "distribute", category: "Dissemination & Federation", description: "Distribute or federate records to authenticated nodes." },
@@ -131,7 +368,7 @@ export default function PolicyBuilder() {
 
     // Selected action options depending on active profile
     const currentActionsList = actionVocabProfile.includes('cdif.codata.org')
-        ? cdifActions
+        ? (cdifCv1Actions.length > 0 ? cdifCv1Actions : cdifFallbackActions)
         : (vocabActions?.actions ? Object.entries(vocabActions.actions).map(([k, v]) => ({
             iri: `odrl:${k}`,
             name: k,
@@ -180,6 +417,7 @@ export default function PolicyBuilder() {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
                 const rawConstraints = (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
                     title: c['dcterms:title'] || c['title'] || '',
+                    category: c['dcterms:type']?.['@id'] || c['dcterms:type'] || '',
                     leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                     operator: c['odrl:operator'] || c['operator'] || 'odrl:eq',
                     rightOperand: c['odrl:rightOperand'] || c['rightOperand'] || ''
@@ -259,7 +497,11 @@ export default function PolicyBuilder() {
                     "duodrl": "https://w3id.org/duodrl#",
                     "obo": "http://purl.obolibrary.org/obo/",
                     "skos": "http://www.w3.org/2004/02/skos/core#",
-                    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+                    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                    "cc": "http://creativecommons.org/ns#",
+                    "cv1": "https://odrl.codata.org/cv1/",
+                    "cv2": "https://odrl.codata.org/cv2/",
+                    "cv3": "https://odrl.codata.org/cv3/"
                 }
             ],
             "@type": policyType,
@@ -319,6 +561,7 @@ export default function PolicyBuilder() {
                             "odrl:rightOperand": c.rightOperand
                         };
                         if (c.title) constraintObj["dcterms:title"] = c.title;
+                        if (c.category) constraintObj["dcterms:type"] = { "@id": c.category };
                         return constraintObj;
                     });
                 }
@@ -380,13 +623,20 @@ export default function PolicyBuilder() {
             return res.data;
         },
         onSuccess: (data) => {
+            const warnings = data.warnings || [];
             if (data.valid) {
-                setShaclFeedback({ status: 'success', message: 'SHACL & ODRL 2.2 Validation Passed! Conforms to W3C specification.' });
+                setShaclFeedback({
+                    status: 'success',
+                    message: warnings.length > 0
+                        ? 'SHACL & ODRL 2.2 Validation Passed, with CDIF vocabulary warnings:'
+                        : 'SHACL & ODRL 2.2 Validation Passed! Conforms to W3C specification.',
+                    errors: warnings
+                });
             } else {
                 setShaclFeedback({
                     status: 'error',
                     message: 'Validation failed',
-                    errors: data.errors
+                    errors: [...data.errors, ...warnings]
                 });
             }
         },
@@ -429,9 +679,9 @@ export default function PolicyBuilder() {
         setPermissions([
             ...permissions,
             {
-                action: 'oac:Read',
+                action: DEFAULT_PERMISSION_ACTION,
                 refinements: [],
-                constraints: [],
+                constraints: [newPurposeConstraint()],
                 otherConstraints: []
             }
         ]);
@@ -461,12 +711,7 @@ export default function PolicyBuilder() {
 
     const addPermissionConstraint = (pIndex) => {
         const next = [...permissions];
-        next[pIndex].constraints.push({
-            title: '',
-            leftOperand: 'oac:Purpose',
-            operator: 'odrl:isA',
-            rightOperand: 'dpv:IdentityVerification'
-        });
+        next[pIndex].constraints.push(newPurposeConstraint());
         setPermissions(next);
     };
 
@@ -481,6 +726,7 @@ export default function PolicyBuilder() {
         if (!next[pIndex].otherConstraints) next[pIndex].otherConstraints = [];
         next[pIndex].otherConstraints.push({
             title: '',
+            category: '',
             leftOperand: 'odrl:spatial',
             operator: 'odrl:eq',
             rightOperand: 'https://sws.geonames.org/2921044/'
@@ -598,6 +844,25 @@ export default function PolicyBuilder() {
         setDuties(next);
     };
 
+    // Browse windows. onSelect receives the chosen term; the window closes afterwards.
+    const openBrowser = (opts) => setBrowser({
+        ...opts,
+        onSelect: (v) => { opts.onSelect(v); setBrowser(null); },
+    });
+    const browseApi = {
+        openPurposes: ({ value, onSelect, selectLabel = 'Use this purpose' }) => openBrowser({
+            title: 'Browse purposes',
+            subtitle: 'CDIF CV2 purpose constraints. A broader purpose includes all purposes under it.',
+            nodes: purposeTree(cdifPurposes),
+            value, selectLabel, onSelect,
+        }),
+        openLeftOperands: ({ value, groups = [], onSelect, selectLabel = 'Use this left operand' }) => openBrowser({
+            title: 'Browse constraints',
+            subtitle: groups.length ? 'CDIF other constraints (CV3) and ODRL 2.2 left operands.' : 'ODRL 2.2 left operands.',
+            nodes: leftOperandTree(groups, ODRL_LEFT_OPERAND_TERMS),
+            value, selectLabel, onSelect,
+        }),
+    };
     // Handler to apply selected action to the active rule
     const selectActionForTarget = (actionIri) => {
         if (!actionPickerTarget) return;
@@ -616,10 +881,10 @@ export default function PolicyBuilder() {
             setDuties(next);
         }
         setActionPickerTarget(null);
-        setActionPickerSearch('');
     };
 
     return (
+        <BrowseContext.Provider value={browseApi}>
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-6">
@@ -781,7 +1046,7 @@ export default function PolicyBuilder() {
                             W3C ODRL 2.2 Core (https://www.w3.org/TR/odrl-vocab/#actionConcepts)
                         </option>
                         <option value="https://cdif.codata.org/odrl/v2.3">
-                            CDIF CODATA ODRL v2.3 Profile (https://cdif.codata.org/odrl/v2.3)
+                            CDIF CV1 Actions (https://odrl.codata.org/cv1/)
                         </option>
                     </select>
                 </div>
@@ -970,13 +1235,6 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setActionPickerTarget({ type: 'permission', index: pIdx })}
-                                                            className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 font-medium"
-                                                        >
-                                                            <BookOpen size={11} /> Browse actions
-                                                        </button>
-                                                        <button
-                                                            type="button"
                                                             onClick={() => addPermissionRefinement(pIdx)}
                                                             className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
                                                         >
@@ -984,16 +1242,22 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    value={p.action}
-                                                    onChange={(e) => {
-                                                        const next = [...permissions];
-                                                        next[pIdx].action = e.target.value;
-                                                        setPermissions(next);
-                                                    }}
-                                                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono"
-                                                />
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        value={p.action}
+                                                        onChange={(e) => {
+                                                            const next = [...permissions];
+                                                            next[pIdx].action = e.target.value;
+                                                            setPermissions(next);
+                                                        }}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                    />
+                                                    <BrowseIconButton
+                                                        title="Browse actions"
+                                                        onClick={() => setActionPickerTarget({ type: 'permission', index: pIdx })}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1037,9 +1301,7 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Left Operand"
+                                                            <LeftOperandSelect
                                                                 value={r.leftOperand}
                                                                 onChange={(e) => {
                                                                     const next = [...permissions];
@@ -1048,9 +1310,7 @@ export default function PolicyBuilder() {
                                                                 }}
                                                                 className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                             />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Operator"
+                                                            <OperatorSelect
                                                                 value={r.operator}
                                                                 onChange={(e) => {
                                                                     const next = [...permissions];
@@ -1091,65 +1351,60 @@ export default function PolicyBuilder() {
                                                 </button>
                                             </div>
 
-                                            {p.constraints.map((c, cIdx) => (
-                                                <div key={cIdx} className="p-2.5 mb-2 rounded-lg bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 text-xs space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Purpose Title (dcterms:title)"
-                                                            value={c.title}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].title = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removePermissionConstraint(pIdx, cIdx)}
-                                                            className="text-rose-500 hover:text-rose-700"
-                                                        >
-                                                            <Trash2 size={12} />
-                                                        </button>
+                                            {p.constraints.length === 0 && (
+                                                <p className="text-[11px] text-gray-400 dark:text-gray-500 italic mb-2">
+                                                    No purpose restriction: this permission applies to any purpose.
+                                                </p>
+                                            )}
+
+                                            {p.constraints.map((c, cIdx) => {
+                                                const update = (field, value) => {
+                                                    const next = [...permissions];
+                                                    next[pIdx].constraints[cIdx][field] = value;
+                                                    setPermissions(next);
+                                                };
+                                                const fieldCls = "w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono";
+                                                return (
+                                                    <div key={cIdx} className="p-2.5 mb-2 rounded-lg bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 text-xs space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Purpose Title (dcterms:title)"
+                                                                value={c.title}
+                                                                onChange={(e) => update('title', e.target.value)}
+                                                                className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removePermissionConstraint(pIdx, cIdx)}
+                                                                className="text-rose-500 hover:text-rose-700"
+                                                            >
+                                                                <Trash2 size={12} />
+                                                            </button>
+                                                        </div>
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <input
+                                                                type="text"
+                                                                readOnly
+                                                                value={c.leftOperand || 'oac:Purpose'}
+                                                                title="Left operand of a purpose constraint (fixed)"
+                                                                className={cn(fieldCls, "text-gray-500 dark:text-gray-400 cursor-default focus:outline-none")}
+                                                            />
+                                                            <OperatorSelect
+                                                                value={c.operator}
+                                                                onChange={(e) => update('operator', e.target.value)}
+                                                                className={fieldCls}
+                                                            />
+                                                            <PurposeSelect
+                                                                value={c.rightOperand}
+                                                                concepts={cdifPurposes}
+                                                                onChange={(v) => update('rightOperand', v)}
+                                                                className={fieldCls}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand"
-                                                            value={c.leftOperand}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].leftOperand = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator"
-                                                            value={c.operator}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].operator = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Right Operand"
-                                                            value={c.rightOperand}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].rightOperand = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
 
                                         {/* Other Constraints Section */}
@@ -1190,10 +1445,9 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand (e.g. odrl:spatial, odrl:dateTime)"
+                                                        <LeftOperandSelect
                                                             value={c.leftOperand}
+                                                            groups={cv3LeftOperandGroups}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
                                                                 next[pIdx].otherConstraints[cIdx].leftOperand = e.target.value;
@@ -1201,9 +1455,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator (e.g. odrl:eq, odrl:lt)"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
@@ -1312,13 +1564,6 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setActionPickerTarget({ type: 'prohibition', index: pIdx })}
-                                                            className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 font-medium"
-                                                        >
-                                                            <BookOpen size={11} /> Browse
-                                                        </button>
-                                                        <button
-                                                            type="button"
                                                             onClick={() => addProhibitionRefinement(pIdx)}
                                                             className="text-[11px] text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-0.5"
                                                         >
@@ -1326,16 +1571,22 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    value={p.action}
-                                                    onChange={(e) => {
-                                                        const next = [...prohibitions];
-                                                        next[pIdx].action = e.target.value;
-                                                        setProhibitions(next);
-                                                    }}
-                                                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono"
-                                                />
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        value={p.action}
+                                                        onChange={(e) => {
+                                                            const next = [...prohibitions];
+                                                            next[pIdx].action = e.target.value;
+                                                            setProhibitions(next);
+                                                        }}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                    />
+                                                    <BrowseIconButton
+                                                        title="Browse actions"
+                                                        onClick={() => setActionPickerTarget({ type: 'prohibition', index: pIdx })}
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div>
@@ -1412,9 +1663,7 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Left Operand"
+                                                            <LeftOperandSelect
                                                                 value={r.leftOperand}
                                                                 onChange={(e) => {
                                                                     const next = [...prohibitions];
@@ -1423,9 +1672,7 @@ export default function PolicyBuilder() {
                                                                 }}
                                                                 className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                             />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Operator"
+                                                            <OperatorSelect
                                                                 value={r.operator}
                                                                 onChange={(e) => {
                                                                     const next = [...prohibitions];
@@ -1489,9 +1736,7 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand"
+                                                        <LeftOperandSelect
                                                             value={c.leftOperand}
                                                             onChange={(e) => {
                                                                 const next = [...prohibitions];
@@ -1500,9 +1745,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...prohibitions];
@@ -1611,13 +1854,6 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setActionPickerTarget({ type: 'duty', index: dIdx })}
-                                                            className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-0.5 font-medium"
-                                                        >
-                                                            <BookOpen size={11} /> Browse actions
-                                                        </button>
-                                                        <button
-                                                            type="button"
                                                             onClick={() => addDutyRefinement(dIdx)}
                                                             className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-0.5"
                                                         >
@@ -1625,17 +1861,23 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    placeholder="e.g. odrl:attribute, odrl:compensate"
-                                                    value={d.action}
-                                                    onChange={(e) => {
-                                                        const next = [...duties];
-                                                        next[dIdx].action = e.target.value;
-                                                        setDuties(next);
-                                                    }}
-                                                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono"
-                                                />
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="e.g. odrl:attribute, odrl:compensate"
+                                                        value={d.action}
+                                                        onChange={(e) => {
+                                                            const next = [...duties];
+                                                            next[dIdx].action = e.target.value;
+                                                            setDuties(next);
+                                                        }}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                    />
+                                                    <BrowseIconButton
+                                                        title="Browse actions"
+                                                        onClick={() => setActionPickerTarget({ type: 'duty', index: dIdx })}
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div>
@@ -1713,9 +1955,7 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Left Operand (e.g. odrl:payAmount)"
+                                                            <LeftOperandSelect
                                                                 value={r.leftOperand}
                                                                 onChange={(e) => {
                                                                     const next = [...duties];
@@ -1724,9 +1964,7 @@ export default function PolicyBuilder() {
                                                                 }}
                                                                 className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                             />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Operator"
+                                                            <OperatorSelect
                                                                 value={r.operator}
                                                                 onChange={(e) => {
                                                                     const next = [...duties];
@@ -1790,9 +2028,7 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand"
+                                                        <LeftOperandSelect
                                                             value={c.leftOperand}
                                                             onChange={(e) => {
                                                                 const next = [...duties];
@@ -1801,9 +2037,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...duties];
@@ -2044,115 +2278,54 @@ export default function PolicyBuilder() {
                 </div>
             )}
 
-            {/* Action Picker Pop-up Modal */}
-            {actionPickerTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-2xl bg-white dark:bg-[#121212] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-                        {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
-                            <div className="space-y-1">
-                                <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <BookOpen size={18} className="text-indigo-600 dark:text-indigo-400" />
-                                    Select Action for {actionPickerTarget.type.charAt(0).toUpperCase() + actionPickerTarget.type.slice(1)} #{actionPickerTarget.index + 1}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Choose from available actions under <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400">{actionVocabProfile.includes('cdif') ? 'CDIF CODATA v2.3' : 'W3C ODRL 2.2 Core'}</span>
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setActionPickerTarget(null);
-                                    setActionPickerSearch('');
-                                }}
-                                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 transition-all"
+            {/* Action Picker: hierarchical browse window */}
+            {actionPickerTarget && (() => {
+                const { type, index } = actionPickerTarget;
+                const rules = { permission: permissions, prohibition: prohibitions, duty: duties }[type] || [];
+                const ruleType = type.charAt(0).toUpperCase() + type.slice(1);
+                const ruleGroup = ruleGroupLabel(ruleType);
+                const isCdif = actionVocabProfile.includes('cdif');
+                return (
+                    <VocabBrowser
+                        key={actionVocabProfile}
+                        title={`Select action for ${ruleType} #${index + 1}`}
+                        subtitle={isCdif
+                            ? 'CDIF CV1 actions, grouped by source and by the rule type they are typically used in.'
+                            : 'W3C ODRL 2.2 Core actions, grouped by category.'}
+                        nodes={actionTree(currentActionsList)}
+                        value={rules[index]?.action}
+                        defaultExpanded={isCdif ? [`/CDIF-specific actions/${ruleGroup}`, `/ODRL Common Vocabulary/${ruleGroup}`] : []}
+                        selectLabel="Use this action"
+                        onSelect={selectActionForTarget}
+                        onClose={() => setActionPickerTarget(null)}
+                        toolbar={
+                            <select
+                                value={actionVocabProfile}
+                                onChange={(e) => setActionVocabProfile(e.target.value)}
+                                title="Action vocabulary profile"
+                                className="px-2 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                             >
-                                Cancel
-                            </button>
-                        </div>
+                                <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">W3C ODRL 2.2</option>
+                                <option value="https://cdif.codata.org/odrl/v2.3">CDIF CV1 Actions</option>
+                            </select>
+                        }
+                    />
+                );
+            })()}
 
-                        {/* Search and Profile Switcher in Modal */}
-                        <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/30 dark:bg-white/[0.01] space-y-3">
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Search action by name, category, or description..."
-                                    value={actionPickerSearch}
-                                    onChange={(e) => setActionPickerSearch(e.target.value)}
-                                    autoFocus
-                                    className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs focus:ring-2 focus:ring-indigo-500"
-                                />
-                                <select
-                                    value={actionVocabProfile}
-                                    onChange={(e) => setActionVocabProfile(e.target.value)}
-                                    className="px-3 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">
-                                        W3C ODRL 2.2
-                                    </option>
-                                    <option value="https://cdif.codata.org/odrl/v2.3">
-                                        CDIF CODATA v2.3
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Actions List Grid */}
-                        <div className="p-6 overflow-y-auto space-y-3 custom-scrollbar flex-1">
-                            {(() => {
-                                const q = actionPickerSearch.toLowerCase().trim();
-                                const filtered = currentActionsList.filter(a =>
-                                    !q ||
-                                    a.iri.toLowerCase().includes(q) ||
-                                    a.name.toLowerCase().includes(q) ||
-                                    (a.category && a.category.toLowerCase().includes(q)) ||
-                                    (a.description && a.description.toLowerCase().includes(q))
-                                );
-
-                                if (filtered.length === 0) {
-                                    return (
-                                        <div className="text-center py-10 text-xs text-gray-500 dark:text-gray-400">
-                                            No actions matching &ldquo;{actionPickerSearch}&rdquo;.
-                                        </div>
-                                    );
-                                }
-
-                                return (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                        {filtered.map((act) => (
-                                            <button
-                                                key={act.iri}
-                                                type="button"
-                                                onClick={() => selectActionForTarget(act.iri)}
-                                                className="text-left p-3 rounded-xl border border-gray-200 dark:border-white/10 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all group flex flex-col justify-between"
-                                            >
-                                                <div>
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <span className="font-mono text-xs font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                                                            {act.iri}
-                                                        </span>
-                                                        {act.category && (
-                                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
-                                                                {act.category}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                                                        {act.description}
-                                                    </p>
-                                                </div>
-                                                <div className="mt-2 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    Select action &rarr;
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
-                        </div>
-                    </div>
-                </div>
+            {/* Hierarchical browse window (purposes, constraints) */}
+            {browser && (
+                <VocabBrowser
+                    title={browser.title}
+                    subtitle={browser.subtitle}
+                    nodes={browser.nodes}
+                    value={browser.value}
+                    selectLabel={browser.selectLabel}
+                    onSelect={browser.onSelect}
+                    onClose={() => setBrowser(null)}
+                />
             )}
         </div>
+        </BrowseContext.Provider>
     );
 }
