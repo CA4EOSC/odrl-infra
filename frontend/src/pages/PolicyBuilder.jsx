@@ -328,10 +328,18 @@ export default function PolicyBuilder() {
     });
     const cdifPurposes = cdifVocab?.purposes?.concepts || [];
     const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
-    const cv3LeftOperandGroups = cdifConstraintTypes.length > 0 ? [{
-        label: 'CDIF other constraints (CV3)',
-        terms: cdifConstraintTypes.map(c => ({ value: c.id, description: c.notes?.[0] || humanize(c.label) }))
-    }] : [];
+    // CV3 holds ODRL left operands selected for CDIF ("value" is odrl:<term>, or the cv3 id when
+    // there is no exact ODRL match) plus broader restriction categories; deprecated operands are hidden.
+    const cv3Term = (c) => ({
+        value: c.value,
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
+    });
+    const inCollection = (c, label) => (c.collections || []).some(l => l.startsWith(label));
+    const cv3Usable = cdifConstraintTypes.filter(c => !c.deprecated);
+    const cv3LeftOperandGroups = [
+        { label: 'CDIF left operands (CV3)', terms: cv3Usable.filter(c => inCollection(c, 'ODRL left operands')).map(cv3Term) },
+        { label: 'CDIF restriction categories (CV3)', terms: cv3Usable.filter(c => inCollection(c, 'Restriction categories')).map(cv3Term) },
+    ].filter(g => g.terms.length > 0);
 
     // CV1 actions; "value" is the ODRL/CC term when the CDIF action maps to one, else cv1:<name>
     const ruleTypesOf = (c) => (c.collections || [])

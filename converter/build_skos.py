@@ -1,12 +1,12 @@
-"""Build SKOS concept schemes for CV1 (Actions), CV2 (Purpose Constraints) and
-CV3 (Other Constraints) from the SubGroup 2 "Actions and Purposes" Google Sheet.
+"""Build SKOS concept schemes for CV1 (Actions), CV2 (Purpose Constraints),
+CV3 (Other Constraints) and CV4 (Duty Actions) from the SubGroup 2 "Actions and Purposes" Google Sheet.
 
 Usage (from this directory):
   uv run --no-project --with openpyxl --with rdflib python build_skos.py               # download, else bundled copy
   uv run --no-project --with openpyxl --with rdflib python build_skos.py --xlsx F.xlsx # use a specific .xlsx
 
-Writes cv1-actions.ttl, cv2-purposes.ttl, cv3-constraints.ttl and cdif-access-vocab.ttl
-(all three combined) to ../config/.
+Writes cv1-actions.ttl, cv2-purposes.ttl, cv3-constraints.ttl, cv4-duty-actions.ttl and
+cdif-access-vocab.ttl (all four combined) to ../config/.
 
 The sheet is downloaded first; if that fails, the bundled copy "Actions and Purposes.xlsx"
 next to this script is used instead (and refreshed whenever a download succeeds).
@@ -17,6 +17,7 @@ Otherwise set GOOGLE_ACCESS_TOKEN to an OAuth token with Drive read access, e.g.
 """
 
 import argparse
+import datetime as dt
 import os
 import re
 import sys
@@ -38,6 +39,7 @@ BASE = "https://odrl.codata.org/"
 CV1 = Namespace(BASE + "cv1/")
 CV2 = Namespace(BASE + "cv2/")
 CV3 = Namespace(BASE + "cv3/")
+CV4 = Namespace(BASE + "cv4/")
 ODRL = Namespace("http://www.w3.org/ns/odrl/2/")
 CC = Namespace("http://creativecommons.org/ns#")
 DPV = Namespace("https://w3id.org/dpv#")
@@ -50,8 +52,26 @@ CC_TERMS = {"derivativeworks": "DerivativeWorks", "distribution": "Distribution"
 # ODRL terms that exist in the ODRL 2.2 vocabulary but are not flagged "ODRL Common?" in the sheet.
 EXTRA_ODRL = {"Modify": "modify", "secondaryUse": "secondaryUse", "Share": "share", "extractWord": "extractWord"}
 
+# ODRL 2.2 left operands (https://www.w3.org/TR/odrl-vocab/#term-LeftOperand), keyed lower-case.
+ODRL_LEFT_OPERANDS = {t.lower(): t for t in (
+    "absolutePosition absoluteSize absoluteSpatialPosition absoluteTemporalPosition count dateTime "
+    "delayPeriod deliveryChannel device elapsedTime event fileFormat industry language media meteredTime "
+    "payAmount percentage product purpose recipient relativePosition relativeSize relativeSpatialPosition "
+    "relativeTemporalPosition resolution spatial spatialCoordinates system systemDevice timeInterval "
+    "unitOfCount version virtualLocation").split()}
+OPERATORS = {"<": "lt", ">": "gt", "=": "eq", "<=": "lteq", ">=": "gteq", "!=": "neq"}
+
+SHEET_CV1 = "CV1-Actions"
+SHEET_CV2 = "CV2-Purpose Constraints"
+SHEET_CV3 = ("CV3-OtherContsraints", "CV3-Other Constraints")   # sheet name has a typo in the source
+SHEET_CV4 = "CV4-DutyActions"
+
 
 def clean(v):
+    if isinstance(v, dt.datetime):
+        return v.date().isoformat() if v.time() == dt.time() else v.isoformat()
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v))
     return re.sub(r"\s+", " ", str(v)).strip() if v is not None else ""
 
 
@@ -68,10 +88,17 @@ def rows(ws, first, ncols):
         yield [clean(c.value) for c in r], r[0].row
 
 
+def sheet(wb, names):
+    for n in (names,) if isinstance(names, str) else names:
+        if n in wb.sheetnames:
+            return wb[n]
+    raise KeyError(f"none of the sheets {names} found; have {wb.sheetnames}")
+
+
 def new_graph():
     g = Graph()
     for p, ns in [("skos", SKOS), ("dct", DCTERMS), ("owl", OWL), ("odrl", ODRL), ("cc", CC),
-                  ("dpv", DPV), ("obo", OBO), ("cv1", CV1), ("cv2", CV2), ("cv3", CV3)]:
+                  ("dpv", DPV), ("obo", OBO), ("cv1", CV1), ("cv2", CV2), ("cv3", CV3), ("cv4", CV4)]:
         g.bind(p, ns)
     return g
 
@@ -102,8 +129,14 @@ def collection(g, uri, label, members):
         g.add((uri, SKOS.member, m))
 
 
+def text(g, uri, prop, value):
+    if value:
+        g.add((uri, prop, Literal(value, lang="en")))
+
+
 # --------------------------------------------------------------------------- CV1
-def build_cv1(ws, extra_duties):
+def build_cv1(ws):
+    """Columns: CDIF ACTIONS | ODRL Common? | Source | skos:definition | skos:dnote | Notes."""
     g = new_graph()
     s = scheme(g, CV1, "CDIF Actions (CV1)",
                "Actions that can be permitted, prohibited or required (duties) in CDIF access "
@@ -112,7 +145,7 @@ def build_cv1(ws, extra_duties):
     by_label, deprecated, rule_types = {}, [], {"Duty": [], "Prohibition": [], "Permission": []}
     odrl_common, cdif_ext = [], []
 
-    for (label, common, src, note), _ in rows(ws, 5, 4):
+    for (label, common, src, definition, dnote, note), _ in rows(ws, 5, 6):
         if not label:
             continue
         uri = CV1[camel(label, upper=False)]
@@ -132,8 +165,14 @@ def build_cv1(ws, extra_duties):
                 g.add((uri, SKOS.editorialNote, Literal(
                     "Mapping to ODRL added during SKOS conversion; not stated in source sheet.", lang="en")))
 
+        # definitions that are still open questions ("?", "Synonym for ODRL:Play?") are editorial
+        if definition and definition != "?":
+            text(g, uri, SKOS.editorialNote if definition.endswith("?") else SKOS.definition, definition)
+        if dnote and dnote != "?":
+            text(g, uri, SKOS.scopeNote, dnote)
+
         if note:
-            g.add((uri, SKOS.scopeNote, Literal(note, lang="en")))
+            text(g, uri, SKOS.note, note)
             m = re.match(r"(?i)deprecated(?: by (\S+))?", note)
             if m:
                 deprecated.append((uri, m.group(1)))
@@ -144,18 +183,6 @@ def build_cv1(ws, extra_duties):
                     rule_types[rt].append(uri)
             if "deprecated" in note.lower() and not m:   # e.g. "Deprecated, ..." on Ad-hoc sharing
                 deprecated.append((uri, None))
-
-    # duty actions named in CV3's "ASSOCIATED DUTY ACTION" column that CV1 does not list yet
-    for name, origin in extra_duties:
-        if name.lower() in by_label:
-            continue
-        uri = CV1[camel(name, upper=False)]
-        concept(g, s, uri, name)
-        by_label[name.lower()] = uri
-        cdif_ext.append(uri)
-        rule_types["Duty"].append(uri)
-        g.add((uri, SKOS.editorialNote, Literal(
-            f"Added from the CV3 sheet, where it is the associated duty action of '{origin}'.", lang="en")))
 
     # deprecations; point replacements at the CDIF concept for the replacing ODRL action
     for uri, by in deprecated:
@@ -174,23 +201,27 @@ def build_cv1(ws, extra_duties):
 
 # --------------------------------------------------------------------------- CV2
 def build_cv2(ws):
+    """Columns: CDIF PURPOSE CONSTRAINTS | Source | Parent | IRI | Notes."""
     g = new_graph()
     s = scheme(g, CV2, "CDIF Purpose Constraints (CV2)",
                "Purposes used as constraints on CDIF actions, re-using Data Privacy Vocabulary (DPV) "
                "purpose concepts.", "https://w3id.org/dpv/modules/purposes")
     data = [(r, n) for r, n in rows(ws, 5, 5) if r[0]]
+
+    def key(x):
+        return x.split("#")[-1].strip().lower().replace(" ", "").replace("-", "")
+
     by_label = {}
     for (label, _src, _parent, iri, note), _ in data:
         uri = CV2[camel(label, upper=True)]
-        by_label[label.lower().replace(" ", "").replace("-", "")] = uri
+        by_label[key(label)] = uri
         concept(g, s, uri, label, top=False)
         local = iri.split("#")[-1] if "#" in iri else camel(label, upper=True)
         g.add((uri, SKOS.exactMatch, DPV[local]))
-        if note:
-            g.add((uri, SKOS.definition, Literal(note, lang="en")))
+        text(g, uri, SKOS.definition, note)
 
     for (label, _src, parent, _iri, _note), _ in data:
-        uri = by_label[label.lower().replace(" ", "").replace("-", "")]
+        uri = by_label[key(label)]
         if parent == "Root":
             g.add((uri, SKOS.topConceptOf, s))
             g.add((s, SKOS.hasTopConcept, uri))
@@ -200,51 +231,95 @@ def build_cv2(ws):
             g.add((uri, SKOS.editorialNote, Literal(
                 "Parent not given in source sheet; set to Purpose following the DPV hierarchy.", lang="en")))
         for p in parent.split(";"):
-            key = p.split("#")[-1].strip().lower().replace(" ", "").replace("-", "")
-            g.add((uri, SKOS.broader, by_label[key]))
-            g.add((by_label[key], SKOS.narrower, uri))
+            g.add((uri, SKOS.broader, by_label[key(p)]))
+            g.add((by_label[key(p)], SKOS.narrower, uri))
     return g
 
 
 # --------------------------------------------------------------------------- CV3
-def build_cv3(ws, cv1):
+def build_cv3(ws):
+    """Two blocks on one sheet:
+    - ODRL left operands: Left Operand | OP | Ro.Operand | Example | | extra note
+      (OP holds either an example operator or a status such as "DON'T USE" / "DEPRECATED")
+    - restriction categories: Label | Source | Status | Description (DUO rows are skipped)."""
     g = new_graph()
     s = scheme(g, CV3, "CDIF Other Constraints (CV3)",
-               "Other constraints describing the scope of applicability of a CDIF access policy "
-               "(environment, legal, usage context, person, identity, role, financial, ...).",
-               "https://www.w3.org/TR/odrl-vocab/#actionsCommon")
-    cv1_labels = {str(o).lower(): sub for sub, o in cv1.subject_objects(SKOS.prefLabel)}
-    last = None
-    for (label, src, alt, note, duty, refinement), _ in rows(ws, 5, 6):
-        if src.startswith("DUO:"):   # DUO-based rows are not part of CV3 (group decision 2026-11-04)
-            last = None
+               "Other constraints describing the scope of applicability of a CDIF access policy: the "
+               "ODRL left operands selected for CDIF, and broader restriction categories (environment, "
+               "legal, usage context, person, identity, role, financial) still under investigation.",
+               "https://www.w3.org/TR/odrl-vocab/#term-LeftOperand")
+    operands, deprecated, no_use_case, categories = [], [], [], []
+
+    for (label, op, ro, example, _e, extra), _ in rows(ws, 5, 6):
+        if not label or set(label) == {"."}:
             continue
-        if label:
-            last = CV3[camel(label, upper=True)]
-            concept(g, s, last, label)
-            if note:
-                g.add((last, SKOS.scopeNote, Literal(note, lang="en")))
-            if alt:
-                g.add((last, SKOS.editorialNote, Literal(f"DPV/ODRL alternative: {alt}", lang="en")))
-            if refinement:
-                g.add((last, SKOS.editorialNote, Literal(f"Refinement: {refinement}", lang="en")))
-        # associated duty action (may continue on a row with an empty label, e.g. row 19)
-        if duty and duty.lower() != "x" and last is not None:
-            target = cv1_labels.get(duty.lower())
-            if target:
-                g.add((last, SKOS.related, target))
-            g.add((last, SKOS.note, Literal(f"Associated duty action: {duty}", lang="en")))
+        if op.startswith("DUO:"):   # DUO-based rows are not part of CV3 (group decision 2026-11-04)
+            continue
+        prefix, _, local = label.rpartition(":")
+        if local.lower() in ODRL_LEFT_OPERANDS or prefix:
+            uri = CV3[camel(local, upper=False)]
+            concept(g, s, uri, label)
+            operands.append(uri)
+            if prefix.lower() == "dpv":
+                g.add((uri, SKOS.closeMatch, DPV[local[0].upper() + local[1:]]))
+                g.add((uri, SKOS.editorialNote, Literal(
+                    f"Source sheet names '{label}' ({extra or 'DPV'}); mapped to the DPV concept "
+                    "during SKOS conversion.", lang="en")))
+            else:
+                g.add((uri, SKOS.exactMatch, ODRL[ODRL_LEFT_OPERANDS[local.lower()]]))
+                g.add((uri, DCTERMS.source,
+                       URIRef(f"https://www.w3.org/TR/odrl-vocab/#term-{ODRL_LEFT_OPERANDS[local.lower()]}")))
+                text(g, uri, SKOS.editorialNote, extra)
+            status = op.upper()
+            if status in ("DON'T USE", "DEPRECATED"):
+                g.add((uri, OWL.deprecated, Literal(True)))
+                g.add((uri, SKOS.editorialNote, Literal(f"Marked '{op}' in source sheet.", lang="en")))
+                deprecated.append(uri)
+            elif "NO USE CASE" in status:
+                g.add((uri, SKOS.editorialNote, Literal(op, lang="en")))
+                no_use_case.append(uri)
+            elif op:
+                odrl_op = OPERATORS.get(op, op)
+                g.add((uri, SKOS.example, Literal(f"{label} {odrl_op} {ro}".strip(), lang="en")))
+            text(g, uri, SKOS.scopeNote, example)
+        else:
+            uri = CV3[camel(label, upper=True)]
+            concept(g, s, uri, label)
+            categories.append(uri)
+            if ro:
+                g.add((uri, SKOS.editorialNote, Literal(f"Status: {ro}", lang="en")))
+            text(g, uri, SKOS.scopeNote, example)
+
+    collection(g, CV3["collection/leftOperands"], "ODRL left operands used in CDIF", operands)
+    collection(g, CV3["collection/deprecated"], "Left operands not to be used in CDIF", deprecated)
+    collection(g, CV3["collection/noKnownUseCase"],
+               "Left operands without a known UKDS/Sikt use case", no_use_case)
+    collection(g, CV3["collection/restrictionCategories"],
+               "Restriction categories (under investigation)", categories)
     return g
 
 
-def cv3_duty_actions(ws):
-    """(action name, constraint label) for single-term entries in CV3's duty-action column."""
-    out, origin = [], None
-    for (label, _src, _alt, _note, duty, _ref), _ in rows(ws, 5, 6):
-        origin = label or origin
-        if re.fullmatch(r"[A-Z][A-Za-z]+", duty):
-            out.append((duty, origin))
-    return out
+# --------------------------------------------------------------------------- CV4
+def build_cv4(ws, cv1):
+    """Columns: DUTY ACTIONS | note."""
+    g = new_graph()
+    s = scheme(g, CV4, "CDIF Duty Actions (CV4)",
+               "Actions that an assignee must perform (ODRL duties) before or while exercising a "
+               "permission in a CDIF access policy.",
+               "https://www.w3.org/TR/odrl-vocab/#term-Duty")
+    cv1_labels = {str(o).lower(): sub for sub, o in cv1.subject_objects(SKOS.prefLabel)}
+    for (label, note), _ in rows(ws, 5, 2):
+        if not label:
+            continue
+        uri = CV4[camel(label, upper=False)]
+        concept(g, s, uri, label)
+        text(g, uri, SKOS.scopeNote, note)
+        same = cv1_labels.get(label.lower())
+        if same is not None:
+            g.add((uri, SKOS.exactMatch, same))
+            for m in cv1.objects(same, SKOS.exactMatch):
+                g.add((uri, SKOS.exactMatch, m))
+    return g
 
 
 def download_sheet(sheet_id, dest):
@@ -296,15 +371,18 @@ def main():
             xlsx = BUNDLED_XLSX
     args.out.mkdir(parents=True, exist_ok=True)
     wb = openpyxl.load_workbook(xlsx)
-    cv1 = build_cv1(wb["CV1-Actions"], cv3_duty_actions(wb["CV3-Other Constraints"]))
-    cv2 = build_cv2(wb["CV2-Purpose Constraints"])
-    cv3 = build_cv3(wb["CV3-Other Constraints"], cv1)
+    cv1 = build_cv1(sheet(wb, SHEET_CV1))
+    cv2 = build_cv2(sheet(wb, SHEET_CV2))
+    cv3 = build_cv3(sheet(wb, SHEET_CV3))
+    cv4 = build_cv4(sheet(wb, SHEET_CV4), cv1)
     combined = new_graph()
-    for name, g in [("cv1-actions", cv1), ("cv2-purposes", cv2), ("cv3-constraints", cv3)]:
+    for name, g in [("cv1-actions", cv1), ("cv2-purposes", cv2), ("cv3-constraints", cv3),
+                    ("cv4-duty-actions", cv4)]:
         g.serialize(args.out / f"{name}.ttl", format="turtle")
         combined += g
         print(f"{name}.ttl: {len(set(g.subjects(RDF.type, SKOS.Concept)))} concepts, {len(g)} triples")
     combined.serialize(args.out / "cdif-access-vocab.ttl", format="turtle")
+    print(f"cdif-access-vocab.ttl: {len(combined)} triples")
 
 
 if __name__ == "__main__":
