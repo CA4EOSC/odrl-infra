@@ -81,26 +81,28 @@ const ODRL_LEFT_OPERANDS = [
 ];
 
 // Compact select for ODRL terms: short names in the list, the description as tooltip.
-function TermSelect({ value, terms, name, placeholder, ...props }) {
-    const selected = terms.find(o => o.value === value);
+// Select for vocabulary terms: shows the prefixed term (e.g. odrl:isA), description as tooltip.
+// "groups" adds labelled sections, e.g. CDIF CV3 terms before the ODRL left operands.
+function TermSelect({ value, terms, groups = [], name, placeholder, ...props }) {
+    const all = [...groups.flatMap(g => g.terms), ...terms];
+    const selected = all.find(o => o.value === value);
+    const option = (o) => <option key={o.value} value={o.value} title={o.description}>{o.value}</option>;
     return (
         <select
             value={value || ''}
-            title={selected ? `${name}: ${selected.value} — ${selected.description}`
-                : value ? `${name}: ${value} (not an ODRL 2.2 term)` : name}
+            title={selected ? `${selected.value} — ${selected.description}` : value || name}
             {...props}
         >
             {placeholder && <option value="" disabled>{placeholder}</option>}
             {!selected && value && <option value={value}>{value}</option>}
-            {terms.map(o => (
-                <option key={o.value} value={o.value} title={o.description}>{o.label}</option>
-            ))}
+            {groups.map(g => <optgroup key={g.label} label={g.label}>{g.terms.map(option)}</optgroup>)}
+            {groups.length > 0 ? <optgroup label="ODRL 2.2">{terms.map(option)}</optgroup> : terms.map(option)}
         </select>
     );
 }
 
 const LeftOperandSelect = (props) => (
-    <TermSelect terms={ODRL_LEFT_OPERANDS} name="Left operand" placeholder="Left operand…" {...props} />
+    <TermSelect terms={ODRL_LEFT_OPERANDS} name="Left operand" placeholder="Left Operand" {...props} />
 );
 const OperatorSelect = (props) => <TermSelect terms={ODRL_OPERATORS} name="Operator" {...props} />;
 
@@ -138,7 +140,7 @@ function PurposeSelect({ value, concepts, onChange, className }) {
     const { roots, groups } = useMemo(() => purposeGroups(concepts), [concepts]);
     const known = concepts.find(c => c.value === value);
     const [customMode, setCustomMode] = useState(false);
-    const showCustom = customMode || (!!value && !known);
+    const showCustom = customMode;
     return (
         <div className="space-y-1">
             <select
@@ -154,14 +156,15 @@ function PurposeSelect({ value, concepts, onChange, className }) {
                 }}
                 className={className}
             >
-                <option value="" disabled>{concepts.length ? 'Purpose…' : 'Loading purposes…'}</option>
+                <option value="" disabled>{concepts.length ? 'Right Operand' : 'Loading purposes…'}</option>
+                {!known && value && !showCustom && <option value={value}>{value}</option>}
                 {roots.map(c => (
-                    <option key={c.id} value={c.value} title={c.definition || ''}>Any purpose</option>
+                    <option key={c.id} value={c.value} title={c.definition || ''}>{c.value}</option>
                 ))}
                 {groups.map(g => (
                     <optgroup key={g.label} label={g.label}>
-                        {g.items.map(({ c, text }) => (
-                            <option key={c.id} value={c.value} title={c.definition || ''}>{text}</option>
+                        {g.items.map(({ c }) => (
+                            <option key={c.id} value={c.value} title={c.definition || ''}>{c.value}</option>
                         ))}
                     </optgroup>
                 ))}
@@ -179,20 +182,6 @@ function PurposeSelect({ value, concepts, onChange, className }) {
                 />
             )}
         </div>
-    );
-}
-
-// CDIF CV3 "other constraint" categories, stored on the constraint as dcterms:type
-function ConstraintTypeSelect({ value, options, ...props }) {
-    const known = options.some(o => o.id === value);
-    return (
-        <select value={value} title="Constraint type (CDIF CV3)" {...props}>
-            <option value="">Constraint type…</option>
-            {!known && value && <option value={value}>{value}</option>}
-            {options.map(o => (
-                <option key={o.id} value={o.id} title={o.notes?.[0] || ''}>{o.label}</option>
-            ))}
-        </select>
     );
 }
 
@@ -293,6 +282,10 @@ export default function PolicyBuilder() {
     });
     const cdifPurposes = cdifVocab?.purposes?.concepts || [];
     const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
+    const cv3LeftOperandGroups = cdifConstraintTypes.length > 0 ? [{
+        label: 'CDIF other constraints (CV3)',
+        terms: cdifConstraintTypes.map(c => ({ value: c.id, description: c.notes?.[0] || humanize(c.label) }))
+    }] : [];
 
     // CV1 actions; "value" is the ODRL/CC term when the CDIF action maps to one, else cv1:<name>
     const ruleTypesOf = (c) => (c.collections || [])
@@ -1380,16 +1373,6 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
                                                         />
-                                                        <ConstraintTypeSelect
-                                                            value={c.category || ''}
-                                                            options={cdifConstraintTypes}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].otherConstraints[cIdx].category = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                        />
                                                         <button
                                                             type="button"
                                                             onClick={() => removePermissionOtherConstraint(pIdx, cIdx)}
@@ -1401,6 +1384,7 @@ export default function PolicyBuilder() {
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <LeftOperandSelect
                                                             value={c.leftOperand}
+                                                            groups={cv3LeftOperandGroups}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
                                                                 next[pIdx].otherConstraints[cIdx].leftOperand = e.target.value;
