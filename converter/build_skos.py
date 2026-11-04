@@ -2,12 +2,14 @@
 CV3 (Other Constraints) from the SubGroup 2 "Actions and Purposes" Google Sheet.
 
 Usage (from this directory):
-  uv run --no-project --with openpyxl --with rdflib python build_skos.py               # download the sheet
-  uv run --no-project --with openpyxl --with rdflib python build_skos.py --xlsx F.xlsx # use a local copy
+  uv run --no-project --with openpyxl --with rdflib python build_skos.py               # download, else bundled copy
+  uv run --no-project --with openpyxl --with rdflib python build_skos.py --xlsx F.xlsx # use a specific .xlsx
 
 Writes cv1-actions.ttl, cv2-purposes.ttl, cv3-constraints.ttl and cdif-access-vocab.ttl
-(all three combined) next to this script.
+(all three combined) to ../config/.
 
+The sheet is downloaded first; if that fails, the bundled copy "Actions and Purposes.xlsx"
+next to this script is used instead (and refreshed whenever a download succeeds).
 Downloading: if the sheet is shared as "Anyone with the link can view" no login is needed.
 Otherwise set GOOGLE_ACCESS_TOKEN to an OAuth token with Drive read access, e.g.
   GOOGLE_ACCESS_TOKEN=$(gcloud auth print-access-token \
@@ -28,6 +30,7 @@ from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, OWL, RDF, SKOS, XSD
 
 HERE = Path(__file__).resolve().parent
+BUNDLED_XLSX = HERE / "Actions and Purposes.xlsx"
 SHEET_ID = "1TxeIVLdYr6nXj07AyGzbhHPQdDWfxtO8TvlhPGKRsW0"
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -260,9 +263,11 @@ def download_sheet(sheet_id, dest):
         hint = ("check that the token has Drive read access to the sheet" if token else
                 "the sheet is not public: share it as 'Anyone with the link can view', "
                 "set GOOGLE_ACCESS_TOKEN, or pass --xlsx with a downloaded copy")
-        sys.exit(f"Download failed (HTTP {e.code}): {hint}.")
+        raise RuntimeError(f"HTTP {e.code}: {hint}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"network error: {e.reason}") from e
     if not data.startswith(b"PK"):   # .xlsx is a zip; Google returns an HTML login page otherwise
-        sys.exit("Download did not return an .xlsx file (login page?). Use GOOGLE_ACCESS_TOKEN or --xlsx.")
+        raise RuntimeError("response is not an .xlsx file (login page?)")
     dest.write_bytes(data)
     print(f"Downloaded sheet {sheet_id} ({len(data) // 1024} KB)")
     return dest
@@ -272,13 +277,24 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--xlsx", type=Path, help="local .xlsx copy (skips the download)")
     ap.add_argument("--sheet-id", default=SHEET_ID, help="Google Sheet ID to download")
-    ap.add_argument("--out", type=Path, default=HERE, help="output directory (default: this directory)")
+    ap.add_argument("--out", type=Path, default=HERE.parent / "config", help="output directory (default: ../config)")
+    ap.add_argument("--no-download", action="store_true", help="use the bundled .xlsx without downloading")
     args = ap.parse_args()
 
     if args.xlsx:
         xlsx = args.xlsx
+    elif args.no_download:
+        xlsx = BUNDLED_XLSX
     else:
-        xlsx = download_sheet(args.sheet_id, Path(tempfile.mkdtemp()) / "actions-and-purposes.xlsx")
+        try:
+            xlsx = download_sheet(args.sheet_id, Path(tempfile.mkdtemp()) / "actions-and-purposes.xlsx")
+            BUNDLED_XLSX.write_bytes(xlsx.read_bytes())   # keep the bundled copy current
+        except RuntimeError as e:
+            if not BUNDLED_XLSX.exists():
+                sys.exit(f"Download failed ({e}) and no bundled copy at {BUNDLED_XLSX}.")
+            print(f"Download failed ({e}); using bundled copy {BUNDLED_XLSX.name}", file=sys.stderr)
+            xlsx = BUNDLED_XLSX
+    args.out.mkdir(parents=True, exist_ok=True)
     wb = openpyxl.load_workbook(xlsx)
     cv1 = build_cv1(wb["CV1-Actions"], cv3_duty_actions(wb["CV3-Other Constraints"]))
     cv2 = build_cv2(wb["CV2-Purpose Constraints"])
