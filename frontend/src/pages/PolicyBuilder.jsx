@@ -54,6 +54,20 @@ function OperatorSelect({ value, ...props }) {
     );
 }
 
+// CDIF CV3 "other constraint" categories, stored on the constraint as dcterms:type
+function ConstraintTypeSelect({ value, options, ...props }) {
+    const known = options.some(o => o.id === value);
+    return (
+        <select value={value} title="Constraint type (CDIF CV3)" {...props}>
+            <option value="">Constraint type…</option>
+            {!known && value && <option value={value}>{value}</option>}
+            {options.map(o => (
+                <option key={o.id} value={o.id} title={o.notes?.[0] || ''}>{o.label}</option>
+            ))}
+        </select>
+    );
+}
+
 export default function PolicyBuilder() {
     // Basic Policy Metadata
     const [policyType, setPolicyType] = useState('Offer');
@@ -141,8 +155,34 @@ export default function PolicyBuilder() {
         }
     });
 
-    // Custom CDIF v2.3 Profile Actions
-    const cdifActions = [
+    // CDIF access vocabularies (SKOS, config/*.ttl): CV1 actions, CV2 purposes, CV3 other constraints
+    const { data: cdifVocab } = useQuery({
+        queryKey: ['vocab-cdif'],
+        queryFn: async () => {
+            const res = await api.get('/policy/vocab/cdif');
+            return res.data;
+        }
+    });
+    const cdifPurposes = cdifVocab?.purposes?.concepts || [];
+    const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
+
+    // CV1 actions; "value" is the ODRL/CC term when the CDIF action maps to one, else cv1:<name>
+    const ruleTypesOf = (c) => (c.collections || [])
+        .map(l => (l.match(/ODRL (Duty|Prohibition|Permission)/) || [])[1])
+        .filter(Boolean);
+    const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(c => ({
+        iri: c.value,
+        name: c.label,
+        category: c.deprecated
+            ? 'Deprecated'
+            : (ruleTypesOf(c).join(' / ') || (c.value.startsWith('cv1:') ? 'CDIF extension' : 'ODRL Common')),
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ')
+            + (c.replacedBy ? ` Use ${c.replacedBy} instead.` : ''),
+        deprecated: c.deprecated
+    }));
+
+    // Fallback CDIF actions, used only until/if the CV1 vocabulary cannot be loaded
+    const cdifFallbackActions = [
         { iri: "odrl:read", name: "read", category: "Data Access & Ingestion", description: "Read digital objects or record streams across domain gateways." },
         { iri: "odrl:use", name: "use", category: "Data Access & Ingestion", description: "General use of digital cross-domain assets." },
         { iri: "odrl:distribute", name: "distribute", category: "Dissemination & Federation", description: "Distribute or federate records to authenticated nodes." },
@@ -159,7 +199,7 @@ export default function PolicyBuilder() {
 
     // Selected action options depending on active profile
     const currentActionsList = actionVocabProfile.includes('cdif.codata.org')
-        ? cdifActions
+        ? (cdifCv1Actions.length > 0 ? cdifCv1Actions : cdifFallbackActions)
         : (vocabActions?.actions ? Object.entries(vocabActions.actions).map(([k, v]) => ({
             iri: `odrl:${k}`,
             name: k,
@@ -208,6 +248,7 @@ export default function PolicyBuilder() {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
                 const rawConstraints = (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
                     title: c['dcterms:title'] || c['title'] || '',
+                    category: c['dcterms:type']?.['@id'] || c['dcterms:type'] || '',
                     leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                     operator: c['odrl:operator'] || c['operator'] || 'odrl:eq',
                     rightOperand: c['odrl:rightOperand'] || c['rightOperand'] || ''
@@ -287,7 +328,11 @@ export default function PolicyBuilder() {
                     "duodrl": "https://w3id.org/duodrl#",
                     "obo": "http://purl.obolibrary.org/obo/",
                     "skos": "http://www.w3.org/2004/02/skos/core#",
-                    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+                    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                    "cc": "http://creativecommons.org/ns#",
+                    "cv1": "https://odrl.codata.org/cv1/",
+                    "cv2": "https://odrl.codata.org/cv2/",
+                    "cv3": "https://odrl.codata.org/cv3/"
                 }
             ],
             "@type": policyType,
@@ -347,6 +392,7 @@ export default function PolicyBuilder() {
                             "odrl:rightOperand": c.rightOperand
                         };
                         if (c.title) constraintObj["dcterms:title"] = c.title;
+                        if (c.category) constraintObj["dcterms:type"] = { "@id": c.category };
                         return constraintObj;
                     });
                 }
@@ -408,13 +454,20 @@ export default function PolicyBuilder() {
             return res.data;
         },
         onSuccess: (data) => {
+            const warnings = data.warnings || [];
             if (data.valid) {
-                setShaclFeedback({ status: 'success', message: 'SHACL & ODRL 2.2 Validation Passed! Conforms to W3C specification.' });
+                setShaclFeedback({
+                    status: 'success',
+                    message: warnings.length > 0
+                        ? 'SHACL & ODRL 2.2 Validation Passed, with CDIF vocabulary warnings:'
+                        : 'SHACL & ODRL 2.2 Validation Passed! Conforms to W3C specification.',
+                    errors: warnings
+                });
             } else {
                 setShaclFeedback({
                     status: 'error',
                     message: 'Validation failed',
-                    errors: data.errors
+                    errors: [...data.errors, ...warnings]
                 });
             }
         },
@@ -493,7 +546,7 @@ export default function PolicyBuilder() {
             title: '',
             leftOperand: 'oac:Purpose',
             operator: 'odrl:isA',
-            rightOperand: 'dpv:IdentityVerification'
+            rightOperand: cdifPurposes[0]?.value || 'dpv:AcademicResearch'
         });
         setPermissions(next);
     };
@@ -509,6 +562,7 @@ export default function PolicyBuilder() {
         if (!next[pIndex].otherConstraints) next[pIndex].otherConstraints = [];
         next[pIndex].otherConstraints.push({
             title: '',
+            category: '',
             leftOperand: 'odrl:spatial',
             operator: 'odrl:eq',
             rightOperand: 'https://sws.geonames.org/2921044/'
@@ -649,6 +703,12 @@ export default function PolicyBuilder() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Suggestions for purpose right operands (CDIF CV2, DPV terms) */}
+            <datalist id="cdif-cv2-purposes">
+                {cdifPurposes.map(c => (
+                    <option key={c.id} value={c.value}>{c.label}</option>
+                ))}
+            </datalist>
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-6">
                 <div>
@@ -809,7 +869,7 @@ export default function PolicyBuilder() {
                             W3C ODRL 2.2 Core (https://www.w3.org/TR/odrl-vocab/#actionConcepts)
                         </option>
                         <option value="https://cdif.codata.org/odrl/v2.3">
-                            CDIF CODATA ODRL v2.3 Profile (https://cdif.codata.org/odrl/v2.3)
+                            CDIF CV1 Actions (https://odrl.codata.org/cv1/)
                         </option>
                     </select>
                 </div>
@@ -1162,7 +1222,9 @@ export default function PolicyBuilder() {
                                                         />
                                                         <input
                                                             type="text"
-                                                            placeholder="Right Operand"
+                                                            list="cdif-cv2-purposes"
+                                                            title="Purpose from CDIF CV2 (or any IRI)"
+                                                            placeholder="Purpose (CDIF CV2)"
                                                             value={c.rightOperand}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
@@ -1204,6 +1266,16 @@ export default function PolicyBuilder() {
                                                                 setPermissions(next);
                                                             }}
                                                             className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
+                                                        />
+                                                        <ConstraintTypeSelect
+                                                            value={c.category || ''}
+                                                            options={cdifConstraintTypes}
+                                                            onChange={(e) => {
+                                                                const next = [...permissions];
+                                                                next[pIdx].otherConstraints[cIdx].category = e.target.value;
+                                                                setPermissions(next);
+                                                            }}
+                                                            className="mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
                                                         />
                                                         <button
                                                             type="button"
@@ -2070,7 +2142,7 @@ export default function PolicyBuilder() {
                                     Select Action for {actionPickerTarget.type.charAt(0).toUpperCase() + actionPickerTarget.type.slice(1)} #{actionPickerTarget.index + 1}
                                 </h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Choose from available actions under <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400">{actionVocabProfile.includes('cdif') ? 'CDIF CODATA v2.3' : 'W3C ODRL 2.2 Core'}</span>
+                                    Choose from available actions under <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400">{actionVocabProfile.includes('cdif') ? 'CDIF CV1 Actions' : 'W3C ODRL 2.2 Core'}</span>
                                 </p>
                             </div>
                             <button
@@ -2105,7 +2177,7 @@ export default function PolicyBuilder() {
                                         W3C ODRL 2.2
                                     </option>
                                     <option value="https://cdif.codata.org/odrl/v2.3">
-                                        CDIF CODATA v2.3
+                                        CDIF CV1 Actions
                                     </option>
                                 </select>
                             </div>
@@ -2135,14 +2207,17 @@ export default function PolicyBuilder() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                         {filtered.map((act) => (
                                             <button
-                                                key={act.iri}
+                                                key={`${act.iri}|${act.name}`}
                                                 type="button"
                                                 onClick={() => selectActionForTarget(act.iri)}
                                                 className="text-left p-3 rounded-xl border border-gray-200 dark:border-white/10 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all group flex flex-col justify-between"
                                             >
                                                 <div>
                                                     <div className="flex items-center justify-between mb-1">
-                                                        <span className="font-mono text-xs font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                                        <span className={cn(
+                                                            "font-mono text-xs font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400",
+                                                            act.deprecated && "line-through opacity-60"
+                                                        )}>
                                                             {act.iri}
                                                         </span>
                                                         {act.category && (

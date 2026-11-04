@@ -40,6 +40,7 @@ RUN chmod 755 /usr/local/bin/oydid
 COPY tests /usr/src/app/tests
 COPY app /usr/src/app/app
 COPY cli /usr/src/app/cli
+COPY config /usr/src/app/config
 
 # Copy Frontend Build Artifacts
 # Copy to a location outside /usr/src/app to avoid volume masking
