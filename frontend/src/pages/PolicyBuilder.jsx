@@ -28,110 +28,115 @@ import { cn } from '../lib/utils';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
 const ODRL_OPERATORS = [
-    { value: 'odrl:eq', label: 'eq — equal to' },
-    { value: 'odrl:neq', label: 'neq — not equal to' },
-    { value: 'odrl:gt', label: 'gt — greater than' },
-    { value: 'odrl:gteq', label: 'gteq — greater than or equal' },
-    { value: 'odrl:lt', label: 'lt — less than' },
-    { value: 'odrl:lteq', label: 'lteq — less than or equal' },
-    { value: 'odrl:isA', label: 'isA — is an instance of' },
-    { value: 'odrl:hasPart', label: 'hasPart — contains' },
-    { value: 'odrl:isPartOf', label: 'isPartOf — is contained in' },
-    { value: 'odrl:isAllOf', label: 'isAllOf — is all of' },
-    { value: 'odrl:isAnyOf', label: 'isAnyOf — is any of' },
-    { value: 'odrl:isNoneOf', label: 'isNoneOf — is none of' },
+    { value: 'odrl:eq', label: 'eq (=)', description: 'equal to' },
+    { value: 'odrl:neq', label: 'neq (≠)', description: 'not equal to' },
+    { value: 'odrl:gt', label: 'gt (>)', description: 'greater than' },
+    { value: 'odrl:gteq', label: 'gteq (≥)', description: 'greater than or equal' },
+    { value: 'odrl:lt', label: 'lt (<)', description: 'less than' },
+    { value: 'odrl:lteq', label: 'lteq (≤)', description: 'less than or equal' },
+    { value: 'odrl:isA', label: 'isA', description: 'is an instance of' },
+    { value: 'odrl:hasPart', label: 'hasPart', description: 'contains' },
+    { value: 'odrl:isPartOf', label: 'isPartOf', description: 'is contained in' },
+    { value: 'odrl:isAllOf', label: 'isAllOf', description: 'is all of' },
+    { value: 'odrl:isAnyOf', label: 'isAnyOf', description: 'is any of' },
+    { value: 'odrl:isNoneOf', label: 'isNoneOf', description: 'is none of' },
 ];
 
 // ODRL 2.2 left operands (instances of odrl:LeftOperand) — https://www.w3.org/TR/odrl-vocab/#term-LeftOperand
 const ODRL_LEFT_OPERANDS = [
-    { value: 'odrl:absolutePosition', label: 'absolutePosition — absolute position of the asset' },
-    { value: 'odrl:absoluteSize', label: 'absoluteSize — absolute size of the asset' },
-    { value: 'odrl:absoluteSpatialPosition', label: 'absoluteSpatialPosition — absolute spatial position (e.g. pixels)' },
-    { value: 'odrl:absoluteTemporalPosition', label: 'absoluteTemporalPosition — absolute temporal position in a media stream' },
-    { value: 'odrl:count', label: 'count — number of times the action may be exercised' },
-    { value: 'odrl:dateTime', label: 'dateTime — date and time of exercising the action' },
-    { value: 'odrl:delayPeriod', label: 'delayPeriod — delay before exercising the action' },
-    { value: 'odrl:deliveryChannel', label: 'deliveryChannel — delivery channel used' },
-    { value: 'odrl:device', label: 'device — device used (deprecated: use systemDevice)' },
-    { value: 'odrl:elapsedTime', label: 'elapsedTime — elapsed time of exercising the action' },
-    { value: 'odrl:event', label: 'event — identified event' },
-    { value: 'odrl:fileFormat', label: 'fileFormat — file format' },
-    { value: 'odrl:industry', label: 'industry — industry sector' },
-    { value: 'odrl:language', label: 'language — natural language' },
-    { value: 'odrl:media', label: 'media — media type or category' },
-    { value: 'odrl:meteredTime', label: 'meteredTime — accumulated time of exercising the action' },
-    { value: 'odrl:payAmount', label: 'payAmount — amount of a financial payment' },
-    { value: 'odrl:percentage', label: 'percentage — percentage of the asset' },
-    { value: 'odrl:product', label: 'product — product or service category' },
-    { value: 'odrl:purpose', label: 'purpose — purpose of exercising the action' },
-    { value: 'odrl:recipient', label: 'recipient — party receiving the result' },
-    { value: 'odrl:relativePosition', label: 'relativePosition — relative position within the asset' },
-    { value: 'odrl:relativeSize', label: 'relativeSize — relative size of the asset' },
-    { value: 'odrl:relativeSpatialPosition', label: 'relativeSpatialPosition — relative spatial position' },
-    { value: 'odrl:relativeTemporalPosition', label: 'relativeTemporalPosition — relative temporal position' },
-    { value: 'odrl:resolution', label: 'resolution — rendering resolution' },
-    { value: 'odrl:spatial', label: 'spatial — named geospatial area' },
-    { value: 'odrl:spatialCoordinates', label: 'spatialCoordinates — geospatial coordinates' },
-    { value: 'odrl:system', label: 'system — system used (deprecated: use systemDevice)' },
-    { value: 'odrl:systemDevice', label: 'systemDevice — system or device used' },
-    { value: 'odrl:timeInterval', label: 'timeInterval — recurring period of time' },
-    { value: 'odrl:unitOfCount', label: 'unitOfCount — unit of measure for count' },
-    { value: 'odrl:version', label: 'version — version of the asset' },
-    { value: 'odrl:virtualLocation', label: 'virtualLocation — virtual (IT) location' },
+    { value: 'odrl:absolutePosition', label: 'absolutePosition', description: 'absolute position of the asset' },
+    { value: 'odrl:absoluteSize', label: 'absoluteSize', description: 'absolute size of the asset' },
+    { value: 'odrl:absoluteSpatialPosition', label: 'absoluteSpatialPosition', description: 'absolute spatial position (e.g. pixels)' },
+    { value: 'odrl:absoluteTemporalPosition', label: 'absoluteTemporalPosition', description: 'absolute temporal position in a media stream' },
+    { value: 'odrl:count', label: 'count', description: 'number of times the action may be exercised' },
+    { value: 'odrl:dateTime', label: 'dateTime', description: 'date and time of exercising the action' },
+    { value: 'odrl:delayPeriod', label: 'delayPeriod', description: 'delay before exercising the action' },
+    { value: 'odrl:deliveryChannel', label: 'deliveryChannel', description: 'delivery channel used' },
+    { value: 'odrl:device', label: 'device', description: 'device used (deprecated: use systemDevice)' },
+    { value: 'odrl:elapsedTime', label: 'elapsedTime', description: 'elapsed time of exercising the action' },
+    { value: 'odrl:event', label: 'event', description: 'identified event' },
+    { value: 'odrl:fileFormat', label: 'fileFormat', description: 'file format' },
+    { value: 'odrl:industry', label: 'industry', description: 'industry sector' },
+    { value: 'odrl:language', label: 'language', description: 'natural language' },
+    { value: 'odrl:media', label: 'media', description: 'media type or category' },
+    { value: 'odrl:meteredTime', label: 'meteredTime', description: 'accumulated time of exercising the action' },
+    { value: 'odrl:payAmount', label: 'payAmount', description: 'amount of a financial payment' },
+    { value: 'odrl:percentage', label: 'percentage', description: 'percentage of the asset' },
+    { value: 'odrl:product', label: 'product', description: 'product or service category' },
+    { value: 'odrl:purpose', label: 'purpose', description: 'purpose of exercising the action' },
+    { value: 'odrl:recipient', label: 'recipient', description: 'party receiving the result' },
+    { value: 'odrl:relativePosition', label: 'relativePosition', description: 'relative position within the asset' },
+    { value: 'odrl:relativeSize', label: 'relativeSize', description: 'relative size of the asset' },
+    { value: 'odrl:relativeSpatialPosition', label: 'relativeSpatialPosition', description: 'relative spatial position' },
+    { value: 'odrl:relativeTemporalPosition', label: 'relativeTemporalPosition', description: 'relative temporal position' },
+    { value: 'odrl:resolution', label: 'resolution', description: 'rendering resolution' },
+    { value: 'odrl:spatial', label: 'spatial', description: 'named geospatial area' },
+    { value: 'odrl:spatialCoordinates', label: 'spatialCoordinates', description: 'geospatial coordinates' },
+    { value: 'odrl:system', label: 'system', description: 'system used (deprecated: use systemDevice)' },
+    { value: 'odrl:systemDevice', label: 'systemDevice', description: 'system or device used' },
+    { value: 'odrl:timeInterval', label: 'timeInterval', description: 'recurring period of time' },
+    { value: 'odrl:unitOfCount', label: 'unitOfCount', description: 'unit of measure for count' },
+    { value: 'odrl:version', label: 'version', description: 'version of the asset' },
+    { value: 'odrl:virtualLocation', label: 'virtualLocation', description: 'virtual (IT) location' },
 ];
 
-function LeftOperandSelect({ value, ...props }) {
-    const known = ODRL_LEFT_OPERANDS.some(o => o.value === value);
+// Compact select for ODRL terms: short names in the list, the description as tooltip.
+function TermSelect({ value, terms, name, placeholder, ...props }) {
+    const selected = terms.find(o => o.value === value);
     return (
-        <select value={value || ''} title="Left operand" {...props}>
-            <option value="" disabled>Left operand…</option>
-            {!known && value && <option value={value}>{value} (non-standard)</option>}
-            {ODRL_LEFT_OPERANDS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+        <select
+            value={value || ''}
+            title={selected ? `${name}: ${selected.value} — ${selected.description}`
+                : value ? `${name}: ${value} (not an ODRL 2.2 term)` : name}
+            {...props}
+        >
+            {placeholder && <option value="" disabled>{placeholder}</option>}
+            {!selected && value && <option value={value}>{value}</option>}
+            {terms.map(o => (
+                <option key={o.value} value={o.value} title={o.description}>{o.label}</option>
             ))}
         </select>
     );
 }
 
-function OperatorSelect({ value, ...props }) {
-    const known = ODRL_OPERATORS.some(o => o.value === value);
-    return (
-        <select value={value} title="Operator" {...props}>
-            {!known && value && <option value={value}>{value} (non-standard)</option>}
-            {ODRL_OPERATORS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-        </select>
-    );
-}
+const LeftOperandSelect = (props) => (
+    <TermSelect terms={ODRL_LEFT_OPERANDS} name="Left operand" placeholder="Left operand…" {...props} />
+);
+const OperatorSelect = (props) => <TermSelect terms={ODRL_OPERATORS} name="Operator" {...props} />;
+const termLabel = (terms, value) => terms.find(o => o.value === value)?.label || value || '—';
 
 // "AcademicResearch" / "Non-Commercial Research" -> "Academic Research" / "Non Commercial Research"
 const humanize = (label) => label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-// Order CDIF CV2 purposes as a tree (depth-first). A purpose with several parents is shown
-// once, under the parent that has the most children (e.g. Commercial Research under R&D).
-function purposeTree(concepts) {
+// Group CDIF CV2 purposes for the dropdown: each top-level purpose that has narrower purposes
+// becomes a heading (itself + its descendants); top-level leaves go under "Other purposes".
+// A purpose with several parents is listed once, under the parent with the most children
+// (e.g. Commercial Research under Research And Development).
+function purposeGroups(concepts) {
     const children = {};
     concepts.forEach(c => (c.broader || []).forEach(b => { (children[b] ||= []).push(c); }));
     const primaryParent = (c) => [...(c.broader || [])]
         .sort((a, b) => (children[b]?.length || 0) - (children[a]?.length || 0))[0];
-    const out = [];
-    const walk = (c, depth) => {
-        out.push({ c, depth });
-        (children[c.id] || [])
-            .filter(k => primaryParent(k) === c.id)
-            .sort((a, b) => a.label.localeCompare(b.label))
-            .forEach(k => walk(k, depth + 1));
-    };
-    concepts.filter(c => !(c.broader || []).length).forEach(r => walk(r, 0));
-    return out;
+    const kidsOf = (c) => (children[c.id] || [])
+        .filter(k => primaryParent(k) === c.id)
+        .sort((a, b) => a.label.localeCompare(b.label));
+    const descendants = (c) => kidsOf(c).flatMap(k => [k, ...descendants(k)]);
+
+    const roots = concepts.filter(c => !(c.broader || []).length);
+    const tops = roots.flatMap(kidsOf);
+    const groups = tops.filter(t => kidsOf(t).length > 0)
+        .map(t => ({ label: humanize(t.label), items: [{ c: t, text: `${humanize(t.label)} (any)` },
+            ...descendants(t).map(c => ({ c, text: humanize(c.label) }))] }));
+    const leaves = tops.filter(t => kidsOf(t).length === 0);
+    if (leaves.length) groups.push({ label: 'Other purposes', items: leaves.map(c => ({ c, text: humanize(c.label) })) });
+    return { roots, groups };
 }
 
 const OTHER_PURPOSE = '__other__';
 
 // Purpose (right operand) picker backed by CDIF CV2; "Other" allows any IRI.
 function PurposeSelect({ value, concepts, onChange }) {
-    const tree = useMemo(() => purposeTree(concepts), [concepts]);
+    const { roots, groups } = useMemo(() => purposeGroups(concepts), [concepts]);
     const known = concepts.find(c => c.value === value);
     const [customMode, setCustomMode] = useState(false);
     const showCustom = customMode || (!!value && !known);
@@ -152,11 +157,15 @@ function PurposeSelect({ value, concepts, onChange }) {
                 className={selectCls}
             >
                 <option value="" disabled>{concepts.length ? 'Select a purpose…' : 'Loading CDIF purposes…'}</option>
-                {tree.map(({ c, depth }) => (
-                    <option key={c.id} value={c.value} title={c.definition || ''}>
-                        {'\u00A0\u00A0\u00A0'.repeat(depth)}{depth > 0 ? '↳ ' : ''}
-                        {depth === 0 ? `Any purpose (${humanize(c.label)})` : humanize(c.label)}
-                    </option>
+                {roots.map(c => (
+                    <option key={c.id} value={c.value} title={c.definition || ''}>Any purpose</option>
+                ))}
+                {groups.map(g => (
+                    <optgroup key={g.label} label={g.label}>
+                        {g.items.map(({ c, text }) => (
+                            <option key={c.id} value={c.value} title={c.definition || ''}>{text}</option>
+                        ))}
+                    </optgroup>
                 ))}
                 <option value={OTHER_PURPOSE}>Other (enter an IRI)…</option>
             </select>
@@ -1340,31 +1349,40 @@ export default function PolicyBuilder() {
                                                                 <Trash2 size={13} />
                                                             </button>
                                                         </div>
-                                                        <details className="group">
-                                                            <summary className="cursor-pointer select-none text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                                                                Constraint details{' '}
-                                                                <span className="font-mono text-gray-400">
-                                                                    {c.leftOperand} {(c.operator || '').replace('odrl:', '')} {c.rightOperand}
+                                                        <details className="group border-t border-gray-100 dark:border-white/5 pt-2">
+                                                            <summary className="cursor-pointer select-none flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                                                <span className="font-semibold">Advanced</span>
+                                                                <span className="truncate font-mono text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">
+                                                                    {termLabel(ODRL_LEFT_OPERANDS, c.leftOperand)} · {termLabel(ODRL_OPERATORS, c.operator)}
                                                                 </span>
                                                             </summary>
-                                                            <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Title (dcterms:title)"
-                                                                    value={c.title}
-                                                                    onChange={(e) => update('title', e.target.value)}
-                                                                    className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                                />
-                                                                <LeftOperandSelect
-                                                                    value={c.leftOperand}
-                                                                    onChange={(e) => update('leftOperand', e.target.value)}
-                                                                    className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                                />
-                                                                <OperatorSelect
-                                                                    value={c.operator}
-                                                                    onChange={(e) => update('operator', e.target.value)}
-                                                                    className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                                />
+                                                            <div className="mt-2 grid grid-cols-2 gap-2">
+                                                                <label className="space-y-1">
+                                                                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Left operand</span>
+                                                                    <LeftOperandSelect
+                                                                        value={c.leftOperand}
+                                                                        onChange={(e) => update('leftOperand', e.target.value)}
+                                                                        className="w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
+                                                                    />
+                                                                </label>
+                                                                <label className="space-y-1">
+                                                                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Operator</span>
+                                                                    <OperatorSelect
+                                                                        value={c.operator}
+                                                                        onChange={(e) => update('operator', e.target.value)}
+                                                                        className="w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
+                                                                    />
+                                                                </label>
+                                                                <label className="col-span-2 space-y-1">
+                                                                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Title (dcterms:title)</span>
+                                                                    <input
+                                                                        type="text"
+                                                                        placeholder="e.g. Purpose for access is academic research"
+                                                                        value={c.title}
+                                                                        onChange={(e) => update('title', e.target.value)}
+                                                                        className="w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
+                                                                    />
+                                                                </label>
                                                             </div>
                                                         </details>
                                                     </div>
