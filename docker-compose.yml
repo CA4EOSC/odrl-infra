@@ -5,15 +5,16 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-        - REDIRECT_URI=${REDIRECT_URI}
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+        - VITE_REDIRECT_URI=${VITE_REDIRECT_URI}
+        - VITE_ORCID_CLIENT_ID=${VITE_ORCID_CLIENT_ID}
     volumes:
       - .:/usr/src/app
     ports:
       - "8001:8001"
     environment:
       - QDRANT_HOST=qdrant
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
     depends_on:
       - qdrant
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload

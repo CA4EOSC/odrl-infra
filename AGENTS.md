@@ -85,6 +85,21 @@ When creating a DID through `/api/did/create`, the response includes:
 -   **Key Management**: Never leak the `private_key` of a Restricted DID.
 -   **TTL Strategy**: Use short-lived VCs (1-4 hours) for high-risk operations and longer-lived ones (24 hours) for routine tasks.
 
+## 5. Agent Authentication & OAuth Flow
+
+The ODRL Infrastructure supports decentralized identity verification via OAuth 2.0 and OpenID Connect (OIDC) providers like Google and ORCID. This allows agents to seamlessly anchor their Web2 identities to their Web3 DIDs.
+
+### Workflow: OAuth Identity Proofing
+1. **Initiation**: The frontend opens a popup or redirects to the identity provider's authorization endpoint, requesting `openid`, `profile`, and `email` scopes.
+2. **Callback Handling**: After successful authentication, the provider redirects the user back to the application's callback URL (`/auth/:provider/callback`). The response contains an `id_token` (JWT containing profile data) and an `access_token` within the URL hash.
+3. **Cross-Window Communication**:
+   - If opened in a popup, the callback page uses `window.opener.postMessage` to securely transmit the tokens back to the main application window before automatically closing.
+   - If the popup is blocked or the user navigates directly, the system uses a robust fallback mechanism, storing the tokens in `localStorage` (`oauth_fallback`) and redirecting to the wallet interface.
+4. **Backend Verification**: To issue an identity Verifiable Credential (VC), the client submits the tokens to the backend (`/api/vc/google` or `/api/vc/orcid`):
+   - **Google**: The backend cryptographically verifies the `id_token` signature and audience using Google's public keys.
+   - **ORCID**: The backend calls the ORCID `/oauth/userinfo` endpoint using the provided `access_token` to validate the identity claim.
+5. **Credential Issuance**: Upon successful verification, the backend issues an immutable Verifiable Credential anchoring the user's identity (e.g., ORCID iD or Google Email) to their locally managed DID.
+
 ## References
 
 -   Vyacheslav Tykhonov, Anton Polishko, Artur Kiulian, and Maksym Komar. (2020). **CoronaWhy: Building a Distributed, Credible and Scalable Research and Data Infrastructure for Open Science**. SciNLP workshop at AKBC 2020. [https://doi.org/10.5281/zenodo.3922256](https://doi.org/10.5281/zenodo.3922256)
