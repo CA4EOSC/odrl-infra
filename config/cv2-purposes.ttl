@@ -1,0 +1,188 @@
+@prefix cv2: <https://w3id.org/cdif/access/purpose/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dpv: <https://w3id.org/dpv#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cv2:AcademicResearch a skos:Concept ;
+    skos:broader cv2:ResearchAndDevelopment ;
+    skos:definition "Purposes associated with conducting or assisting with research conducted in an academic context e.g. within universities"@en ;
+    skos:exactMatch dpv:AcademicResearch ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "AcademicResearch"@en .
+
+cv2:AccountManagement a skos:Concept ;
+    skos:broader cv2:ServiceProvision ;
+    skos:definition "Account Management refers to purposes associated with account management, such as to create, provide, maintain, and manage accounts"@en ;
+    skos:exactMatch dpv:AccountManagement ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "AccountManagement"@en .
+
+cv2:Advertising a skos:Concept ;
+    skos:broader cv2:Marketing ;
+    skos:definition "Purposes associated with conducting advertising i.e. process or artefact used to call attention to a product, service, etc. through announcements, notices, or other forms of communication"@en ;
+    skos:exactMatch dpv:Advertising ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "Advertising"@en .
+
+cv2:CommunicationManagement a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Communication Management refers to purposes associated with providing or managing communication activities e.g. to send an email for notifying some information"@en ;
+    skos:exactMatch dpv:CommunicationManagement ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "CommunicationManagement"@en .
+
+cv2:CustomerManagement a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Customer Management refers to purposes associated with managing activities related with past, current, and future customers"@en ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:CustomerManagement ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "CustomerManagement"@en .
+
+cv2:EnforceSecurity a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with ensuring and enforcing security for data, personnel, or other related matters"@en ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:EnforceSecurity ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "EnforceSecurity"@en .
+
+cv2:HumanResourceManagement a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with managing humans and 'human resources' within the organisation for effective and efficient operations."@en ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:HumanResourceManagement ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "HumanResourceManagement"@en .
+
+cv2:OrganisationGovernance a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:OrganisationGovernance ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "OrganisationGovernance"@en .
+
+cv2:Personalisation a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Personalisation ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "Personalisation"@en .
+
+cv2:PublicBenefit a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:PublicBenefit ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "PublicBenefit"@en .
+
+cv2:RecordManagement a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:RecordManagement ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "RecordManagement"@en .
+
+cv2:ScientificResearch a skos:Concept ;
+    skos:broader cv2:ResearchAndDevelopment ;
+    skos:definition "Purposes associated with scientific research"@en ;
+    skos:exactMatch dpv:ScientificResearch ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "Scientific Research"@en .
+
+cv2:VendorManagement a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:VendorManagement ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "VendorManagement"@en .
+
+cv2:CommercialPurpose a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with processing activities performed in a commercial setting or with intention to commercialise"@en ;
+    skos:exactMatch dpv:CommercialPurpose ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:narrower cv2:CommercialResearch ;
+    skos:prefLabel "CommercialPurpose"@en .
+
+cv2:CommercialResearch a skos:Concept ;
+    skos:broader cv2:CommercialPurpose,
+        cv2:ResearchAndDevelopment ;
+    skos:definition "Purposes associated with conducting research in a commercial setting or with intention to commercialise e.g. in a company or sponsored by a company"@en ;
+    skos:exactMatch dpv:CommercialResearch ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "Commercial Research"@en .
+
+cv2:Marketing a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with marketing, advertising, and promotional activities."@en ;
+    skos:exactMatch dpv:Marketing ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:narrower cv2:Advertising ;
+    skos:prefLabel "Marketing"@en .
+
+cv2:NonCommercialPurpose a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with processing activities performed in a non-commercial setting or without intention to commercialise"@en ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:NonCommercialPurpose ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:narrower cv2:NonCommercialResearch ;
+    skos:prefLabel "NonCommercialPurpose"@en .
+
+cv2:NonCommercialResearch a skos:Concept ;
+    skos:broader cv2:NonCommercialPurpose,
+        cv2:ResearchAndDevelopment ;
+    skos:definition "Purposes associated with conducting research in a non-commercial setting e.g. for a non-profit-organisation (NGO)"@en ;
+    skos:exactMatch dpv:NonCommercialResearch ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:prefLabel "Non-Commercial Research"@en .
+
+cv2:ServiceProvision a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with the provision of a service or product."@en ;
+    skos:exactMatch dpv:ServiceProvision ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:narrower cv2:AccountManagement ;
+    skos:prefLabel "ServiceProvision"@en .
+
+cv2:ResearchAndDevelopment a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:definition "Purposes associated with conducting research and development for new methods, products, or services"@en ;
+    skos:exactMatch dpv:ResearchAndDevelopment ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:narrower cv2:AcademicResearch,
+        cv2:CommercialResearch,
+        cv2:NonCommercialResearch,
+        cv2:ScientificResearch ;
+    skos:prefLabel "ResearchAndDevelopment"@en .
+
+cv2:Purpose a skos:Concept ;
+    skos:definition "The end-goal or reason for which personal data is processed."@en ;
+    skos:exactMatch dpv:Purpose ;
+    skos:inScheme <https://w3id.org/cdif/access/purpose> ;
+    skos:narrower cv2:CommercialPurpose,
+        cv2:CommunicationManagement,
+        cv2:CustomerManagement,
+        cv2:EnforceSecurity,
+        cv2:HumanResourceManagement,
+        cv2:Marketing,
+        cv2:NonCommercialPurpose,
+        cv2:OrganisationGovernance,
+        cv2:Personalisation,
+        cv2:PublicBenefit,
+        cv2:RecordManagement,
+        cv2:ResearchAndDevelopment,
+        cv2:ServiceProvision,
+        cv2:VendorManagement ;
+    skos:prefLabel "Purpose"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/purpose> .
+
+<https://w3id.org/cdif/access/purpose> a skos:ConceptScheme ;
+    dct:created "2026-11-04"^^xsd:date ;
+    dct:description "Purposes used as constraints on CDIF actions, re-using Data Privacy Vocabulary (DPV) purpose concepts."@en ;
+    dct:source <https://w3id.org/dpv/modules/purposes> ;
+    dct:title "CDIF Purpose Constraints (CV2)"@en ;
+    skos:hasTopConcept cv2:Purpose .
+
