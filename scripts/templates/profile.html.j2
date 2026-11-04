@@ -1,0 +1,287 @@
+{#-
+  ReSpec template for the documentation of the ODRL profile.
+
+  scripts/build_profile_docs.py fills in this template with the data in the
+  profile's Turtle file and writes the result next to it (docs/profile.html).
+    * Change the profile itself (labels, definitions, metadata) in the Turtle file.
+    * Change the wording or layout of the document here. Places for hand-written
+      text are marked "EDIT". Template syntax: https://jinja.palletsprojects.com/templates/
+    * Then run:  python scripts/build_profile_docs.py
+-#}
+{%- macro ref(r) -%}
+  {%- if r.tbd -%}<span class="tbd"{% if r.title %} title="{{ r.title }}"{% endif %}>{{ r.text }}</span>
+  {%- elif r.href -%}<a href="{{ r.href }}"{% if r.title %} title="{{ r.title }}"{% endif %}>{% if r.code %}<code>{{ r.text }}</code>{% else %}{{ r.text }}{% endif %}</a>
+  {%- elif r.code -%}<code{% if r.title %} title="{{ r.title }}"{% endif %}>{{ r.text }}</code>
+  {%- else -%}{{ r.text | text }}
+  {%- endif -%}
+{%- endmacro -%}
+{%- macro refs(items) -%}
+  {%- for r in items -%}{{ ref(r) }}{% if not loop.last %}{% if r.code or r.href %}, {% else %}<br>{% endif %}{% endif %}{%- endfor -%}
+{%- endmacro -%}
+{%- macro tbd(label="TBD") -%}<span class="tbd">{{ label }}</span>{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ profile.title }}</title>
+  <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+  <script class="remove">
+    // Generated from {{ source.display }} by scripts/build_profile_docs.py
+    var respecConfig = {{ respec_config | tojson(indent=2) | indent(4) }};
+  </script>
+  <style>
+    /* Colours are translucent so that they also work with ReSpec's dark mode. */
+    table.def { width: 100%; border-collapse: collapse; margin: .5em 0 1.5em; }
+    table.def th, table.def td { border: 1px solid rgba(127, 127, 127, .35); padding: .35em .6em;
+                                 text-align: left; vertical-align: top; }
+    table.def th { width: 9em; background: rgba(0, 90, 156, .08); font-weight: 600; white-space: nowrap; }
+    table.terms { width: 100%; }
+    table.terms td:first-child { white-space: nowrap; }
+    table.terms tr.deprecated td:first-child code { text-decoration: line-through; }
+    table.overview td:not(:first-child), table.overview th:not(:first-child) { text-align: right; }
+    .tbd { color: #b25e00; font-style: italic; }
+    .badge { display: inline-block; padding: 0 .45em; border: 1px solid currentColor; border-radius: .7em;
+             font-size: .75em; line-height: 1.5; white-space: nowrap; vertical-align: .1em; }
+    tr.deprecated .badge { color: #c62828; }
+    tr.not-defined .badge { color: #b25e00; }
+    input.term-filter { width: min(100%, 24em); padding: .3em .5em; font: inherit; }
+  </style>
+</head>
+<body>
+<!--
+  GENERATED FILE - do not edit by hand.
+  Built by scripts/build_profile_docs.py from {{ source.display }} and scripts/templates/profile.html.j2.
+-->
+
+<section id="abstract">
+{% if profile.abstract %}
+  <p>{{ profile.abstract | text }}</p>
+{% else %}
+  <p>{{ tbd("No abstract yet: add dcterms:abstract to the profile.") }}</p>
+{% endif %}
+</section>
+
+{# ReSpec moves this paragraph into the header (instead of its W3C copyright notice). #}
+<p class="copyright">
+  {%- if profile.rights_holder %}Copyright &copy; {{ profile.date[:4] if profile.date else "" }} {{ profile.rights_holder }}. {% endif %}
+  {%- if profile.license_href %}This document is licensed under <a rel="license" href="{{ profile.license_href }}">{{ profile.license_label }}</a>.
+  {%- elif profile.license_label %}License: {{ profile.license_label }}.{% endif %}
+  {%- if profile.rights %} {{ profile.rights | text }}{% endif -%}
+</p>
+
+{# class="override" stops ReSpec from adding W3C status boilerplate. #}
+<section id="sotd" class="override">
+  <h2>Status of This Document</h2>
+  <p>
+    This document describes {% if profile.version %}version {{ profile.version }} of {% endif %}the {{ profile.title }}
+    {%- if profile.status %} (status: <strong>{{ profile.status }}</strong>){% endif %}.
+    It is generated from the profile's Turtle file, <a href="{{ source.href }}">{{ source.name }}</a>.
+  </p>
+{% if github %}
+  <p>Comments and suggestions are welcome as <a href="https://github.com/{{ github }}/issues">GitHub issues</a>.</p>
+{% endif %}
+  {# EDIT: add more about the status of the profile here. #}
+</section>
+
+<section id="introduction">
+  <h2>Introduction</h2>
+{% if profile.description %}
+  <p>{{ profile.description | text }}</p>
+{% endif %}
+  <p>
+    The <em>{{ profile.title }}</em> is an ODRL profile [[ODRL-MODEL]] identified by <code>{{ profile.iri }}</code>
+    {%- if profile.profile_of %}. It is a profile of the {% for p in profile.profile_of %}<a href="{{ p.iri }}">{{ p.label }}</a>{% if not loop.last %} and the {% endif %}{% endfor %}{% endif %}.
+    Following the ODRL Profile Best Practices [[ODRL-PROFILE-BP]], the concepts it uses are organised in SKOS
+    collections [[SKOS-REFERENCE]] (see <a href="#vocabulary"></a>) and the terms it defines are specified in
+    <a href="#terms"></a>.
+  </p>
+  {# EDIT: add hand-written introduction text here (motivation, scope, a diagram of the profile, ...). #}
+
+{% if collections %}
+  <section id="summary">
+    <h3>Overview</h3>
+    {% set any_undefined = collections | selectattr("undefined") | list %}
+    <table class="simple overview">
+      <thead>
+        <tr><th>Collection</th><th>Members</th><th>Defined by this profile</th><th>Adopted</th>{% if any_undefined %}<th>Not defined yet</th>{% endif %}</tr>
+      </thead>
+      <tbody>
+{% for c in collections %}
+        <tr>
+          <td><a href="#{{ c.id }}">{{ c.title }}</a></td>
+          <td>{{ c.total }}</td>
+          <td>{{ c.local }}</td>
+          <td>{% for name, n in c.adopted.items() %}{{ n }} {{ name }}{% if not loop.last %}, {% endif %}{% else %}0{% endfor %}</td>
+{% if any_undefined %}
+          <td>{{ c.undefined }}</td>
+{% endif %}
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endif %}
+
+  <section id="namespaces">
+    <h3>Namespaces</h3>
+    <p>This document uses the following namespace prefixes.</p>
+    <table class="simple">
+      <thead><tr><th>Prefix</th><th>Namespace</th><th>Description</th></tr></thead>
+      <tbody>
+{% for n in namespaces %}
+        <tr>
+          <td><code>{{ n.prefix }}</code></td>
+          <td><code>{{ n.namespace }}</code></td>
+          <td>{% if n.href %}<a href="{{ n.href }}">{{ n.description }}</a>{% else %}{{ n.description }}{% endif %}{% if n.ref %} [[{{ n.ref }}]]{% endif %}</td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+{% if resources %}
+  <section id="resources">
+    <h3>Profile resources</h3>
+    <p>
+      The profile is described with the Profiles Vocabulary [[DX-PROF]] and has the following resources.
+    </p>
+    <table class="simple">
+      <thead><tr><th>Resource</th><th>Role</th><th>Artifact</th><th>Format</th><th>Conforms to</th></tr></thead>
+      <tbody>
+{% for r in resources %}
+        <tr>
+          <td>{{ r.title }}{% if r.description %}<br>{{ r.description | text }}{% endif %}</td>
+          <td>{{ r.roles | join(", ") }}</td>
+          <td>{% if r.artifacts %}{{ refs(r.artifacts) }}{% else %}{{ tbd() }}{% endif %}</td>
+          <td>{{ r.formats | join(", ") }}</td>
+          <td>{{ refs(r.conforms_to) }}</td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endif %}
+</section>
+{% if conformance %}
+
+{# Added when definitions use RFC 2119 key words (MUST, SHOULD, ...); ReSpec writes the text. #}
+<section id="conformance">
+</section>
+{% endif %}
+
+<section id="vocabulary">
+  <h2>Profile vocabulary</h2>
+  <p>
+    Every concept used by this profile is a member of one of the SKOS collections below, whether this profile
+    defines it or adopts it from another vocabulary
+    {%- if vocabularies %} ({% for v in vocabularies %}{% if v.url %}<a href="{{ v.url }}">{{ v.name }}</a>{% else %}{{ v.name }}{% endif %}{% if v.ref %} [[{{ v.ref }}]]{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}){% endif %}.
+    Terms defined by this profile link to their definition in <a href="#terms"></a>; adopted terms link to the
+    documentation of their source vocabulary.
+  </p>
+{% for c in collections %}
+
+  <section id="{{ c.id }}">
+    <h3>{{ c.title }}</h3>
+    <p>
+      The collection <code title="{{ c.iri }}">{{ c.qname }}</code>
+      {%- if c.label and c.label != c.title %} (&ldquo;{{ c.label }}&rdquo;){% endif %} has {{ c.total }} members:
+      {{ c.local }} defined by this profile
+      {%- for name, n in c.adopted.items() %}, {{ n }} from {{ name }}{% endfor %}
+      {%- if c.undefined %}, and {{ c.undefined }} not defined yet{% endif %}.
+    </p>
+{% if c.scope_note %}
+    <p>{{ c.scope_note | text }}</p>
+{% endif %}
+{% if c.definition %}
+    <p>{{ c.definition | text }}</p>
+{% endif %}
+{% if c.rows | length > 15 %}
+    <p><input type="search" class="term-filter" data-table="table-{{ c.id }}" placeholder="Filter the {{ c.total }} terms" aria-label="Filter the terms of {{ c.title }}"></p>
+{% endif %}
+    <table class="simple terms" id="table-{{ c.id }}">
+      <thead><tr><th>Term</th><th>Label</th><th>Definition</th><th>Source</th></tr></thead>
+      <tbody>
+{% for r in c.rows %}
+        <tr{% if r.status %} class="{{ r.status | replace(' ', '-') }}"{% endif %}>
+          <td>{{ ref(r.term) }}</td>
+          <td>{% if r.label %}{{ r.label }}{% elif r.local %}{{ tbd() }}{% endif %}</td>
+          <td>
+            {%- if r.definition %}{{ r.definition | text }}{% elif r.local and not r.status %}{{ tbd() }}{% endif %}
+            {%- if r.status %} <span class="badge">{{ r.status }}</span>{% endif %}
+            {%- if r.replaced_by %} Use {{ refs(r.replaced_by) }} instead.{% endif -%}
+          </td>
+          <td>{{ ref(r.source) }}</td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endfor %}
+</section>
+
+<section id="terms">
+  <h2>Terms defined by this profile</h2>
+{% if term_groups %}
+  <p>
+    This section specifies the {{ term_count }} terms defined by this profile, in the
+    namespace{% if term_namespaces | length > 1 %}s{% endif %}
+    {% for n in term_namespaces %}<code>{{ n.namespace }}</code>{% if n.prefix %} (prefix <code>{{ n.prefix }}:</code>){% endif %}{% if not loop.last %} and {% endif %}{% endfor %}.
+  </p>
+{% for group in term_groups %}
+
+  <section id="{{ group.id }}">
+    <h3>{{ group.title }}</h3>
+{% for t in group.terms %}
+    <section id="{{ t.id }}">
+      <h4>{{ t.heading }}</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td>{% if t.label %}{{ t.label }}{% else %}{{ tbd() }}{% endif %}{% if t.alt_labels %} (also: {{ t.alt_labels | join(", ") }}){% endif %}</td></tr>
+          <tr><th>IRI:</th><td><code>{{ t.iri }}</code></td></tr>
+          <tr><th>Definition:</th><td>{% if t.definition %}{{ t.definition | text }}{% else %}{{ tbd() }}{% endif %}</td></tr>
+{% for title, values in t.rows %}
+          <tr><th>{{ title }}:</th><td>{{ refs(values) }}</td></tr>
+{% endfor %}
+        </tbody>
+      </table>
+    </section>
+{% endfor %}
+  </section>
+{% endfor %}
+{% else %}
+  <p>This profile does not define terms of its own; it adopts all its concepts from other vocabularies.</p>
+{% endif %}
+</section>
+{% if examples %}
+
+<section id="examples">
+  <h2>Examples</h2>
+  <p>These example policies use this profile.</p>
+{% for ex in examples %}
+  <pre class="example {{ ex.css }}" title="{{ ex.title }} ({{ ex.file }})">{{ ex.content }}</pre>
+{% endfor %}
+</section>
+{% endif %}
+
+{# EDIT: appendices go here, for example:
+<section class="appendix" id="acknowledgements">
+  <h2>Acknowledgements</h2>
+  <p>...</p>
+</section>
+#}
+<script>
+  // Filters the long term tables (stays in the published document).
+  document.addEventListener("input", function (event) {
+    var box = event.target;
+    if (!box.classList || !box.classList.contains("term-filter")) return;
+    var table = document.getElementById(box.getAttribute("data-table"));
+    if (!table) return;
+    var query = box.value.trim().toLowerCase();
+    Array.prototype.forEach.call(table.tBodies[0].rows, function (row) {
+      row.hidden = query !== "" && row.textContent.toLowerCase().indexOf(query) === -1;
+    });
+  });
+</script>
+</body>
+</html>

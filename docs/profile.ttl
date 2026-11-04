@@ -304,7 +304,7 @@ cdif-access:View a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 cdif-access:purposeCollection a skos:Collection ;
     skos:prefLabel "ODRL CDIF Access profile - purpose concepts"@en ;
     skos:scopeNote ""@en ;
-    skos:member dpv:purpose ;
+    skos:member odrl:purpose ;
 	skos:member dpv:AcademicResearch ;
 	skos:member dpv:AccountManagement ;
 	skos:member dpv:Advertising ;
@@ -323,5 +323,5 @@ cdif-access:purposeCollection a skos:Collection ;
 	skos:member dpv:ServiceProvision ;
 	skos:member dpv:VendorManagement ;
 	skos:member dpv:CommercialResearch ;
-	skos:member dpv:Non-CommercialResearch  ;
+	skos:member dpv:NonCommercialResearch  ;
 	skos:member dpv:ScientificResearch .

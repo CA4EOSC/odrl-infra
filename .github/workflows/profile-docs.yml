@@ -1,0 +1,81 @@
+name: Profile documentation
+
+# Rebuilds docs/profile.html from docs/profile.ttl with scripts/build_profile_docs.py.
+# On main, the rebuilt file is committed back to the repository. On pull requests,
+# it is built as a check and uploaded as an artifact so reviewers can preview it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/profile.ttl
+      - docs/examples/**
+      - scripts/build_profile_docs.py
+      - scripts/templates/**
+      - scripts/requirements-docs.txt
+      - .github/workflows/profile-docs.yml
+  pull_request:
+    paths:
+      - docs/profile.ttl
+      - docs/examples/**
+      - scripts/build_profile_docs.py
+      - scripts/templates/**
+      - scripts/requirements-docs.txt
+      - .github/workflows/profile-docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements-docs.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements-docs.txt
+
+      # Add --strict to make the job fail while the profile check reports issues.
+      - name: Build docs/profile.html
+        shell: bash
+        run: |
+          python scripts/build_profile_docs.py | tee "$RUNNER_TEMP/build-log.txt"
+          {
+            echo "### Profile documentation"
+            echo '```'
+            cat "$RUNNER_TEMP/build-log.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload preview
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: profile-html-preview
+          path: docs/profile.html
+
+      - name: Commit the rebuilt documentation
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain -- docs/profile.html)" ]; then
+            echo "docs/profile.html is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/profile.html
+          git commit -m "docs: rebuild profile documentation from docs/profile.ttl"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"

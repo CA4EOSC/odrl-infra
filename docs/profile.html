@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ODRL Profile for CDIF Access</title>
+  <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+  <script class="remove">
+    // Generated from docs/profile.ttl by scripts/build_profile_docs.py
+    var respecConfig = {
+      "specStatus": "base",
+      "shortName": "cdif-access",
+      "latestVersion": "https://w3id.org/cdif/access",
+      "editors": [
+        {
+          "name": "Author/Contributor"
+        }
+      ],
+      "otherLinks": [
+        {
+          "key": "Version:",
+          "data": [
+            {
+              "value": "0.1"
+            }
+          ]
+        },
+        {
+          "key": "Status:",
+          "data": [
+            {
+              "value": "Draft"
+            }
+          ]
+        },
+        {
+          "key": "Profile of:",
+          "data": [
+            {
+              "value": "ODRL 2.2 Core Profile",
+              "href": "http://www.w3.org/ns/odrl/2/core"
+            }
+          ]
+        },
+        {
+          "key": "Namespace:",
+          "data": [
+            {
+              "value": "https://w3id.org/cdif/access#",
+              "href": "https://w3id.org/cdif/access#"
+            }
+          ]
+        },
+        {
+          "key": "Preferred prefix:",
+          "data": [
+            {
+              "value": "cdif-access"
+            }
+          ]
+        },
+        {
+          "key": "Download serialization:",
+          "data": [
+            {
+              "value": "Turtle",
+              "href": "profile.ttl"
+            }
+          ]
+        },
+        {
+          "key": "Publisher:",
+          "data": [
+            {
+              "value": "Publisher"
+            }
+          ]
+        },
+        {
+          "key": "Participate:",
+          "data": [
+            {
+              "value": "GitHub CDIF4EOSC/odrl-infra",
+              "href": "https://github.com/CDIF4EOSC/odrl-infra"
+            },
+            {
+              "value": "File an issue",
+              "href": "https://github.com/CDIF4EOSC/odrl-infra/issues/new"
+            },
+            {
+              "value": "Commit history",
+              "href": "https://github.com/CDIF4EOSC/odrl-infra/commits/main/docs/profile.ttl"
+            },
+            {
+              "value": "Pull requests",
+              "href": "https://github.com/CDIF4EOSC/odrl-infra/pulls"
+            }
+          ]
+        }
+      ],
+      "localBiblio": {
+        "ODRL-PROFILE-BP": {
+          "title": "ODRL V2.2 Profile Best Practices",
+          "href": "https://www.w3.org/community/reports/odrl/CG-FINAL-profile-bp-20240808.html",
+          "publisher": "W3C ODRL Community Group",
+          "status": "Final Community Group Report",
+          "date": "08 August 2024"
+        },
+        "DPV": {
+          "title": "Data Privacy Vocabulary (DPV)",
+          "href": "https://w3id.org/dpv",
+          "publisher": "W3C Data Privacy Vocabularies and Controls Community Group"
+        },
+        "CC-REL": {
+          "title": "ccREL: The Creative Commons Rights Expression Language",
+          "href": "https://www.w3.org/submissions/ccREL/",
+          "authors": [
+            "Hal Abelson",
+            "Ben Adida",
+            "Mike Linksvayer",
+            "Nathan Yergler"
+          ],
+          "publisher": "W3C",
+          "status": "W3C Member Submission",
+          "date": "01 May 2008"
+        }
+      },
+      "publishDate": "2026-11-03",
+      "thisVersion": "https://w3id.org/cdif//access/0.1"
+    };
+  </script>
+  <style>
+    /* Colours are translucent so that they also work with ReSpec's dark mode. */
+    table.def { width: 100%; border-collapse: collapse; margin: .5em 0 1.5em; }
+    table.def th, table.def td { border: 1px solid rgba(127, 127, 127, .35); padding: .35em .6em;
+                                 text-align: left; vertical-align: top; }
+    table.def th { width: 9em; background: rgba(0, 90, 156, .08); font-weight: 600; white-space: nowrap; }
+    table.terms { width: 100%; }
+    table.terms td:first-child { white-space: nowrap; }
+    table.terms tr.deprecated td:first-child code { text-decoration: line-through; }
+    table.overview td:not(:first-child), table.overview th:not(:first-child) { text-align: right; }
+    .tbd { color: #b25e00; font-style: italic; }
+    .badge { display: inline-block; padding: 0 .45em; border: 1px solid currentColor; border-radius: .7em;
+             font-size: .75em; line-height: 1.5; white-space: nowrap; vertical-align: .1em; }
+    tr.deprecated .badge { color: #c62828; }
+    tr.not-defined .badge { color: #b25e00; }
+    input.term-filter { width: min(100%, 24em); padding: .3em .5em; font: inherit; }
+  </style>
+</head>
+<body>
+<!--
+  GENERATED FILE - do not edit by hand.
+  Built by scripts/build_profile_docs.py from docs/profile.ttl and scripts/templates/profile.html.j2.
+-->
+
+<section id="abstract">
+  <p>Abstract TBD</p>
+</section>
+
+<p class="copyright">This document is licensed under <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+
+<section id="sotd" class="override">
+  <h2>Status of This Document</h2>
+  <p>
+    This document describes version 0.1 of the ODRL Profile for CDIF Access (status: <strong>draft</strong>).
+    It is generated from the profile's Turtle file, <a href="profile.ttl">profile.ttl</a>.
+  </p>
+  <p>Comments and suggestions are welcome as <a href="https://github.com/CDIF4EOSC/odrl-infra/issues">GitHub issues</a>.</p>
+</section>
+
+<section id="introduction">
+  <h2>Introduction</h2>
+  <p>
+    The <em>ODRL Profile for CDIF Access</em> is an ODRL profile [[ODRL-MODEL]] identified by <code>https://w3id.org/cdif/access</code>. It is a profile of the <a href="http://www.w3.org/ns/odrl/2/core">ODRL 2.2 Core Profile</a>.
+    Following the ODRL Profile Best Practices [[ODRL-PROFILE-BP]], the concepts it uses are organised in SKOS
+    collections [[SKOS-REFERENCE]] (see <a href="#vocabulary"></a>) and the terms it defines are specified in
+    <a href="#terms"></a>.
+  </p>
+
+  <section id="summary">
+    <h3>Overview</h3>
+    <table class="simple overview">
+      <thead>
+        <tr><th>Collection</th><th>Members</th><th>Defined by this profile</th><th>Adopted</th><th>Not defined yet</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="#actionsCollection">Action concepts</a></td>
+          <td>79</td>
+          <td>27</td>
+          <td>45 ODRL, 3 ccREL</td>
+          <td>4</td>
+        </tr>
+        <tr>
+          <td><a href="#purposeCollection">Purpose concepts</a></td>
+          <td>21</td>
+          <td>0</td>
+          <td>20 DPV, 1 ODRL</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="namespaces">
+    <h3>Namespaces</h3>
+    <p>This document uses the following namespace prefixes.</p>
+    <table class="simple">
+      <thead><tr><th>Prefix</th><th>Namespace</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>cdif-access</code></td>
+          <td><code>https://w3id.org/cdif/access#</code></td>
+          <td><a href="#terms">This profile</a></td>
+        </tr>
+        <tr>
+          <td><code>bibo</code></td>
+          <td><code>http://purl.org/ontology/bibo/</code></td>
+          <td><a href="http://purl.org/ontology/bibo/">Bibliographic Ontology</a></td>
+        </tr>
+        <tr>
+          <td><code>cc</code></td>
+          <td><code>http://creativecommons.org/ns#</code></td>
+          <td><a href="https://creativecommons.org/ns">Creative Commons Rights Expression Language (ccREL)</a> [[CC-REL]]</td>
+        </tr>
+        <tr>
+          <td><code>dcterms</code></td>
+          <td><code>http://purl.org/dc/terms/</code></td>
+          <td><a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/">DCMI Metadata Terms</a></td>
+        </tr>
+        <tr>
+          <td><code>dpv</code></td>
+          <td><code>https://w3id.org/dpv#</code></td>
+          <td><a href="https://w3id.org/dpv">Data Privacy Vocabulary (DPV)</a> [[DPV]]</td>
+        </tr>
+        <tr>
+          <td><code>foaf</code></td>
+          <td><code>http://xmlns.com/foaf/0.1/</code></td>
+          <td><a href="http://xmlns.com/foaf/spec/">FOAF Vocabulary</a></td>
+        </tr>
+        <tr>
+          <td><code>odrl</code></td>
+          <td><code>http://www.w3.org/ns/odrl/2/</code></td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/">ODRL Vocabulary &amp; Expression 2.2</a> [[ODRL-VOCAB]]</td>
+        </tr>
+        <tr>
+          <td><code>owl</code></td>
+          <td><code>http://www.w3.org/2002/07/owl#</code></td>
+          <td><a href="https://www.w3.org/TR/owl2-overview/">OWL 2 Web Ontology Language</a></td>
+        </tr>
+        <tr>
+          <td><code>profile</code></td>
+          <td><code>http://www.w3.org/ns/dx/prof/</code></td>
+          <td><a href="https://www.w3.org/TR/dx-prof/">The Profiles Vocabulary</a> [[DX-PROF]]</td>
+        </tr>
+        <tr>
+          <td><code>rdf</code></td>
+          <td><code>http://www.w3.org/1999/02/22-rdf-syntax-ns#</code></td>
+          <td><a href="https://www.w3.org/TR/rdf11-concepts/">RDF 1.1 Concepts</a></td>
+        </tr>
+        <tr>
+          <td><code>rdfs</code></td>
+          <td><code>http://www.w3.org/2000/01/rdf-schema#</code></td>
+          <td><a href="https://www.w3.org/TR/rdf-schema/">RDF Schema 1.1</a></td>
+        </tr>
+        <tr>
+          <td><code>role</code></td>
+          <td><code>http://www.w3.org/ns/dx/prof/role/</code></td>
+          <td><a href="https://www.w3.org/TR/dx-prof/#resource-roles-vocab">Profiles Vocabulary: resource roles</a> [[DX-PROF]]</td>
+        </tr>
+        <tr>
+          <td><code>skos</code></td>
+          <td><code>http://www.w3.org/2004/02/skos/core#</code></td>
+          <td><a href="https://www.w3.org/TR/skos-reference/">Simple Knowledge Organization System (SKOS)</a> [[SKOS-REFERENCE]]</td>
+        </tr>
+        <tr>
+          <td><code>sw</code></td>
+          <td><code>http://www.w3.org/2003/06/sw-vocab-status/ns#</code></td>
+          <td><a href="https://www.w3.org/2003/06/sw-vocab-status/note">Term-centric Semantic Web Vocabulary Annotations</a></td>
+        </tr>
+        <tr>
+          <td><code>vann</code></td>
+          <td><code>http://purl.org/vocab/vann/</code></td>
+          <td><a href="https://vocab.org/vann/">VANN: vocabulary for annotating vocabulary descriptions</a></td>
+        </tr>
+        <tr>
+          <td><code>xsd</code></td>
+          <td><code>http://www.w3.org/2001/XMLSchema#</code></td>
+          <td><a href="https://www.w3.org/TR/xmlschema11-2/">XML Schema Datatypes</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="resources">
+    <h3>Profile resources</h3>
+    <p>
+      The profile is described with the Profiles Vocabulary [[DX-PROF]] and has the following resources.
+    </p>
+    <table class="simple">
+      <thead><tr><th>Resource</th><th>Role</th><th>Artifact</th><th>Format</th><th>Conforms to</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>ODRL Profile for CDIF Access HTML specification</td>
+          <td>Specification</td>
+          <td><span class="tbd" title="Placeholder: path/to/the/profile/html">TBD</span></td>
+          <td>text/html</td>
+          <td><a href="https://www.w3.org/TR/html/">HTML</a></td>
+        </tr>
+        <tr>
+          <td>ODRL Profile for CDIF Access Turtle vocabulary</td>
+          <td>Vocabulary</td>
+          <td><span class="tbd" title="Placeholder: path/to/the/profile/turtle">TBD</span></td>
+          <td>text/turtle</td>
+          <td><a href="https://www.w3.org/TR/turtle/">RDF 1.1 Turtle</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>
+
+<section id="vocabulary">
+  <h2>Profile vocabulary</h2>
+  <p>
+    Every concept used by this profile is a member of one of the SKOS collections below, whether this profile
+    defines it or adopts it from another vocabulary (<a href="https://www.w3.org/TR/odrl-vocab/">ODRL Vocabulary &amp; Expression 2.2</a> [[ODRL-VOCAB]], <a href="https://w3id.org/dpv">Data Privacy Vocabulary (DPV)</a> [[DPV]], <a href="https://creativecommons.org/ns">Creative Commons Rights Expression Language (ccREL)</a> [[CC-REL]]).
+    Terms defined by this profile link to their definition in <a href="#terms"></a>; adopted terms link to the
+    documentation of their source vocabulary.
+  </p>
+
+  <section id="actionsCollection">
+    <h3>Action concepts</h3>
+    <p>
+      The collection <code title="https://w3id.org/cdif/access#actionsCollection">cdif-access:actionsCollection</code> (&ldquo;ODRL CDIF Access profile - action concepts&rdquo;) has 79 members:
+      27 defined by this profile, 45 from ODRL, 3 from ccREL, and 4 not defined yet.
+    </p>
+    <p><input type="search" class="term-filter" data-table="table-actionsCollection" placeholder="Filter the 79 terms" aria-label="Filter the terms of Action concepts"></p>
+    <table class="simple terms" id="table-actionsCollection">
+      <thead><tr><th>Term</th><th>Label</th><th>Definition</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="#AccreditedTrainingCompleted" title="https://w3id.org/cdif/access#AccreditedTrainingCompleted"><code>cdif-access:AccreditedTrainingCompleted</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#AIAnalysis" title="https://w3id.org/cdif/access#AIAnalysis"><code>cdif-access:AIAnalysis</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#AICuration" title="https://w3id.org/cdif/access#AICuration"><code>cdif-access:AICuration</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#AISearch" title="https://w3id.org/cdif/access#AISearch"><code>cdif-access:AISearch</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#AnalysisDevice" title="https://w3id.org/cdif/access#AnalysisDevice"><code>cdif-access:AnalysisDevice</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#APIAccess" title="https://w3id.org/cdif/access#APIAccess"><code>cdif-access:APIAccess</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#AssociateWithResearchProject" title="https://w3id.org/cdif/access#AssociateWithResearchProject"><code>cdif-access:AssociateWithResearchProject</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Browse" title="https://w3id.org/cdif/access#Browse"><code>cdif-access:Browse</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#CiteData" title="https://w3id.org/cdif/access#CiteData"><code>cdif-access:CiteData</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#CredentialDisclosure" title="https://w3id.org/cdif/access#CredentialDisclosure"><code>cdif-access:CredentialDisclosure</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#DepositDerivedDataProduct" title="https://w3id.org/cdif/access#DepositDerivedDataProduct"><code>cdif-access:DepositDerivedDataProduct</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Download" title="https://w3id.org/cdif/access#Download"><code>cdif-access:Download</code></a></td>
+          <td>download</td>
+          <td>define download</td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#EncryptDataLocally" title="https://w3id.org/cdif/access#EncryptDataLocally"><code>cdif-access:EncryptDataLocally</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Identify" title="https://w3id.org/cdif/access#Identify"><code>cdif-access:Identify</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Link" title="https://w3id.org/cdif/access#Link"><code>cdif-access:Link</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#MutuallyExclusiveAnalysis" title="https://w3id.org/cdif/access#MutuallyExclusiveAnalysis"><code>cdif-access:MutuallyExclusiveAnalysis</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#OnlineAnalysis" title="https://w3id.org/cdif/access#OnlineAnalysis"><code>cdif-access:OnlineAnalysis</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#ProcureThirdPartyApproval" title="https://w3id.org/cdif/access#ProcureThirdPartyApproval"><code>cdif-access:ProcureThirdPartyApproval</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#ReArchive" title="https://w3id.org/cdif/access#ReArchive"><code>cdif-access:ReArchive</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Republish" title="https://w3id.org/cdif/access#Republish"><code>cdif-access:Republish</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Reshare" title="https://w3id.org/cdif/access#Reshare"><code>cdif-access:Reshare</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#Search" title="https://w3id.org/cdif/access#Search"><code>cdif-access:Search</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#SecureTransfer" title="https://w3id.org/cdif/access#SecureTransfer"><code>cdif-access:SecureTransfer</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#SignAgreement" title="https://w3id.org/cdif/access#SignAgreement"><code>cdif-access:SignAgreement</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#SubmitAnalysisOutputsForChecking" title="https://w3id.org/cdif/access#SubmitAnalysisOutputsForChecking"><code>cdif-access:SubmitAnalysisOutputsForChecking</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#TakeScreenShot" title="https://w3id.org/cdif/access#TakeScreenShot"><code>cdif-access:TakeScreenShot</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="#View" title="https://w3id.org/cdif/access#View"><code>cdif-access:View</code></a></td>
+          <td><span class="tbd">TBD</span></td>
+          <td><span class="tbd">TBD</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr class="not-defined">
+          <td><code title="https://w3id.org/cdif/access#DestroyData">cdif-access:DestroyData</code></td>
+          <td><span class="tbd">TBD</span></td>
+          <td> <span class="badge">not defined</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr class="not-defined">
+          <td><code title="https://w3id.org/cdif/access#Notify">cdif-access:Notify</code></td>
+          <td><span class="tbd">TBD</span></td>
+          <td> <span class="badge">not defined</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr class="not-defined">
+          <td><code title="https://w3id.org/cdif/access#secondaryUse">cdif-access:secondaryUse</code></td>
+          <td><span class="tbd">TBD</span></td>
+          <td> <span class="badge">not defined</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr class="not-defined">
+          <td><code title="https://w3id.org/cdif/access#StoreData">cdif-access:StoreData</code></td>
+          <td><span class="tbd">TBD</span></td>
+          <td> <span class="badge">not defined</span></td>
+          <td>This profile</td>
+        </tr>
+        <tr>
+          <td><a href="http://creativecommons.org/ns#DerivativeWorks" title="http://creativecommons.org/ns#DerivativeWorks"><code>cc:DerivativeWorks</code></a></td>
+          <td>Derivative Works</td>
+          <td>Distribution of derivative works.</td>
+          <td><a href="https://creativecommons.org/ns" title="Creative Commons Rights Expression Language (ccREL)">ccREL</a></td>
+        </tr>
+        <tr>
+          <td><a href="http://creativecommons.org/ns#Distribution" title="http://creativecommons.org/ns#Distribution"><code>cc:Distribution</code></a></td>
+          <td>Distribution</td>
+          <td>Distribution, public display, and publicly performance.</td>
+          <td><a href="https://creativecommons.org/ns" title="Creative Commons Rights Expression Language (ccREL)">ccREL</a></td>
+        </tr>
+        <tr>
+          <td><a href="http://creativecommons.org/ns#Reproduction" title="http://creativecommons.org/ns#Reproduction"><code>cc:Reproduction</code></a></td>
+          <td>Reproduction</td>
+          <td>Making multiple copies.</td>
+          <td><a href="https://creativecommons.org/ns" title="Creative Commons Rights Expression Language (ccREL)">ccREL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-acceptTracking" title="http://www.w3.org/ns/odrl/2/acceptTracking"><code>odrl:acceptTracking</code></a></td>
+          <td>Accept Tracking</td>
+          <td>To accept that the use of the Asset may be tracked.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-adHocShare" title="http://www.w3.org/ns/odrl/2/adHocShare"><code>odrl:adHocShare</code></a></td>
+          <td>Ad-hoc sharing</td>
+          <td>The act of sharing the asset to parties in close proximity to the owner. <span class="badge">deprecated</span></td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-aggregate" title="http://www.w3.org/ns/odrl/2/aggregate"><code>odrl:aggregate</code></a></td>
+          <td>Aggregate</td>
+          <td>To use the Asset or parts of it as part of a composite collection.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-annotate" title="http://www.w3.org/ns/odrl/2/annotate"><code>odrl:annotate</code></a></td>
+          <td>Annotate</td>
+          <td>To add explanatory notations/commentaries to the Asset without modifying the Asset in any other way.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-anonymize" title="http://www.w3.org/ns/odrl/2/anonymize"><code>odrl:anonymize</code></a></td>
+          <td>Anonymize</td>
+          <td>To anonymize all or parts of the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-append" title="http://www.w3.org/ns/odrl/2/append"><code>odrl:append</code></a></td>
+          <td>Append</td>
+          <td>The act of adding to the end of an asset. <span class="badge">deprecated</span> Use <a href="https://www.w3.org/TR/odrl-vocab/#term-modify" title="http://www.w3.org/ns/odrl/2/modify"><code>odrl:modify</code></a> instead.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-archive" title="http://www.w3.org/ns/odrl/2/archive"><code>odrl:archive</code></a></td>
+          <td>Archive</td>
+          <td>To store the Asset (in a non-transient form).</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-concurrentUse" title="http://www.w3.org/ns/odrl/2/concurrentUse"><code>odrl:concurrentUse</code></a></td>
+          <td>Concurrent Use</td>
+          <td>To create multiple copies of the Asset that are being concurrently used.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-copy" title="http://www.w3.org/ns/odrl/2/copy"><code>odrl:copy</code></a></td>
+          <td>Copy</td>
+          <td>The act of making an exact reproduction of the asset. <span class="badge">deprecated</span> Use <a href="https://www.w3.org/TR/odrl-vocab/#term-reproduce" title="http://www.w3.org/ns/odrl/2/reproduce"><code>odrl:reproduce</code></a> instead.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-delete" title="http://www.w3.org/ns/odrl/2/delete"><code>odrl:delete</code></a></td>
+          <td>Delete</td>
+          <td>To permanently remove all copies of the Asset after it has been used.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-derive" title="http://www.w3.org/ns/odrl/2/derive"><code>odrl:derive</code></a></td>
+          <td>Derive</td>
+          <td>To create a new derivative Asset from this Asset and to edit or modify the derivative.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-digitize" title="http://www.w3.org/ns/odrl/2/digitize"><code>odrl:digitize</code></a></td>
+          <td>Digitize</td>
+          <td>To produce a digital copy of (or otherwise digitize) the Asset from its analogue form.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-display" title="http://www.w3.org/ns/odrl/2/display"><code>odrl:display</code></a></td>
+          <td>Display</td>
+          <td>To create a static and transient rendition of an Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-distribute" title="http://www.w3.org/ns/odrl/2/distribute"><code>odrl:distribute</code></a></td>
+          <td>Distribute</td>
+          <td>To supply the Asset to third-parties.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-execute" title="http://www.w3.org/ns/odrl/2/execute"><code>odrl:execute</code></a></td>
+          <td>Execute</td>
+          <td>To run the computer program Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-export" title="http://www.w3.org/ns/odrl/2/export"><code>odrl:export</code></a></td>
+          <td>Export</td>
+          <td>The act of transforming the asset into a new form. <span class="badge">deprecated</span> Use <a href="https://www.w3.org/TR/odrl-vocab/#term-transform" title="http://www.w3.org/ns/odrl/2/transform"><code>odrl:transform</code></a> instead.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-extract" title="http://www.w3.org/ns/odrl/2/extract"><code>odrl:extract</code></a></td>
+          <td>Extract</td>
+          <td>To extract parts of the Asset and to use it as a new Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-extractChar" title="http://www.w3.org/ns/odrl/2/extractChar"><code>odrl:extractChar</code></a></td>
+          <td>Extract character</td>
+          <td>The act of extracting (replicating) unchanged characters from the asset. <span class="badge">deprecated</span></td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-extractPage" title="http://www.w3.org/ns/odrl/2/extractPage"><code>odrl:extractPage</code></a></td>
+          <td>Extract page</td>
+          <td>The act of extracting (replicating) unchanged pages from the asset. <span class="badge">deprecated</span></td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-extractWord" title="http://www.w3.org/ns/odrl/2/extractWord"><code>odrl:extractWord</code></a></td>
+          <td>Extract word</td>
+          <td>The act of extracting (replicating) unchanged words from the asset. <span class="badge">deprecated</span></td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-give" title="http://www.w3.org/ns/odrl/2/give"><code>odrl:give</code></a></td>
+          <td>Give</td>
+          <td>To transfer the ownership of the Asset to a third party without compensation and while deleting the original asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-grantUse" title="http://www.w3.org/ns/odrl/2/grantUse"><code>odrl:grantUse</code></a></td>
+          <td>Grant Use</td>
+          <td>To grant the use of the Asset to third parties.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-include" title="http://www.w3.org/ns/odrl/2/include"><code>odrl:include</code></a></td>
+          <td>Include</td>
+          <td>To include other related assets in the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-index" title="http://www.w3.org/ns/odrl/2/index"><code>odrl:index</code></a></td>
+          <td>Index</td>
+          <td>To record the Asset in an index.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-inform" title="http://www.w3.org/ns/odrl/2/inform"><code>odrl:inform</code></a></td>
+          <td>Inform</td>
+          <td>To inform that an action has been performed on or in relation to the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-install" title="http://www.w3.org/ns/odrl/2/install"><code>odrl:install</code></a></td>
+          <td>Install</td>
+          <td>To load the computer program Asset onto a storage device which allows operating or running the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-modify" title="http://www.w3.org/ns/odrl/2/modify"><code>odrl:modify</code></a></td>
+          <td>Modify</td>
+          <td>To change existing content of the Asset. A new asset is not created by this action.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-move" title="http://www.w3.org/ns/odrl/2/move"><code>odrl:move</code></a></td>
+          <td>Move</td>
+          <td>To move the Asset from one digital location to another including deleting the original copy.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-play" title="http://www.w3.org/ns/odrl/2/play"><code>odrl:play</code></a></td>
+          <td>Play</td>
+          <td>To create a sequential and transient rendition of an Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-present" title="http://www.w3.org/ns/odrl/2/present"><code>odrl:present</code></a></td>
+          <td>Present</td>
+          <td>To publicly perform the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-preview" title="http://www.w3.org/ns/odrl/2/preview"><code>odrl:preview</code></a></td>
+          <td>Preview</td>
+          <td>The act of providing a short preview of the asset. <span class="badge">deprecated</span></td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-print" title="http://www.w3.org/ns/odrl/2/print"><code>odrl:print</code></a></td>
+          <td>Print</td>
+          <td>To create a tangible and permanent rendition of an Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-read" title="http://www.w3.org/ns/odrl/2/read"><code>odrl:read</code></a></td>
+          <td>Read</td>
+          <td>To obtain data from the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-reproduce" title="http://www.w3.org/ns/odrl/2/reproduce"><code>odrl:reproduce</code></a></td>
+          <td>Reproduce</td>
+          <td>To make duplicate copies the Asset in any material form.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-reviewPolicy" title="http://www.w3.org/ns/odrl/2/reviewPolicy"><code>odrl:reviewPolicy</code></a></td>
+          <td>Review Policy</td>
+          <td>To review the Policy applicable to the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-sell" title="http://www.w3.org/ns/odrl/2/sell"><code>odrl:sell</code></a></td>
+          <td>Sell</td>
+          <td>To transfer the ownership of the Asset to a third party with compensation and while deleting the original asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-share" title="http://www.w3.org/ns/odrl/2/share"><code>odrl:share</code></a></td>
+          <td>Share</td>
+          <td>The act of the non-commercial reproduction and distribution of the asset to third-parties. <span class="badge">deprecated</span> Use <a href="http://creativecommons.org/ns#Sharing" title="http://creativecommons.org/ns#Sharing"><code>cc:Sharing</code></a> instead.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-stream" title="http://www.w3.org/ns/odrl/2/stream"><code>odrl:stream</code></a></td>
+          <td>Stream</td>
+          <td>To deliver the Asset in real-time.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-synchronize" title="http://www.w3.org/ns/odrl/2/synchronize"><code>odrl:synchronize</code></a></td>
+          <td>Synchronize</td>
+          <td>To use the Asset in timed relations with media (audio/visual) elements of another Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-textToSpeech" title="http://www.w3.org/ns/odrl/2/textToSpeech"><code>odrl:textToSpeech</code></a></td>
+          <td>Text-to-speech</td>
+          <td>To have a text Asset read out loud.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-transform" title="http://www.w3.org/ns/odrl/2/transform"><code>odrl:transform</code></a></td>
+          <td>Transform</td>
+          <td>To convert the Asset into a different format.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-translate" title="http://www.w3.org/ns/odrl/2/translate"><code>odrl:translate</code></a></td>
+          <td>Translate</td>
+          <td>To translate the original natural language of an Asset into another natural language.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-watermark" title="http://www.w3.org/ns/odrl/2/watermark"><code>odrl:watermark</code></a></td>
+          <td>Watermark</td>
+          <td>To apply a watermark to the Asset.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-write" title="http://www.w3.org/ns/odrl/2/write"><code>odrl:write</code></a></td>
+          <td>Write</td>
+          <td>The act of writing to the Asset. <span class="badge">deprecated</span> Use <a href="https://www.w3.org/TR/odrl-vocab/#term-modify" title="http://www.w3.org/ns/odrl/2/modify"><code>odrl:modify</code></a> instead.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+        <tr class="deprecated">
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-writeTo" title="http://www.w3.org/ns/odrl/2/writeTo"><code>odrl:writeTo</code></a></td>
+          <td>Write to</td>
+          <td>The act of adding data to the Asset. <span class="badge">deprecated</span> Use <a href="https://www.w3.org/TR/odrl-vocab/#term-modify" title="http://www.w3.org/ns/odrl/2/modify"><code>odrl:modify</code></a> instead.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="purposeCollection">
+    <h3>Purpose concepts</h3>
+    <p>
+      The collection <code title="https://w3id.org/cdif/access#purposeCollection">cdif-access:purposeCollection</code> (&ldquo;ODRL CDIF Access profile - purpose concepts&rdquo;) has 21 members:
+      0 defined by this profile, 20 from DPV, 1 from ODRL.
+    </p>
+    <p><input type="search" class="term-filter" data-table="table-purposeCollection" placeholder="Filter the 21 terms" aria-label="Filter the terms of Purpose concepts"></p>
+    <table class="simple terms" id="table-purposeCollection">
+      <thead><tr><th>Term</th><th>Label</th><th>Definition</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><a href="https://w3id.org/dpv#AcademicResearch" title="https://w3id.org/dpv#AcademicResearch"><code>dpv:AcademicResearch</code></a></td>
+          <td>Academic Research</td>
+          <td>Purposes associated with conducting or assisting with research conducted in an academic context e.g. within universities</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#AccountManagement" title="https://w3id.org/dpv#AccountManagement"><code>dpv:AccountManagement</code></a></td>
+          <td>Account Management</td>
+          <td>Account Management refers to purposes associated with account management, such as to create, provide, maintain, and manage accounts</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#Advertising" title="https://w3id.org/dpv#Advertising"><code>dpv:Advertising</code></a></td>
+          <td>Advertising</td>
+          <td>Purposes associated with conducting advertising i.e. process or artefact used to call attention to a product, service, etc. through announcements, notices, or other forms of communication</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#CommercialPurpose" title="https://w3id.org/dpv#CommercialPurpose"><code>dpv:CommercialPurpose</code></a></td>
+          <td>Commercial Purpose</td>
+          <td>Purposes associated with processing activities performed in a commercial setting or with intention to commercialise</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#CommercialResearch" title="https://w3id.org/dpv#CommercialResearch"><code>dpv:CommercialResearch</code></a></td>
+          <td>Commercial Research</td>
+          <td>Purposes associated with conducting research in a commercial setting or with intention to commercialise e.g. in a company or sponsored by a company</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#CommunicationManagement" title="https://w3id.org/dpv#CommunicationManagement"><code>dpv:CommunicationManagement</code></a></td>
+          <td>Communication Management</td>
+          <td>Communication Management refers to purposes associated with providing or managing communication activities e.g. to send an email for notifying some information</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#CustomerManagement" title="https://w3id.org/dpv#CustomerManagement"><code>dpv:CustomerManagement</code></a></td>
+          <td>Customer Management</td>
+          <td>Customer Management refers to purposes associated with managing activities related with past, current, and future customers</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#EnforceSecurity" title="https://w3id.org/dpv#EnforceSecurity"><code>dpv:EnforceSecurity</code></a></td>
+          <td>Enforce Security</td>
+          <td>Purposes associated with ensuring and enforcing security for data, personnel, or other related matters</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#HumanResourceManagement" title="https://w3id.org/dpv#HumanResourceManagement"><code>dpv:HumanResourceManagement</code></a></td>
+          <td>Human Resource Management</td>
+          <td>Purposes associated with managing humans and &#39;human resources&#39; within the organisation for effective and efficient operations.</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#Marketing" title="https://w3id.org/dpv#Marketing"><code>dpv:Marketing</code></a></td>
+          <td>Marketing</td>
+          <td>Purposes associated with conducting marketing in relation to organisation or products or services e.g. promoting, selling, and distributing</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#NonCommercialPurpose" title="https://w3id.org/dpv#NonCommercialPurpose"><code>dpv:NonCommercialPurpose</code></a></td>
+          <td>Non-commercial Purpose</td>
+          <td>Purposes associated with processing activities performed in a non-commercial setting or without intention to commercialise</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#NonCommercialResearch" title="https://w3id.org/dpv#NonCommercialResearch"><code>dpv:NonCommercialResearch</code></a></td>
+          <td>Non-Commercial Research</td>
+          <td>Purposes associated with conducting research in a non-commercial setting e.g. for a non-profit-organisation (NGO)</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#OrganisationGovernance" title="https://w3id.org/dpv#OrganisationGovernance"><code>dpv:OrganisationGovernance</code></a></td>
+          <td>Organisation Governance</td>
+          <td>Purposes associated with conducting activities and functions for governance of an organisation</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#Personalisation" title="https://w3id.org/dpv#Personalisation"><code>dpv:Personalisation</code></a></td>
+          <td>Personalisation</td>
+          <td>Purposes associated with creating and providing customisation based on attributes and/or needs of person(s) or context(s).</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#PublicBenefit" title="https://w3id.org/dpv#PublicBenefit"><code>dpv:PublicBenefit</code></a></td>
+          <td>Public Benefit</td>
+          <td>Purposes undertaken and intended to provide benefit to public or society</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#RecordManagement" title="https://w3id.org/dpv#RecordManagement"><code>dpv:RecordManagement</code></a></td>
+          <td>Record Management</td>
+          <td>Purposes associated with manage creation, storage, and use of records relevant to operations, events, and processes e.g. to store logs or access requests</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#ResearchAndDevelopment" title="https://w3id.org/dpv#ResearchAndDevelopment"><code>dpv:ResearchAndDevelopment</code></a></td>
+          <td>Research and Development</td>
+          <td>Purposes associated with conducting research and development for new methods, products, or services</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#ScientificResearch" title="https://w3id.org/dpv#ScientificResearch"><code>dpv:ScientificResearch</code></a></td>
+          <td>Scientific Research</td>
+          <td>Purposes associated with scientific research</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#ServiceProvision" title="https://w3id.org/dpv#ServiceProvision"><code>dpv:ServiceProvision</code></a></td>
+          <td>Service Provision</td>
+          <td>Purposes associated with providing service or product or activities</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv#VendorManagement" title="https://w3id.org/dpv#VendorManagement"><code>dpv:VendorManagement</code></a></td>
+          <td>Vendor Management</td>
+          <td>Purposes associated with manage orders, payment, evaluation, and prospecting related to vendors</td>
+          <td><a href="https://w3id.org/dpv" title="Data Privacy Vocabulary (DPV)">DPV</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/#term-purpose" title="http://www.w3.org/ns/odrl/2/purpose"><code>odrl:purpose</code></a></td>
+          <td>Purpose</td>
+          <td>A defined purpose for exercising the action of the Rule.</td>
+          <td><a href="https://www.w3.org/TR/odrl-vocab/" title="ODRL Vocabulary &amp; Expression 2.2">ODRL</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>
+
+<section id="terms">
+  <h2>Terms defined by this profile</h2>
+  <p>
+    This section specifies the 27 terms defined by this profile, in the
+    namespace<code>https://w3id.org/cdif/access#</code> (prefix <code>cdif-access:</code>).
+  </p>
+
+  <section id="terms-actions">
+    <h3>Actions</h3>
+    <section id="AccreditedTrainingCompleted">
+      <h4>AccreditedTrainingCompleted</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#AccreditedTrainingCompleted</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="AIAnalysis">
+      <h4>AIAnalysis</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#AIAnalysis</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="AICuration">
+      <h4>AICuration</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#AICuration</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="AISearch">
+      <h4>AISearch</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#AISearch</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="AnalysisDevice">
+      <h4>AnalysisDevice</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#AnalysisDevice</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="APIAccess">
+      <h4>APIAccess</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#APIAccess</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="AssociateWithResearchProject">
+      <h4>AssociateWithResearchProject</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#AssociateWithResearchProject</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Browse">
+      <h4>Browse</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Browse</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="CiteData">
+      <h4>CiteData</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#CiteData</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="CredentialDisclosure">
+      <h4>CredentialDisclosure</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#CredentialDisclosure</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="DepositDerivedDataProduct">
+      <h4>DepositDerivedDataProduct</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#DepositDerivedDataProduct</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Download">
+      <h4>download</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td>download</td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Download</code></td></tr>
+          <tr><th>Definition:</th><td>define download</td></tr>
+          <tr><th>Usage note:</th><td>for usage notes</td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="EncryptDataLocally">
+      <h4>EncryptDataLocally</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#EncryptDataLocally</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Identify">
+      <h4>Identify</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Identify</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Link">
+      <h4>Link</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Link</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="MutuallyExclusiveAnalysis">
+      <h4>MutuallyExclusiveAnalysis</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#MutuallyExclusiveAnalysis</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="OnlineAnalysis">
+      <h4>OnlineAnalysis</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#OnlineAnalysis</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="ProcureThirdPartyApproval">
+      <h4>ProcureThirdPartyApproval</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#ProcureThirdPartyApproval</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="ReArchive">
+      <h4>ReArchive</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#ReArchive</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Republish">
+      <h4>Republish</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Republish</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Reshare">
+      <h4>Reshare</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Reshare</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="Search">
+      <h4>Search</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#Search</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="SecureTransfer">
+      <h4>SecureTransfer</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#SecureTransfer</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="SignAgreement">
+      <h4>SignAgreement</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#SignAgreement</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="SubmitAnalysisOutputsForChecking">
+      <h4>SubmitAnalysisOutputsForChecking</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#SubmitAnalysisOutputsForChecking</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="TakeScreenShot">
+      <h4>TakeScreenShot</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#TakeScreenShot</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section id="View">
+      <h4>View</h4>
+      <table class="def">
+        <tbody>
+          <tr><th>Label:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>IRI:</th><td><code>https://w3id.org/cdif/access#View</code></td></tr>
+          <tr><th>Definition:</th><td><span class="tbd">TBD</span></td></tr>
+          <tr><th>Instance of:</th><td><a href="https://www.w3.org/TR/odrl-vocab/#term-Action" title="http://www.w3.org/ns/odrl/2/Action"><code>odrl:Action</code></a>, <a href="http://www.w3.org/2002/07/owl#Class" title="http://www.w3.org/2002/07/owl#Class"><code>owl:Class</code></a>, <a href="http://www.w3.org/2000/01/rdf-schema#Class" title="http://www.w3.org/2000/01/rdf-schema#Class"><code>rdfs:Class</code></a>, <a href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><code>skos:Concept</code></a></td></tr>
+          <tr><th>Member of:</th><td><a href="#actionsCollection">Action concepts</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </section>
+</section>
+
+<script>
+  // Filters the long term tables (stays in the published document).
+  document.addEventListener("input", function (event) {
+    var box = event.target;
+    if (!box.classList || !box.classList.contains("term-filter")) return;
+    var table = document.getElementById(box.getAttribute("data-table"));
+    if (!table) return;
+    var query = box.value.trim().toLowerCase();
+    Array.prototype.forEach.call(table.tBodies[0].rows, function (row) {
+      row.hidden = query !== "" && row.textContent.toLowerCase().indexOf(query) === -1;
+    });
+  });
+</script>
+</body>
+</html>
