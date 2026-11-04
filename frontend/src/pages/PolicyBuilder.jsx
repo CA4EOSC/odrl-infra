@@ -42,6 +42,57 @@ const ODRL_OPERATORS = [
     { value: 'odrl:isNoneOf', label: 'isNoneOf — is none of' },
 ];
 
+// ODRL 2.2 left operands (instances of odrl:LeftOperand) — https://www.w3.org/TR/odrl-vocab/#term-LeftOperand
+const ODRL_LEFT_OPERANDS = [
+    { value: 'odrl:absolutePosition', label: 'absolutePosition — absolute position of the asset' },
+    { value: 'odrl:absoluteSize', label: 'absoluteSize — absolute size of the asset' },
+    { value: 'odrl:absoluteSpatialPosition', label: 'absoluteSpatialPosition — absolute spatial position (e.g. pixels)' },
+    { value: 'odrl:absoluteTemporalPosition', label: 'absoluteTemporalPosition — absolute temporal position in a media stream' },
+    { value: 'odrl:count', label: 'count — number of times the action may be exercised' },
+    { value: 'odrl:dateTime', label: 'dateTime — date and time of exercising the action' },
+    { value: 'odrl:delayPeriod', label: 'delayPeriod — delay before exercising the action' },
+    { value: 'odrl:deliveryChannel', label: 'deliveryChannel — delivery channel used' },
+    { value: 'odrl:device', label: 'device — device used (deprecated: use systemDevice)' },
+    { value: 'odrl:elapsedTime', label: 'elapsedTime — elapsed time of exercising the action' },
+    { value: 'odrl:event', label: 'event — identified event' },
+    { value: 'odrl:fileFormat', label: 'fileFormat — file format' },
+    { value: 'odrl:industry', label: 'industry — industry sector' },
+    { value: 'odrl:language', label: 'language — natural language' },
+    { value: 'odrl:media', label: 'media — media type or category' },
+    { value: 'odrl:meteredTime', label: 'meteredTime — accumulated time of exercising the action' },
+    { value: 'odrl:payAmount', label: 'payAmount — amount of a financial payment' },
+    { value: 'odrl:percentage', label: 'percentage — percentage of the asset' },
+    { value: 'odrl:product', label: 'product — product or service category' },
+    { value: 'odrl:purpose', label: 'purpose — purpose of exercising the action' },
+    { value: 'odrl:recipient', label: 'recipient — party receiving the result' },
+    { value: 'odrl:relativePosition', label: 'relativePosition — relative position within the asset' },
+    { value: 'odrl:relativeSize', label: 'relativeSize — relative size of the asset' },
+    { value: 'odrl:relativeSpatialPosition', label: 'relativeSpatialPosition — relative spatial position' },
+    { value: 'odrl:relativeTemporalPosition', label: 'relativeTemporalPosition — relative temporal position' },
+    { value: 'odrl:resolution', label: 'resolution — rendering resolution' },
+    { value: 'odrl:spatial', label: 'spatial — named geospatial area' },
+    { value: 'odrl:spatialCoordinates', label: 'spatialCoordinates — geospatial coordinates' },
+    { value: 'odrl:system', label: 'system — system used (deprecated: use systemDevice)' },
+    { value: 'odrl:systemDevice', label: 'systemDevice — system or device used' },
+    { value: 'odrl:timeInterval', label: 'timeInterval — recurring period of time' },
+    { value: 'odrl:unitOfCount', label: 'unitOfCount — unit of measure for count' },
+    { value: 'odrl:version', label: 'version — version of the asset' },
+    { value: 'odrl:virtualLocation', label: 'virtualLocation — virtual (IT) location' },
+];
+
+function LeftOperandSelect({ value, ...props }) {
+    const known = ODRL_LEFT_OPERANDS.some(o => o.value === value);
+    return (
+        <select value={value || ''} title="Left operand" {...props}>
+            <option value="" disabled>Left operand…</option>
+            {!known && value && <option value={value}>{value} (non-standard)</option>}
+            {ODRL_LEFT_OPERANDS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+        </select>
+    );
+}
+
 function OperatorSelect({ value, ...props }) {
     const known = ODRL_OPERATORS.some(o => o.value === value);
     return (
@@ -1205,9 +1256,7 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Left Operand"
+                                                            <LeftOperandSelect
                                                                 value={r.leftOperand}
                                                                 onChange={(e) => {
                                                                     const next = [...permissions];
@@ -1306,10 +1355,7 @@ export default function PolicyBuilder() {
                                                                     onChange={(e) => update('title', e.target.value)}
                                                                     className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
                                                                 />
-                                                                <input
-                                                                    type="text"
-                                                                    title="Left operand"
-                                                                    placeholder="Left Operand"
+                                                                <LeftOperandSelect
                                                                     value={c.leftOperand}
                                                                     onChange={(e) => update('leftOperand', e.target.value)}
                                                                     className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
@@ -1374,9 +1420,7 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand (e.g. odrl:spatial, odrl:dateTime)"
+                                                        <LeftOperandSelect
                                                             value={c.leftOperand}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
@@ -1594,9 +1638,7 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Left Operand"
+                                                            <LeftOperandSelect
                                                                 value={r.leftOperand}
                                                                 onChange={(e) => {
                                                                     const next = [...prohibitions];
@@ -1669,9 +1711,7 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand"
+                                                        <LeftOperandSelect
                                                             value={c.leftOperand}
                                                             onChange={(e) => {
                                                                 const next = [...prohibitions];
@@ -1891,9 +1931,7 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Left Operand (e.g. odrl:payAmount)"
+                                                            <LeftOperandSelect
                                                                 value={r.leftOperand}
                                                                 onChange={(e) => {
                                                                     const next = [...duties];
@@ -1966,9 +2004,7 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand"
+                                                        <LeftOperandSelect
                                                             value={c.leftOperand}
                                                             onChange={(e) => {
                                                                 const next = [...duties];
