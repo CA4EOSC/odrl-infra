@@ -28,16 +28,17 @@ WORKDIR /usr/src/oydid-gem
 RUN gem build oydid.gemspec && gem install oydid-*.gem
 
 # Install Python dependencies
-# Added aiofiles for FastAPI StaticFiles
-RUN pip3 install --no-cache-dir pytest fastapi uvicorn google-auth requests rdflib aiofiles qdrant-client fastembed --break-system-packages
+# Added aiofiles for FastAPI StaticFiles, pyshacl for SHACL verification
+RUN pip3 install --no-cache-dir pytest fastapi uvicorn google-auth requests rdflib aiofiles qdrant-client fastembed pyshacl --break-system-packages
 
 # Setup OYDID CLI
 COPY oydid/cli/oydid.rb /usr/local/bin/oydid
 RUN chmod 755 /usr/local/bin/oydid
 
-# Copy test script and API app
+# Copy test script, CLI, and API app
 COPY tests /usr/src/app/tests
 COPY app /usr/src/app/app
+COPY cli /usr/src/app/cli
 
 # Copy Frontend Build Artifacts
 # Copy to a location outside /usr/src/app to avoid volume masking
