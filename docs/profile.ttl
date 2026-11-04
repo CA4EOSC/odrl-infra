@@ -26,7 +26,7 @@ PREFIX cdif-access: <https://w3id.org/cdif/access#>
     vann:preferredNamespaceUri "https://w3id.org/cdif/access#"^^xsd:string ;
 	rdfs:label "ODRL Profile for CDIF Access"@en ;
 	owl:versionInfo "0.1"^^xsd:string ;
-	owl:versionIRI <https://w3id.org/cdif//access/0.1> ;
+	owl:versionIRI <https://w3id.org/cdif/access/0.1> ;
 	# owl:priorVersion <https://w3id.org/cdif/0.1> ;
 	dcterms:created "2026-11-03"^^xsd:date ;
 	# dcterms:modified "2023-10-09"^^xsd:date ;
