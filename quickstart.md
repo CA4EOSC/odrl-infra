@@ -50,6 +50,15 @@ echo '{"hello":"updated world"}' | oydid update did:oyd:zQm...
 oydid revoke did:oyd:zQm...
 ```
 
+**5. Encrypt and Decrypt a DID**
+```bash
+# Encrypt
+echo '{"secret":"data"}' | oydid encrypt did:oyd:RecipientDID
+
+# Decrypt
+echo 'JWE_DATA' | oydid decrypt --doc-enc z1S5...RecipientPrivateKey
+```
+
 ## Option 2: JavaScript Library Quickstart
 
 If you are building a Node.js or web application, use the `oydid` npm package.

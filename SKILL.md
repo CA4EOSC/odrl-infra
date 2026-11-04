@@ -14,6 +14,13 @@ The ODRL API service provides a RESTful interface for managing DIDs and issuing 
 - **Update DID**: `POST /did/update`
   - Body: `{"did": "did:oyd:...", "payload": {"key": "new_value"}}`
 - **Revoke DID**: `DELETE /did/{did}`
+- **Create Restricted DID**: `POST /did/create/restricted`
+  - Body: `{"payload": {...}, "target_did": "did:oyd:targetUserKey"}`
+  - Encrypts the payload for the recipient identified by `target_did`.
+- **Resolve Restricted DID**: `POST /did/resolve/restricted`
+  - Body: `{"did": "did:oyd:...", "private_key": "z1S5..."}`
+  - Decrypts the restricted DID using the recipient's private key.
+
 
 ### Bookmark DIDs
 
@@ -68,6 +75,8 @@ The OYDID CLI allows for direct interaction with the DID network.
 | `read` | Resolve a DID Document | `oydid read did:oyd:...` |
 | `update` | Update a DID Document | `echo '{"hello":"new"}' \| oydid update did:oyd:...` |
 | `revoke` | Revoke a DID | `oydid revoke did:oyd:...` |
+| `encrypt` | Encrypt payload for a DID | `echo '{"secret":"data"}' \| oydid encrypt did:oyd:target` |
+| `decrypt` | Decrypt with a private key | `echo 'JWE_DATA' \| oydid decrypt --doc-enc z1S5...` |
 
 ### Verifiable Credentials
 

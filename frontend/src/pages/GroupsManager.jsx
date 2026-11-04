@@ -15,6 +15,8 @@ const ROLES = [
 export default function GroupsManager() {
     const [orgName, setOrgName] = useState('');
     const [orgDesc, setOrgDesc] = useState('');
+    const [isSupercollection, setIsSupercollection] = useState(false);
+    const [collectionLink, setCollectionLink] = useState('');
     const [members, setMembers] = useState([{ did: '', role: 'member' }]);
     const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem('groups_history') || '[]'));
 
@@ -31,6 +33,8 @@ export default function GroupsManager() {
             const data = {
                 name: orgName,
                 description: orgDesc,
+                is_supercollection: isSupercollection,
+                collection_link: collectionLink,
                 members: members.filter(m => m.did.trim()).map(m => ({
                     member: m.did,
                     role: m.role
@@ -39,9 +43,10 @@ export default function GroupsManager() {
             const res = await api.post('/groups/create', data);
             const payload = {
                 "@context": "http://www.w3.org/ns/org#",
-                "type": "Organization",
+                "type": isSupercollection ? ["Organization", "Supercollection"] : "Organization",
                 "name": orgName,
                 "description": orgDesc,
+                ...(collectionLink ? { "relatedCollection": collectionLink } : {}),
                 "hasMember": data.members.map(m => ({
                     "type": "Membership",
                     "member": m.member,
@@ -55,6 +60,8 @@ export default function GroupsManager() {
             addToHistory(data.did, data.originalContent);
             setOrgName('');
             setOrgDesc('');
+            setIsSupercollection(false);
+            setCollectionLink('');
             setMembers([{ did: '', role: 'member' }]);
         }
     });
@@ -100,23 +107,42 @@ export default function GroupsManager() {
                                 <Building className="text-indigo-500" size={20} /> Organization Details
                             </h3>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Organization Name</label>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Organization Name *</label>
                                 <input
                                     type="text"
                                     value={orgName}
                                     onChange={(e) => setOrgName(e.target.value)}
                                     placeholder="e.g., Open Data Initiative"
                                     required
-                                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white mb-3"
                                 />
+                                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={isSupercollection}
+                                        onChange={(e) => setIsSupercollection(e.target.checked)}
+                                        className="rounded text-indigo-600 focus:ring-indigo-500 bg-gray-50 border-gray-300 dark:bg-black/20 dark:border-white/10"
+                                    />
+                                    Supercollection
+                                </label>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Short Description (Optional)</label>
                                 <textarea
                                     value={orgDesc}
                                     onChange={(e) => setOrgDesc(e.target.value)}
                                     rows={3}
                                     placeholder="Describe the purpose of this group..."
+                                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Link to other collection (Optional)</label>
+                                <input
+                                    type="url"
+                                    value={collectionLink}
+                                    onChange={(e) => setCollectionLink(e.target.value)}
+                                    placeholder="e.g., https://ai.codata.org/collections_index"
                                     className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-black/20 dark:border-white/10 dark:text-white"
                                 />
                             </div>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Mail, Github, Terminal, Fingerprint, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../lib/utils';
+import { useUser } from '../context/UserContext';
 
 import { OAUTH_CONFIG } from '../config';
 
@@ -17,20 +18,166 @@ export default function VcWallet() {
     const [selectedType, setSelectedType] = useState(null);
     const [formData, setFormData] = useState({ token: '', subject_did: '', username: '', public_key: '', signature: '', orcid: '' });
     const [result, setResult] = useState(null);
+    const [socialProfile, setSocialProfile] = useState(null);
+    const { login } = useUser();
+
+    useEffect(() => {
+        const handleMessage = async (event) => {
+            if (event.data?.type === 'OAUTH_CALLBACK') {
+                const { provider, token, accessToken, orcid } = event.data;
+
+                if (provider === 'google' || provider === 'orcid') {
+                    try {
+                        // Decode the id_token JWT to get user info
+                        const base64Url = token.split('.')[1];
+                        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                        base64 += '='.repeat((4 - (base64.length % 4)) % 4);
+                        const jsonPayload = decodeURIComponent(
+                            atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+                        );
+                        const payload = JSON.parse(jsonPayload);
+                        let profile = {};
+
+                        if (provider === 'google') {
+                            profile = {
+                                name: payload.name,
+                                email: payload.email,
+                                picture: payload.picture,
+                                provider: 'google'
+                            };
+                            setFormData(prev => ({ ...prev, token }));
+                        } else if (provider === 'orcid') {
+                            // payload.sub is the ORCID iD (e.g. "0000-0001-9447-9830")
+                            const userOrcid = payload.sub || orcid;
+                            const name = payload.given_name
+                                ? `${payload.given_name} ${payload.family_name || ''}`.trim()
+                                : 'ORCID User';
+                            profile = {
+                                name,
+                                orcid: userOrcid,
+                                email: payload.email || `${userOrcid}@orcid.org`,
+                                provider: 'orcid'
+                            };
+                            // Fill the ORCID iD field from JWT sub, and token field from access_token
+                            setFormData(prev => ({
+                                ...prev,
+                                orcid: userOrcid || '',
+                                token: accessToken || token,
+                            }));
+                        }
+
+                        setSocialProfile(profile);
+
+                        // Check registry for an existing DID
+                        try {
+                            const registryKey = profile.email;
+                            const res = await api.get(`/registry/${encodeURIComponent(registryKey)}`);
+                            if (res.data?.did) {
+                                const existingDid = res.data.did;
+                                setFormData(prev => ({ ...prev, subject_did: existingDid }));
+                                login(profile, existingDid);
+                            }
+                        } catch (apiErr) {
+                            if (apiErr.response?.status !== 404) {
+                                console.error('Failed to fetch DID from registry', apiErr);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`Failed to parse ${provider} JWT token`, e);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        
+        // Check for fallback from redirect
+        const fallback = localStorage.getItem('oauth_fallback');
+        if (fallback) {
+            localStorage.removeItem('oauth_fallback');
+            try {
+                const data = JSON.parse(fallback);
+                // Simulate message event
+                handleMessage({ data: { type: 'OAUTH_CALLBACK', ...data } });
+                // Switch to the correct VC type tab automatically
+                setSelectedType(data.provider);
+            } catch (e) {
+                console.error("Failed to parse fallback oauth data", e);
+            }
+        }
+
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
 
     const issueMutation = useMutation({
         mutationFn: async (data) => {
             const endpoint = VC_TYPES.find(t => t.id === selectedType).endpoint;
             const res = await api.post(endpoint, data);
-            return res.data;
+            return { data: res.data, submittedData: data };
         },
-        onSuccess: (data) => setResult(data),
+        onSuccess: async ({ data, submittedData }) => {
+            setResult(data);
+            
+            // Log the user in context to display profile
+            const profile = socialProfile || { name: submittedData.username || 'User' };
+            login(profile, submittedData.subject_did);
+
+            // Send webhook to callback URL if specified
+            const searchParams = new URLSearchParams(window.location.search);
+            const callbackUrl = searchParams.get('callback');
+            if (callbackUrl) {
+                try {
+                    await fetch(callbackUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } catch (err) {
+                    console.error("Failed to POST to callback URL:", err);
+                }
+            }
+        },
         onError: (err) => alert(err.response?.data?.detail || "Failed to issue VC")
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        issueMutation.mutate(formData);
+        let submitData = { ...formData };
+
+        if (!submitData.subject_did) {
+            try {
+                const payload = socialProfile 
+                    ? { name: socialProfile.name, email: socialProfile.email, orcid: socialProfile.orcid } 
+                    : { purpose: "vc-subject" };
+                
+                const res = await api.post('/did/create', { payload });
+                if (res.data && res.data.did) {
+                    const newDid = res.data.did;
+                    submitData.subject_did = newDid;
+                    setFormData(prev => ({ ...prev, subject_did: newDid }));
+                    
+                    if (socialProfile?.email) {
+                        try {
+                            await api.post('/registry', {
+                                email: socialProfile.email,
+                                did: newDid
+                            });
+                        } catch (err) {
+                            console.error("Failed to save to server registry", err);
+                        }
+                    }
+                } else {
+                    throw new Error("Invalid response from DID creation");
+                }
+            } catch (err) {
+                alert("Failed to auto-generate DID: " + (err.response?.data?.detail || err.message));
+                return;
+            }
+        }
+
+        issueMutation.mutate(submitData);
     };
 
     const handleChange = (e) => {
@@ -49,8 +196,9 @@ export default function VcWallet() {
             state: 'random_state_string', // Should be random for security
         });
 
-        // Google uses 'response_type=id_token' for OIDC if not using code flow
-        if (provider === 'google') {
+        // Google and ORCID use OIDC implicit flow returning an id_token
+        if (provider === 'google' || provider === 'orcid') {
+            // ORCID requires 'token id_token' or 'id_token'
             params.set('response_type', 'id_token');
             params.set('nonce', 'random_nonce');
         }
@@ -111,11 +259,10 @@ export default function VcWallet() {
                                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Subject DID</label>
                                     <input
                                         name="subject_did"
-                                        placeholder="did:oyd:..."
+                                        placeholder="Leave empty to auto-generate"
                                         className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors dark:bg-black/20 dark:border-white/10 dark:text-white"
                                         value={formData.subject_did}
                                         onChange={handleChange}
-                                        required
                                     />
                                 </div>
 
@@ -123,14 +270,34 @@ export default function VcWallet() {
                                     <div>
                                         <div className="flex justify-between items-center mb-1">
                                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Google ID Token</label>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleSocialLogin('google')}
-                                                className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-2 py-1 rounded border border-red-200 transition-colors dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
-                                            >
-                                                Connect Google Account
-                                            </button>
+                                            {!socialProfile && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSocialLogin('google')}
+                                                    className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-2 py-1 rounded border border-red-200 transition-colors dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
+                                                >
+                                                    Connect Google Account
+                                                </button>
+                                            )}
                                         </div>
+                                        {socialProfile && (
+                                            <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg mb-3 dark:bg-white/5 dark:border-white/10">
+                                                {socialProfile.picture && (
+                                                    <img src={socialProfile.picture} alt="Profile" className="w-10 h-10 rounded-full" />
+                                                )}
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{socialProfile.name}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{socialProfile.email}</div>
+                                                </div>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setSocialProfile(null) || setFormData({...formData, token: ''})}
+                                                    className="ml-auto text-xs text-red-500 hover:text-red-700 underline"
+                                                >
+                                                    Disconnect
+                                                </button>
+                                            </div>
+                                        )}
                                         <textarea
                                             name="token"
                                             rows={4}
@@ -172,14 +339,34 @@ export default function VcWallet() {
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
                                                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">ORCID iD</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleSocialLogin('orcid')}
-                                                    className="text-xs bg-green-50 text-green-600 hover:bg-green-100 px-2 py-1 rounded border border-green-200 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30"
-                                                >
-                                                    Connect ORCID
-                                                </button>
+                                                {!socialProfile && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSocialLogin('orcid')}
+                                                        className="text-xs bg-green-50 text-green-600 hover:bg-green-100 px-2 py-1 rounded border border-green-200 transition-colors dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30"
+                                                    >
+                                                        Connect ORCID
+                                                    </button>
+                                                )}
                                             </div>
+                                            {socialProfile && socialProfile.provider === 'orcid' && (
+                                                <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg mb-3 dark:bg-green-900/10 dark:border-green-700/30">
+                                                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center dark:bg-green-900/30">
+                                                        <Fingerprint size={16} className="text-green-600 dark:text-green-400" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{socialProfile.name}</div>
+                                                        <div className="text-xs text-green-600 dark:text-green-400 font-mono">{socialProfile.orcid}</div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setSocialProfile(null); setFormData(prev => ({ ...prev, orcid: '', token: '' })); }}
+                                                        className="text-xs text-red-500 hover:text-red-700 underline flex-shrink-0"
+                                                    >
+                                                        Disconnect
+                                                    </button>
+                                                </div>
+                                            )}
                                             <input
                                                 name="orcid"
                                                 placeholder="0000-0000-0000-0000"

@@ -14,7 +14,7 @@ export const OAUTH_CONFIG = {
     orcid: {
         clientId: import.meta.env.VITE_ORCID_CLIENT_ID || "APP-YOUR_ORCID_CLIENT_ID",
         authUrl: "https://orcid.org/oauth/authorize",
-        scope: "/read-limited",
+        scope: "openid /authenticate",
         redirectUri: import.meta.env.VITE_REDIRECT_URI ? `${import.meta.env.VITE_REDIRECT_URI}/auth/orcid/callback` : "http://localhost:5173/auth/orcid/callback"
     }
 };

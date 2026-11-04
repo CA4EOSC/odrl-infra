@@ -4,10 +4,12 @@ WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend ./
-ARG GOOGLE_CLIENT_ID
-ARG REDIRECT_URI
-ENV VITE_GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-ENV VITE_REDIRECT_URI=$REDIRECT_URI
+ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_REDIRECT_URI
+ARG VITE_ORCID_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+ENV VITE_REDIRECT_URI=$VITE_REDIRECT_URI
+ENV VITE_ORCID_CLIENT_ID=$VITE_ORCID_CLIENT_ID
 RUN npm run build
 
 # Stage 2: Backend & Runtime
@@ -27,16 +29,17 @@ WORKDIR /usr/src/oydid-gem
 RUN gem build oydid.gemspec && gem install oydid-*.gem
 
 # Install Python dependencies
-# Added aiofiles for FastAPI StaticFiles
-RUN pip3 install --no-cache-dir pytest fastapi uvicorn google-auth requests rdflib aiofiles qdrant-client fastembed --break-system-packages
+# Added aiofiles for FastAPI StaticFiles, pyshacl for SHACL verification
+RUN pip3 install --no-cache-dir pytest fastapi uvicorn google-auth requests rdflib aiofiles qdrant-client fastembed pyshacl --break-system-packages
 
 # Setup OYDID CLI
 COPY oydid/cli/oydid.rb /usr/local/bin/oydid
 RUN chmod 755 /usr/local/bin/oydid
 
-# Copy test script and API app
+# Copy test script, CLI, and API app
 COPY tests /usr/src/app/tests
 COPY app /usr/src/app/app
+COPY cli /usr/src/app/cli
 
 # Copy Frontend Build Artifacts
 # Copy to a location outside /usr/src/app to avoid volume masking
