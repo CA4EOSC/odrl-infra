@@ -1,52 +1,52 @@
-@prefix cv1: <https://w3id.org/cdif/access/action/> .
-@prefix cv3: <https://w3id.org/cdif/access/constraint/> .
+@prefix cv1: <https://odrl.codata.org/cv1/> .
+@prefix cv3: <https://odrl.codata.org/cv3/> .
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 cv3:EnvironmentalRestriction a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:note "Associated duty action: VerifyResearchEnvironment"@en ;
     skos:prefLabel "EnvironmentalRestriction"@en ;
     skos:related cv1:verifyResearchEnvironment ;
     skos:scopeNote "Characteristics of ReUse Environment e.g. TRE (cf. \"Safe Settings\""@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:FinancialRestrictions a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:note "Associated duty action: Payment requirements"@en ;
     skos:prefLabel "FinancialRestrictions"@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:IdentityAndAccessRestrictions a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:note "Associated duty action: Login and"@en ;
     skos:prefLabel "IdentityAndAccessRestrictions"@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:LegalAndRegulatoryRestrictions a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "LegalAndRegulatoryRestrictions"@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:PersonRestrictions a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "PersonRestrictions"@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:RoleRestrictions a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:note "Associated duty action: e.g. Supervisor of Student, Role in Institution"@en ;
     skos:prefLabel "RoleRestrictions"@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:UsageContextRestrictions a skos:Concept ;
-    skos:inScheme <https://w3id.org/cdif/access/constraint> ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:note "Associated duty action: e.g. Project purpose and abstract, ProjectApproval, EthicsApproval"@en ;
     skos:prefLabel "UsageContextRestrictions"@en ;
-    skos:topConceptOf <https://w3id.org/cdif/access/constraint> .
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-<https://w3id.org/cdif/access/constraint> a skos:ConceptScheme ;
+<https://odrl.codata.org/cv3> a skos:ConceptScheme ;
     dct:created "2026-11-04"^^xsd:date ;
     dct:description "Other constraints describing the scope of applicability of a CDIF access policy (environment, legal, usage context, person, identity, role, financial, ...)."@en ;
     dct:source <https://www.w3.org/TR/odrl-vocab/#actionsCommon> ;

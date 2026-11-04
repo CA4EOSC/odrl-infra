@@ -21,6 +21,7 @@ from cli.create_policy import (
 )
 from ..services.oydid import run_oydid_command
 from ..services.qdrant_service import qdrant_service
+from ..services import cdif_vocab
 
 router = APIRouter(prefix="/policy", tags=["ODRL & OAC Policy Service"])
 
@@ -77,6 +78,20 @@ async def get_vocab_helpers():
     }
 
 
+@router.get("/vocab/cdif")
+async def get_cdif_vocabularies():
+    """Returns the CDIF access vocabularies (SKOS): CV1 actions, CV2 purposes, CV3 other constraints."""
+    return cdif_vocab.all_schemes()
+
+
+@router.get("/vocab/cdif/{scheme}")
+async def get_cdif_vocabulary(scheme: str):
+    """Returns one CDIF vocabulary: cv1 (actions), cv2 (purposes) or cv3 (other constraints)."""
+    if scheme not in cdif_vocab.SCHEMES:
+        raise HTTPException(status_code=404, detail=f"Unknown vocabulary '{scheme}', use cv1, cv2 or cv3")
+    return cdif_vocab.load_scheme(scheme)
+
+
 @router.get("/presets/{preset_name}")
 async def get_preset(preset_name: str):
     """Returns pre-configured policy templates such as listing-4.2, duo-0000042, duo-0000024, or any DUODRL code."""
@@ -112,7 +127,8 @@ async def validate_policy(request: ValidatePolicyRequest):
     is_valid, errors = Validator.validate_policy(request.policy)
     return {
         "valid": is_valid,
-        "errors": errors
+        "errors": errors,
+        "warnings": cdif_vocab.policy_warnings(request.policy),
     }
 
 
