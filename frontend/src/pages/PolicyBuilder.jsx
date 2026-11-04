@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../lib/utils';
+import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
+import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, ruleGroupLabel } from '../lib/vocabTree';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
 const ODRL_OPERATORS = [
@@ -80,6 +82,27 @@ const ODRL_LEFT_OPERANDS = [
     { value: 'odrl:virtualLocation', label: 'virtualLocation', description: 'virtual (IT) location' },
 ];
 
+// Defaults for new rules and rows: a new permission starts as "download" for academic research.
+const DEFAULT_PERMISSION_ACTION = 'cv1:download';
+const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // CDIF CV2 cv2:AcademicResearch
+const newPurposeConstraint = () => ({ title: '', leftOperand: 'oac:Purpose', operator: 'odrl:isA', rightOperand: DEFAULT_PURPOSE });
+
+// Semantic categories for the ODRL 2.2 left operands in the browse window.
+const LEFT_OPERAND_CATEGORIES = {
+    Time: ['dateTime', 'delayPeriod', 'elapsedTime', 'meteredTime', 'timeInterval'],
+    Location: ['spatial', 'spatialCoordinates', 'virtualLocation'],
+    'Quantity & payment': ['count', 'unitOfCount', 'percentage', 'payAmount'],
+    'Part of the asset': ['absolutePosition', 'absoluteSize', 'absoluteSpatialPosition', 'absoluteTemporalPosition',
+        'relativePosition', 'relativeSize', 'relativeSpatialPosition', 'relativeTemporalPosition'],
+    'Usage context': ['purpose', 'recipient', 'industry', 'language', 'product', 'event', 'deliveryChannel'],
+    Technical: ['fileFormat', 'media', 'resolution', 'systemDevice', 'version', 'device', 'system'],
+};
+const ODRL_LEFT_OPERAND_TERMS = ODRL_LEFT_OPERANDS.map(t => ({
+    ...t,
+    group: Object.keys(LEFT_OPERAND_CATEGORIES).find(k => LEFT_OPERAND_CATEGORIES[k].includes(t.label)) || 'Other',
+    deprecated: t.description.includes('deprecated'),
+}));
+
 // Compact select for ODRL terms: short names in the list, the description as tooltip.
 // Select for vocabulary terms: shows the prefixed term (e.g. odrl:isA), description as tooltip.
 // "groups" adds labelled sections, e.g. CDIF CV3 terms before the ODRL left operands.
@@ -101,13 +124,26 @@ function TermSelect({ value, terms, groups = [], name, placeholder, ...props }) 
     );
 }
 
-const LeftOperandSelect = (props) => (
-    <TermSelect terms={ODRL_LEFT_OPERANDS} name="Left operand" placeholder="Left Operand" {...props} />
-);
+// Left operand select with a browse icon that opens the hierarchical browser.
+function LeftOperandSelect({ className, groups = [], onChange, ...props }) {
+    const browse = useBrowse();
+    const select = (
+        <TermSelect terms={ODRL_LEFT_OPERANDS} groups={groups} name="Left operand" placeholder="Left Operand"
+            onChange={onChange} className={cn(className, browse && 'flex-1 min-w-0')} {...props} />
+    );
+    if (!browse) return select;
+    return (
+        <div className="flex gap-1 min-w-0">
+            {select}
+            <BrowseIconButton
+                title="Browse left operands"
+                onClick={() => browse.openLeftOperands({ value: props.value, groups, onSelect: v => onChange({ target: { value: v } }) })}
+            />
+        </div>
+    );
+}
 const OperatorSelect = (props) => <TermSelect terms={ODRL_OPERATORS} name="Operator" {...props} />;
 
-// "AcademicResearch" / "Non-Commercial Research" -> "Academic Research" / "Non Commercial Research"
-const humanize = (label) => label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 // Group CDIF CV2 purposes for the dropdown: each top-level purpose that has narrower purposes
 // becomes a heading (itself + its descendants); top-level leaves go under "Other purposes".
@@ -141,8 +177,10 @@ function PurposeSelect({ value, concepts, onChange, className }) {
     const known = concepts.find(c => c.value === value);
     const [customMode, setCustomMode] = useState(false);
     const showCustom = customMode;
+    const browse = useBrowse();
     return (
-        <div className="space-y-1">
+        <div className="space-y-1 min-w-0">
+            <div className="flex gap-1 min-w-0">
             <select
                 value={showCustom ? OTHER_PURPOSE : (value || '')}
                 title={known ? `${known.value} — ${known.definition || humanize(known.label)}` : 'Right operand: purpose (CDIF CV2)'}
@@ -154,7 +192,7 @@ function PurposeSelect({ value, concepts, onChange, className }) {
                         onChange(e.target.value);
                     }
                 }}
-                className={className}
+                className={cn(className, 'flex-1 min-w-0')}
             >
                 <option value="" disabled>{concepts.length ? 'Right Operand' : 'Loading purposes…'}</option>
                 {!known && value && !showCustom && <option value={value}>{value}</option>}
@@ -170,6 +208,13 @@ function PurposeSelect({ value, concepts, onChange, className }) {
                 ))}
                 <option value={OTHER_PURPOSE}>Other (enter an IRI)…</option>
             </select>
+            {browse && (
+                <BrowseIconButton
+                    title="Browse purposes"
+                    onClick={() => browse.openPurposes({ value, onSelect: (v) => { setCustomMode(false); onChange(v); } })}
+                />
+            )}
+            </div>
             {showCustom && (
                 <input
                     type="text"
@@ -248,7 +293,8 @@ export default function PolicyBuilder() {
     // Action Vocabulary Profile Selection: W3C ODRL 2.2 vs CDIF ODRL v2.3
     const [actionVocabProfile, setActionVocabProfile] = useState('https://www.w3.org/TR/odrl-vocab/#actionConcepts');
     const [actionPickerTarget, setActionPickerTarget] = useState(null); // { type: 'permission'|'prohibition'|'duty', index: number } | null
-    const [actionPickerSearch, setActionPickerSearch] = useState('');
+    // Hierarchical browse window for purposes / left operands: { title, subtitle, nodes, value, selectLabel, onSelect } | null
+    const [browser, setBrowser] = useState(null);
     // Main Tabs: 'specification' | 'permissions' | 'prohibitions' | 'duodrl'
     const [activeTab, setActiveTab] = useState('specification');
     // Modal views triggered from Policy Operations menu
@@ -299,7 +345,9 @@ export default function PolicyBuilder() {
             : (ruleTypesOf(c).join(' / ') || (c.value.startsWith('cv1:') ? 'CDIF extension' : 'ODRL Common')),
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ')
             + (c.replacedBy ? ` Use ${c.replacedBy} instead.` : ''),
-        deprecated: c.deprecated
+        deprecated: c.deprecated,
+        id: c.id,
+        collections: c.collections || []
     }));
 
     // Fallback CDIF actions, used only until/if the CV1 vocabulary cannot be loaded
@@ -631,9 +679,9 @@ export default function PolicyBuilder() {
         setPermissions([
             ...permissions,
             {
-                action: 'oac:Read',
+                action: DEFAULT_PERMISSION_ACTION,
                 refinements: [],
-                constraints: [],
+                constraints: [newPurposeConstraint()],
                 otherConstraints: []
             }
         ]);
@@ -663,12 +711,7 @@ export default function PolicyBuilder() {
 
     const addPermissionConstraint = (pIndex) => {
         const next = [...permissions];
-        next[pIndex].constraints.push({
-            title: '',
-            leftOperand: 'oac:Purpose',
-            operator: 'odrl:isA',
-            rightOperand: cdifPurposes[0]?.value || 'dpv:AcademicResearch'
-        });
+        next[pIndex].constraints.push(newPurposeConstraint());
         setPermissions(next);
     };
 
@@ -801,6 +844,25 @@ export default function PolicyBuilder() {
         setDuties(next);
     };
 
+    // Browse windows. onSelect receives the chosen term; the window closes afterwards.
+    const openBrowser = (opts) => setBrowser({
+        ...opts,
+        onSelect: (v) => { opts.onSelect(v); setBrowser(null); },
+    });
+    const browseApi = {
+        openPurposes: ({ value, onSelect, selectLabel = 'Use this purpose' }) => openBrowser({
+            title: 'Browse purposes',
+            subtitle: 'CDIF CV2 purpose constraints. A broader purpose includes all purposes under it.',
+            nodes: purposeTree(cdifPurposes),
+            value, selectLabel, onSelect,
+        }),
+        openLeftOperands: ({ value, groups = [], onSelect, selectLabel = 'Use this left operand' }) => openBrowser({
+            title: 'Browse constraints',
+            subtitle: groups.length ? 'CDIF other constraints (CV3) and ODRL 2.2 left operands.' : 'ODRL 2.2 left operands.',
+            nodes: leftOperandTree(groups, ODRL_LEFT_OPERAND_TERMS),
+            value, selectLabel, onSelect,
+        }),
+    };
     // Handler to apply selected action to the active rule
     const selectActionForTarget = (actionIri) => {
         if (!actionPickerTarget) return;
@@ -819,10 +881,10 @@ export default function PolicyBuilder() {
             setDuties(next);
         }
         setActionPickerTarget(null);
-        setActionPickerSearch('');
     };
 
     return (
+        <BrowseContext.Provider value={browseApi}>
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-6">
@@ -1173,13 +1235,6 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setActionPickerTarget({ type: 'permission', index: pIdx })}
-                                                            className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 font-medium"
-                                                        >
-                                                            <BookOpen size={11} /> Browse actions
-                                                        </button>
-                                                        <button
-                                                            type="button"
                                                             onClick={() => addPermissionRefinement(pIdx)}
                                                             className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
                                                         >
@@ -1187,16 +1242,22 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    value={p.action}
-                                                    onChange={(e) => {
-                                                        const next = [...permissions];
-                                                        next[pIdx].action = e.target.value;
-                                                        setPermissions(next);
-                                                    }}
-                                                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono"
-                                                />
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        value={p.action}
+                                                        onChange={(e) => {
+                                                            const next = [...permissions];
+                                                            next[pIdx].action = e.target.value;
+                                                            setPermissions(next);
+                                                        }}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                    />
+                                                    <BrowseIconButton
+                                                        title="Browse actions"
+                                                        onClick={() => setActionPickerTarget({ type: 'permission', index: pIdx })}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1503,13 +1564,6 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setActionPickerTarget({ type: 'prohibition', index: pIdx })}
-                                                            className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 font-medium"
-                                                        >
-                                                            <BookOpen size={11} /> Browse
-                                                        </button>
-                                                        <button
-                                                            type="button"
                                                             onClick={() => addProhibitionRefinement(pIdx)}
                                                             className="text-[11px] text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-0.5"
                                                         >
@@ -1517,16 +1571,22 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    value={p.action}
-                                                    onChange={(e) => {
-                                                        const next = [...prohibitions];
-                                                        next[pIdx].action = e.target.value;
-                                                        setProhibitions(next);
-                                                    }}
-                                                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono"
-                                                />
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        value={p.action}
+                                                        onChange={(e) => {
+                                                            const next = [...prohibitions];
+                                                            next[pIdx].action = e.target.value;
+                                                            setProhibitions(next);
+                                                        }}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                    />
+                                                    <BrowseIconButton
+                                                        title="Browse actions"
+                                                        onClick={() => setActionPickerTarget({ type: 'prohibition', index: pIdx })}
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div>
@@ -1794,13 +1854,6 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => setActionPickerTarget({ type: 'duty', index: dIdx })}
-                                                            className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-0.5 font-medium"
-                                                        >
-                                                            <BookOpen size={11} /> Browse actions
-                                                        </button>
-                                                        <button
-                                                            type="button"
                                                             onClick={() => addDutyRefinement(dIdx)}
                                                             className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-0.5"
                                                         >
@@ -1808,17 +1861,23 @@ export default function PolicyBuilder() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    placeholder="e.g. odrl:attribute, odrl:compensate"
-                                                    value={d.action}
-                                                    onChange={(e) => {
-                                                        const next = [...duties];
-                                                        next[dIdx].action = e.target.value;
-                                                        setDuties(next);
-                                                    }}
-                                                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono"
-                                                />
+                                                <div className="flex gap-1.5">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="e.g. odrl:attribute, odrl:compensate"
+                                                        value={d.action}
+                                                        onChange={(e) => {
+                                                            const next = [...duties];
+                                                            next[dIdx].action = e.target.value;
+                                                            setDuties(next);
+                                                        }}
+                                                        className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                    />
+                                                    <BrowseIconButton
+                                                        title="Browse actions"
+                                                        onClick={() => setActionPickerTarget({ type: 'duty', index: dIdx })}
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div>
@@ -2219,118 +2278,54 @@ export default function PolicyBuilder() {
                 </div>
             )}
 
-            {/* Action Picker Pop-up Modal */}
-            {actionPickerTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-2xl bg-white dark:bg-[#121212] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-                        {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
-                            <div className="space-y-1">
-                                <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <BookOpen size={18} className="text-indigo-600 dark:text-indigo-400" />
-                                    Select Action for {actionPickerTarget.type.charAt(0).toUpperCase() + actionPickerTarget.type.slice(1)} #{actionPickerTarget.index + 1}
-                                </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Choose from available actions under <span className="font-mono font-semibold text-indigo-600 dark:text-indigo-400">{actionVocabProfile.includes('cdif') ? 'CDIF CV1 Actions' : 'W3C ODRL 2.2 Core'}</span>
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setActionPickerTarget(null);
-                                    setActionPickerSearch('');
-                                }}
-                                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 transition-all"
+            {/* Action Picker: hierarchical browse window */}
+            {actionPickerTarget && (() => {
+                const { type, index } = actionPickerTarget;
+                const rules = { permission: permissions, prohibition: prohibitions, duty: duties }[type] || [];
+                const ruleType = type.charAt(0).toUpperCase() + type.slice(1);
+                const ruleGroup = ruleGroupLabel(ruleType);
+                const isCdif = actionVocabProfile.includes('cdif');
+                return (
+                    <VocabBrowser
+                        key={actionVocabProfile}
+                        title={`Select action for ${ruleType} #${index + 1}`}
+                        subtitle={isCdif
+                            ? 'CDIF CV1 actions, grouped by source and by the rule type they are typically used in.'
+                            : 'W3C ODRL 2.2 Core actions, grouped by category.'}
+                        nodes={actionTree(currentActionsList)}
+                        value={rules[index]?.action}
+                        defaultExpanded={isCdif ? [`/CDIF-specific actions/${ruleGroup}`, `/ODRL Common Vocabulary/${ruleGroup}`] : []}
+                        selectLabel="Use this action"
+                        onSelect={selectActionForTarget}
+                        onClose={() => setActionPickerTarget(null)}
+                        toolbar={
+                            <select
+                                value={actionVocabProfile}
+                                onChange={(e) => setActionVocabProfile(e.target.value)}
+                                title="Action vocabulary profile"
+                                className="px-2 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                             >
-                                Cancel
-                            </button>
-                        </div>
+                                <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">W3C ODRL 2.2</option>
+                                <option value="https://cdif.codata.org/odrl/v2.3">CDIF CV1 Actions</option>
+                            </select>
+                        }
+                    />
+                );
+            })()}
 
-                        {/* Search and Profile Switcher in Modal */}
-                        <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/30 dark:bg-white/[0.01] space-y-3">
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Search action by name, category, or description..."
-                                    value={actionPickerSearch}
-                                    onChange={(e) => setActionPickerSearch(e.target.value)}
-                                    autoFocus
-                                    className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs focus:ring-2 focus:ring-indigo-500"
-                                />
-                                <select
-                                    value={actionVocabProfile}
-                                    onChange={(e) => setActionVocabProfile(e.target.value)}
-                                    className="px-3 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">
-                                        W3C ODRL 2.2
-                                    </option>
-                                    <option value="https://cdif.codata.org/odrl/v2.3">
-                                        CDIF CV1 Actions
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Actions List Grid */}
-                        <div className="p-6 overflow-y-auto space-y-3 custom-scrollbar flex-1">
-                            {(() => {
-                                const q = actionPickerSearch.toLowerCase().trim();
-                                const filtered = currentActionsList.filter(a =>
-                                    !q ||
-                                    a.iri.toLowerCase().includes(q) ||
-                                    a.name.toLowerCase().includes(q) ||
-                                    (a.category && a.category.toLowerCase().includes(q)) ||
-                                    (a.description && a.description.toLowerCase().includes(q))
-                                );
-
-                                if (filtered.length === 0) {
-                                    return (
-                                        <div className="text-center py-10 text-xs text-gray-500 dark:text-gray-400">
-                                            No actions matching &ldquo;{actionPickerSearch}&rdquo;.
-                                        </div>
-                                    );
-                                }
-
-                                return (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                        {filtered.map((act) => (
-                                            <button
-                                                key={`${act.iri}|${act.name}`}
-                                                type="button"
-                                                onClick={() => selectActionForTarget(act.iri)}
-                                                className="text-left p-3 rounded-xl border border-gray-200 dark:border-white/10 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-white/[0.02] hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all group flex flex-col justify-between"
-                                            >
-                                                <div>
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <span className={cn(
-                                                            "font-mono text-xs font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400",
-                                                            act.deprecated && "line-through opacity-60"
-                                                        )}>
-                                                            {act.iri}
-                                                        </span>
-                                                        {act.category && (
-                                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
-                                                                {act.category}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                                                        {act.description}
-                                                    </p>
-                                                </div>
-                                                <div className="mt-2 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    Select action &rarr;
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
-                        </div>
-                    </div>
-                </div>
+            {/* Hierarchical browse window (purposes, constraints) */}
+            {browser && (
+                <VocabBrowser
+                    title={browser.title}
+                    subtitle={browser.subtitle}
+                    nodes={browser.nodes}
+                    value={browser.value}
+                    selectLabel={browser.selectLabel}
+                    onSelect={browser.onSelect}
+                    onClose={() => setBrowser(null)}
+                />
             )}
         </div>
+        </BrowseContext.Provider>
     );
 }
