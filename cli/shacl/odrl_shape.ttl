@@ -1,0 +1,301 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix oac: <https://w3id.org/oac/> .
+@prefix dpv: <https://w3id.org/dpv#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix duodrl: <https://w3id.org/duodrl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.com/shacl/odrl#> .
+
+# ==============================================================================
+# SHACL Shapes for W3C ODRL 2.2 and OAC Privacy Profile Policy Validation
+# ==============================================================================
+
+ex:PolicyShape
+    a sh:NodeShape ;
+    sh:targetClass odrl:Policy, odrl:Offer, odrl:Agreement, odrl:Set, odrl:Request, oac:PrivacyPolicy ;
+    sh:targetNode odrl:Policy ;
+    rdfs:label "ODRL / OAC Policy Shape" ;
+    rdfs:comment "Validates an ODRL policy and ensures proper identifiers and rules." ;
+    
+    # Must have an identifier
+    sh:property [
+        sh:path odrl:uid ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Policy must have exactly one odrl:uid identifier." ;
+    ] ;
+
+    # Optional metadata
+    sh:property [
+        sh:path rdfs:label ;
+        sh:maxCount 1 ;
+        sh:message "rdfs:label provides human-readable policy description." ;
+    ] ;
+    sh:property [
+        sh:path skos:exactMatch ;
+        sh:message "skos:exactMatch links policy to exact vocabulary concept (e.g. obo:DUO_0000042)." ;
+    ] ;
+    sh:property [
+        sh:path skos:editorialNote ;
+        sh:message "skos:editorialNote contains mapping notes or interpretations." ;
+    ] ;
+    sh:property [
+        sh:path odrl:profile ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "odrl:profile must be an IRI or profile prefix." ;
+    ] ;
+    sh:property [
+        sh:path dcterms:description ;
+        sh:datatype xsd:string ;
+        sh:message "dcterms:description should be a literal string." ;
+    ] ;
+    sh:property [
+        sh:path dcterms:creator ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "dcterms:creator must be an IRI or literal identifier." ;
+    ] ;
+    sh:property [
+        sh:path odrl:target ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "Policy-level odrl:target must be an IRI or literal identifier." ;
+    ] ;
+    sh:property [
+        sh:path odrl:assigner ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "Policy-level odrl:assigner must be an IRI or literal identifier." ;
+    ] ;
+    sh:property [
+        sh:path dcterms:issued ;
+        sh:message "dcterms:issued indicates issuance timestamp." ;
+    ] ;
+
+    # A policy should have at least one rule (permission, prohibition, or obligation)
+    sh:or (
+        [
+            sh:property [
+                sh:path odrl:permission ;
+                sh:minCount 1 ;
+                sh:node ex:PermissionShape ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path odrl:prohibition ;
+                sh:minCount 1 ;
+                sh:node ex:ProhibitionShape ;
+            ]
+        ]
+        [
+            sh:property [
+                sh:path odrl:obligation ;
+                sh:minCount 1 ;
+                sh:node ex:DutyShape ;
+            ]
+        ]
+    ) ;
+    sh:message "A Policy must specify at least one odrl:permission, odrl:prohibition, or odrl:obligation." .
+
+
+# ==============================================================================
+# Permission Rule Shape
+# ==============================================================================
+
+ex:PermissionShape
+    a sh:NodeShape ;
+    rdfs:label "ODRL Permission Shape" ;
+    rdfs:comment "Validates an ODRL / OAC Permission rule." ;
+    
+    # Target Asset (can be specified on rule or inherited from Policy)
+    sh:property [
+        sh:path odrl:target ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Permission target asset must be an IRI or literal if specified." ;
+    ] ;
+
+    # Action
+    sh:property [
+        sh:path odrl:action ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Permission rule must specify exactly one action (odrl:action)." ;
+    ] ;
+    sh:property [
+        sh:path ( odrl:action odrl:refinement ) ;
+        sh:node ex:ConstraintShape ;
+        sh:message "Any refinement inside an Action must conform to ConstraintShape." ;
+    ] ;
+
+    # Assigner (optional or required depending on Offer/Agreement)
+    sh:property [
+        sh:path odrl:assigner ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "odrl:assigner must be an IRI or literal." ;
+    ] ;
+
+    # Assignee (optional)
+    sh:property [
+        sh:path odrl:assignee ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "odrl:assignee must be an IRI or literal." ;
+    ] ;
+
+    # DPV Context (e.g. dpv:Required, dpv:Optional)
+    sh:property [
+        sh:path dpv:hasContext ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "dpv:hasContext specifies whether consent/processing is Required or Optional." ;
+    ] ;
+
+    # Constraints (optional, but if present must be valid)
+    sh:property [
+        sh:path odrl:constraint ;
+        sh:node ex:ConstraintShape ;
+        sh:message "Any constraint inside a Permission must conform to ConstraintShape." ;
+    ] ;
+
+    # Consequential duty (optional)
+    sh:property [
+        sh:path odrl:duty ;
+        sh:node ex:DutyShape ;
+        sh:message "Consequential duty inside permission must conform to DutyShape." ;
+    ] .
+
+
+# ==============================================================================
+# Prohibition Rule Shape
+# ==============================================================================
+
+ex:ProhibitionShape
+    a sh:NodeShape ;
+    rdfs:label "ODRL Prohibition Shape" ;
+    rdfs:comment "Validates an ODRL Prohibition rule." ;
+
+    # Target Asset
+    sh:property [
+        sh:path odrl:target ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Prohibition rule must specify exactly one target asset (odrl:target)." ;
+    ] ;
+
+    # Action
+    sh:property [
+        sh:path odrl:action ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Prohibition rule must specify exactly one action (odrl:action)." ;
+    ] ;
+    sh:property [
+        sh:path ( odrl:action odrl:refinement ) ;
+        sh:node ex:ConstraintShape ;
+        sh:message "Any refinement inside a prohibited Action must conform to ConstraintShape." ;
+    ] ;
+
+    # Output (optional, e.g. duodrl:ResultsOfStudies)
+    sh:property [
+        sh:path odrl:output ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "odrl:output specifies the resulting asset or derivative affected." ;
+    ] ;
+
+    # Assigner
+    sh:property [
+        sh:path odrl:assigner ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+    ] ;
+
+    # Constraints
+    sh:property [
+        sh:path odrl:constraint ;
+        sh:node ex:ConstraintShape ;
+    ] .
+
+
+# ==============================================================================
+# Duty / Obligation Rule Shape
+# ==============================================================================
+
+ex:DutyShape
+    a sh:NodeShape ;
+    rdfs:label "ODRL Duty Shape" ;
+    rdfs:comment "Validates an ODRL Duty / Obligation." ;
+
+    # Action
+    sh:property [
+        sh:path odrl:action ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Duty must specify an action to be executed (odrl:action)." ;
+    ] ;
+
+    # Target (optional in duties like attribute, compensation)
+    sh:property [
+        sh:path odrl:target ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+    ] ;
+
+    # Constraints
+    sh:property [
+        sh:path odrl:constraint ;
+        sh:node ex:ConstraintShape ;
+    ] .
+
+
+# ==============================================================================
+# Constraint Shape
+# ==============================================================================
+
+ex:ConstraintShape
+    a sh:NodeShape ;
+    rdfs:label "ODRL / OAC Constraint Shape" ;
+    rdfs:comment "Validates constraint properties (leftOperand, operator, rightOperand)." ;
+
+    # Left Operand
+    sh:property [
+        sh:path odrl:leftOperand ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Constraint must specify exactly one left operand (odrl:leftOperand)." ;
+    ] ;
+
+    # Operator
+    sh:property [
+        sh:path odrl:operator ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Constraint must specify exactly one operator (odrl:operator, e.g. odrl:isA, oac:isNotA, odrl:eq)." ;
+    ] ;
+
+    # Right Operand
+    sh:property [
+        sh:path odrl:rightOperand ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRIOrLiteral ;
+        sh:message "A Constraint must specify at least one right operand (odrl:rightOperand)." ;
+    ] ;
+
+    # Title / Description
+    sh:property [
+        sh:path dcterms:title ;
+        sh:datatype xsd:string ;
+        sh:message "dcterms:title provides human-readable purpose or constraint rationale." ;
+    ] .
+
