@@ -1322,10 +1322,12 @@ export default function PolicyBuilder() {
                                                             </button>
                                                         </div>
                                                         <div className="grid grid-cols-3 gap-2">
-                                                            <LeftOperandSelect
-                                                                value={c.leftOperand}
-                                                                onChange={(e) => update('leftOperand', e.target.value)}
-                                                                className={fieldCls}
+                                                            <input
+                                                                type="text"
+                                                                readOnly
+                                                                value={c.leftOperand || 'oac:Purpose'}
+                                                                title="Left operand of a purpose constraint (fixed)"
+                                                                className={cn(fieldCls, "text-gray-500 dark:text-gray-400 cursor-default focus:outline-none")}
                                                             />
                                                             <OperatorSelect
                                                                 value={c.operator}
