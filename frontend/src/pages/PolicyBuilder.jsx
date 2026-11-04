@@ -26,6 +26,34 @@ import {
 import api from '../services/api';
 import { cn } from '../lib/utils';
 
+// ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
+const ODRL_OPERATORS = [
+    { value: 'odrl:eq', label: 'eq — equal to' },
+    { value: 'odrl:neq', label: 'neq — not equal to' },
+    { value: 'odrl:gt', label: 'gt — greater than' },
+    { value: 'odrl:gteq', label: 'gteq — greater than or equal' },
+    { value: 'odrl:lt', label: 'lt — less than' },
+    { value: 'odrl:lteq', label: 'lteq — less than or equal' },
+    { value: 'odrl:isA', label: 'isA — is an instance of' },
+    { value: 'odrl:hasPart', label: 'hasPart — contains' },
+    { value: 'odrl:isPartOf', label: 'isPartOf — is contained in' },
+    { value: 'odrl:isAllOf', label: 'isAllOf — is all of' },
+    { value: 'odrl:isAnyOf', label: 'isAnyOf — is any of' },
+    { value: 'odrl:isNoneOf', label: 'isNoneOf — is none of' },
+];
+
+function OperatorSelect({ value, ...props }) {
+    const known = ODRL_OPERATORS.some(o => o.value === value);
+    return (
+        <select value={value} title="Operator" {...props}>
+            {!known && value && <option value={value}>{value} (non-standard)</option>}
+            {ODRL_OPERATORS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+        </select>
+    );
+}
+
 export default function PolicyBuilder() {
     // Basic Policy Metadata
     const [policyType, setPolicyType] = useState('Offer');
@@ -1048,9 +1076,7 @@ export default function PolicyBuilder() {
                                                                 }}
                                                                 className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                             />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Operator"
+                                                            <OperatorSelect
                                                                 value={r.operator}
                                                                 onChange={(e) => {
                                                                     const next = [...permissions];
@@ -1125,9 +1151,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
@@ -1201,9 +1225,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator (e.g. odrl:eq, odrl:lt)"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
@@ -1423,9 +1445,7 @@ export default function PolicyBuilder() {
                                                                 }}
                                                                 className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                             />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Operator"
+                                                            <OperatorSelect
                                                                 value={r.operator}
                                                                 onChange={(e) => {
                                                                     const next = [...prohibitions];
@@ -1500,9 +1520,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...prohibitions];
@@ -1724,9 +1742,7 @@ export default function PolicyBuilder() {
                                                                 }}
                                                                 className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                             />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Operator"
+                                                            <OperatorSelect
                                                                 value={r.operator}
                                                                 onChange={(e) => {
                                                                     const next = [...duties];
@@ -1801,9 +1817,7 @@ export default function PolicyBuilder() {
                                                             }}
                                                             className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
                                                         />
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Operator"
+                                                        <OperatorSelect
                                                             value={c.operator}
                                                             onChange={(e) => {
                                                                 const next = [...duties];
