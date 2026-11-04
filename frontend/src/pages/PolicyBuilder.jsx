@@ -103,7 +103,6 @@ const LeftOperandSelect = (props) => (
     <TermSelect terms={ODRL_LEFT_OPERANDS} name="Left operand" placeholder="Left operand…" {...props} />
 );
 const OperatorSelect = (props) => <TermSelect terms={ODRL_OPERATORS} name="Operator" {...props} />;
-const termLabel = (terms, value) => terms.find(o => o.value === value)?.label || value || '—';
 
 // "AcademicResearch" / "Non-Commercial Research" -> "Academic Research" / "Non Commercial Research"
 const humanize = (label) => label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -135,17 +134,16 @@ function purposeGroups(concepts) {
 const OTHER_PURPOSE = '__other__';
 
 // Purpose (right operand) picker backed by CDIF CV2; "Other" allows any IRI.
-function PurposeSelect({ value, concepts, onChange }) {
+function PurposeSelect({ value, concepts, onChange, className }) {
     const { roots, groups } = useMemo(() => purposeGroups(concepts), [concepts]);
     const known = concepts.find(c => c.value === value);
     const [customMode, setCustomMode] = useState(false);
     const showCustom = customMode || (!!value && !known);
-    const selectCls = "w-full px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500";
     return (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
             <select
                 value={showCustom ? OTHER_PURPOSE : (value || '')}
-                title="Purpose (CDIF CV2)"
+                title={known ? `${known.value} — ${known.definition || humanize(known.label)}` : 'Right operand: purpose (CDIF CV2)'}
                 onChange={(e) => {
                     if (e.target.value === OTHER_PURPOSE) {
                         setCustomMode(true);
@@ -154,9 +152,9 @@ function PurposeSelect({ value, concepts, onChange }) {
                         onChange(e.target.value);
                     }
                 }}
-                className={selectCls}
+                className={className}
             >
-                <option value="" disabled>{concepts.length ? 'Select a purpose…' : 'Loading CDIF purposes…'}</option>
+                <option value="" disabled>{concepts.length ? 'Purpose…' : 'Loading purposes…'}</option>
                 {roots.map(c => (
                     <option key={c.id} value={c.value} title={c.definition || ''}>Any purpose</option>
                 ))}
@@ -173,28 +171,12 @@ function PurposeSelect({ value, concepts, onChange }) {
                 <input
                     type="text"
                     autoFocus={customMode}
-                    placeholder="Purpose IRI, e.g. dpv:IdentityVerification"
+                    placeholder="e.g. dpv:IdentityVerification"
+                    title="Not a CDIF CV2 purpose; validation will show a warning"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/30 border border-amber-300 dark:border-amber-700 text-xs font-mono"
+                    className={cn(className, "border-amber-300 dark:border-amber-700")}
                 />
-            )}
-            {known ? (
-                <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-                    {known.definition && <span>{known.definition} </span>}
-                    <a
-                        href={known.exactMatch?.[0] || known.iri}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-mono text-emerald-600 dark:text-emerald-400 hover:underline whitespace-nowrap"
-                    >
-                        {known.value}
-                    </a>
-                </p>
-            ) : showCustom && concepts.length > 0 && (
-                <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                    Not a CDIF CV2 purpose; validation will show a warning.
-                </p>
             )}
         </div>
     );
@@ -1327,64 +1309,43 @@ export default function PolicyBuilder() {
                                                     next[pIdx].constraints[cIdx][field] = value;
                                                     setPermissions(next);
                                                 };
+                                                const fieldCls = "w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono";
                                                 return (
-                                                    <div key={cIdx} className="p-3 mb-2 rounded-lg bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 border-l-4 border-l-emerald-500 text-xs space-y-2">
-                                                        <div className="flex items-start gap-2">
-                                                            <div className="flex-1 min-w-0">
-                                                                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                                                    Purpose #{cIdx + 1}
-                                                                </label>
-                                                                <PurposeSelect
-                                                                    value={c.rightOperand}
-                                                                    concepts={cdifPurposes}
-                                                                    onChange={(v) => update('rightOperand', v)}
-                                                                />
-                                                            </div>
+                                                    <div key={cIdx} className="p-2.5 mb-2 rounded-lg bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 text-xs space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Purpose Title (dcterms:title)"
+                                                                value={c.title}
+                                                                onChange={(e) => update('title', e.target.value)}
+                                                                className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
+                                                            />
                                                             <button
                                                                 type="button"
-                                                                title="Remove purpose"
                                                                 onClick={() => removePermissionConstraint(pIdx, cIdx)}
-                                                                className="mt-5 p-1 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                                                className="text-rose-500 hover:text-rose-700"
                                                             >
-                                                                <Trash2 size={13} />
+                                                                <Trash2 size={12} />
                                                             </button>
                                                         </div>
-                                                        <details className="group border-t border-gray-100 dark:border-white/5 pt-2">
-                                                            <summary className="cursor-pointer select-none flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                                                                <span className="font-semibold">Advanced</span>
-                                                                <span className="truncate font-mono text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">
-                                                                    {termLabel(ODRL_LEFT_OPERANDS, c.leftOperand)} · {termLabel(ODRL_OPERATORS, c.operator)}
-                                                                </span>
-                                                            </summary>
-                                                            <div className="mt-2 grid grid-cols-2 gap-2">
-                                                                <label className="space-y-1">
-                                                                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Left operand</span>
-                                                                    <LeftOperandSelect
-                                                                        value={c.leftOperand}
-                                                                        onChange={(e) => update('leftOperand', e.target.value)}
-                                                                        className="w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                                    />
-                                                                </label>
-                                                                <label className="space-y-1">
-                                                                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Operator</span>
-                                                                    <OperatorSelect
-                                                                        value={c.operator}
-                                                                        onChange={(e) => update('operator', e.target.value)}
-                                                                        className="w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                                    />
-                                                                </label>
-                                                                <label className="col-span-2 space-y-1">
-                                                                    <span className="block text-[10px] font-bold text-gray-400 uppercase">Title (dcterms:title)</span>
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder="e.g. Purpose for access is academic research"
-                                                                        value={c.title}
-                                                                        onChange={(e) => update('title', e.target.value)}
-                                                                        className="w-full px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                                    />
-                                                                </label>
-                                                            </div>
-                                                        </details>
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <LeftOperandSelect
+                                                                value={c.leftOperand}
+                                                                onChange={(e) => update('leftOperand', e.target.value)}
+                                                                className={fieldCls}
+                                                            />
+                                                            <OperatorSelect
+                                                                value={c.operator}
+                                                                onChange={(e) => update('operator', e.target.value)}
+                                                                className={fieldCls}
+                                                            />
+                                                            <PurposeSelect
+                                                                value={c.rightOperand}
+                                                                concepts={cdifPurposes}
+                                                                onChange={(v) => update('rightOperand', v)}
+                                                                className={fieldCls}
+                                                            />
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
