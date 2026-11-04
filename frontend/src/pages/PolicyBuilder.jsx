@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
     ShieldCheck,
@@ -51,6 +51,92 @@ function OperatorSelect({ value, ...props }) {
                 <option key={o.value} value={o.value}>{o.label}</option>
             ))}
         </select>
+    );
+}
+
+// "AcademicResearch" / "Non-Commercial Research" -> "Academic Research" / "Non Commercial Research"
+const humanize = (label) => label.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+// Order CDIF CV2 purposes as a tree (depth-first). A purpose with several parents is shown
+// once, under the parent that has the most children (e.g. Commercial Research under R&D).
+function purposeTree(concepts) {
+    const children = {};
+    concepts.forEach(c => (c.broader || []).forEach(b => { (children[b] ||= []).push(c); }));
+    const primaryParent = (c) => [...(c.broader || [])]
+        .sort((a, b) => (children[b]?.length || 0) - (children[a]?.length || 0))[0];
+    const out = [];
+    const walk = (c, depth) => {
+        out.push({ c, depth });
+        (children[c.id] || [])
+            .filter(k => primaryParent(k) === c.id)
+            .sort((a, b) => a.label.localeCompare(b.label))
+            .forEach(k => walk(k, depth + 1));
+    };
+    concepts.filter(c => !(c.broader || []).length).forEach(r => walk(r, 0));
+    return out;
+}
+
+const OTHER_PURPOSE = '__other__';
+
+// Purpose (right operand) picker backed by CDIF CV2; "Other" allows any IRI.
+function PurposeSelect({ value, concepts, onChange }) {
+    const tree = useMemo(() => purposeTree(concepts), [concepts]);
+    const known = concepts.find(c => c.value === value);
+    const [customMode, setCustomMode] = useState(false);
+    const showCustom = customMode || (!!value && !known);
+    const selectCls = "w-full px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500";
+    return (
+        <div className="space-y-1.5">
+            <select
+                value={showCustom ? OTHER_PURPOSE : (value || '')}
+                title="Purpose (CDIF CV2)"
+                onChange={(e) => {
+                    if (e.target.value === OTHER_PURPOSE) {
+                        setCustomMode(true);
+                    } else {
+                        setCustomMode(false);
+                        onChange(e.target.value);
+                    }
+                }}
+                className={selectCls}
+            >
+                <option value="" disabled>{concepts.length ? 'Select a purpose…' : 'Loading CDIF purposes…'}</option>
+                {tree.map(({ c, depth }) => (
+                    <option key={c.id} value={c.value} title={c.definition || ''}>
+                        {'\u00A0\u00A0\u00A0'.repeat(depth)}{depth > 0 ? '↳ ' : ''}
+                        {depth === 0 ? `Any purpose (${humanize(c.label)})` : humanize(c.label)}
+                    </option>
+                ))}
+                <option value={OTHER_PURPOSE}>Other (enter an IRI)…</option>
+            </select>
+            {showCustom && (
+                <input
+                    type="text"
+                    autoFocus={customMode}
+                    placeholder="Purpose IRI, e.g. dpv:IdentityVerification"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/30 border border-amber-300 dark:border-amber-700 text-xs font-mono"
+                />
+            )}
+            {known ? (
+                <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+                    {known.definition && <span>{known.definition} </span>}
+                    <a
+                        href={known.exactMatch?.[0] || known.iri}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-emerald-600 dark:text-emerald-400 hover:underline whitespace-nowrap"
+                    >
+                        {known.value}
+                    </a>
+                </p>
+            ) : showCustom && concepts.length > 0 && (
+                <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                    Not a CDIF CV2 purpose; validation will show a warning.
+                </p>
+            )}
+        </div>
     );
 }
 
@@ -703,12 +789,6 @@ export default function PolicyBuilder() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Suggestions for purpose right operands (CDIF CV2, DPV terms) */}
-            <datalist id="cdif-cv2-purposes">
-                {cdifPurposes.map(c => (
-                    <option key={c.id} value={c.value}>{c.label}</option>
-                ))}
-            </datalist>
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-6">
                 <div>
@@ -1177,65 +1257,73 @@ export default function PolicyBuilder() {
                                                 </button>
                                             </div>
 
-                                            {p.constraints.map((c, cIdx) => (
-                                                <div key={cIdx} className="p-2.5 mb-2 rounded-lg bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 text-xs space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Purpose Title (dcterms:title)"
-                                                            value={c.title}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].title = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removePermissionConstraint(pIdx, cIdx)}
-                                                            className="text-rose-500 hover:text-rose-700"
-                                                        >
-                                                            <Trash2 size={12} />
-                                                        </button>
+                                            {p.constraints.length === 0 && (
+                                                <p className="text-[11px] text-gray-400 dark:text-gray-500 italic mb-2">
+                                                    No purpose restriction: this permission applies to any purpose.
+                                                </p>
+                                            )}
+
+                                            {p.constraints.map((c, cIdx) => {
+                                                const update = (field, value) => {
+                                                    const next = [...permissions];
+                                                    next[pIdx].constraints[cIdx][field] = value;
+                                                    setPermissions(next);
+                                                };
+                                                return (
+                                                    <div key={cIdx} className="p-3 mb-2 rounded-lg bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 border-l-4 border-l-emerald-500 text-xs space-y-2">
+                                                        <div className="flex items-start gap-2">
+                                                            <div className="flex-1 min-w-0">
+                                                                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                                                    Purpose #{cIdx + 1}
+                                                                </label>
+                                                                <PurposeSelect
+                                                                    value={c.rightOperand}
+                                                                    concepts={cdifPurposes}
+                                                                    onChange={(v) => update('rightOperand', v)}
+                                                                />
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                title="Remove purpose"
+                                                                onClick={() => removePermissionConstraint(pIdx, cIdx)}
+                                                                className="mt-5 p-1 rounded text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        </div>
+                                                        <details className="group">
+                                                            <summary className="cursor-pointer select-none text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                                                Constraint details{' '}
+                                                                <span className="font-mono text-gray-400">
+                                                                    {c.leftOperand} {(c.operator || '').replace('odrl:', '')} {c.rightOperand}
+                                                                </span>
+                                                            </summary>
+                                                            <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Title (dcterms:title)"
+                                                                    value={c.title}
+                                                                    onChange={(e) => update('title', e.target.value)}
+                                                                    className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
+                                                                />
+                                                                <input
+                                                                    type="text"
+                                                                    title="Left operand"
+                                                                    placeholder="Left Operand"
+                                                                    value={c.leftOperand}
+                                                                    onChange={(e) => update('leftOperand', e.target.value)}
+                                                                    className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
+                                                                />
+                                                                <OperatorSelect
+                                                                    value={c.operator}
+                                                                    onChange={(e) => update('operator', e.target.value)}
+                                                                    className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
+                                                                />
+                                                            </div>
+                                                        </details>
                                                     </div>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Left Operand"
-                                                            value={c.leftOperand}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].leftOperand = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                        />
-                                                        <OperatorSelect
-                                                            value={c.operator}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].operator = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            list="cdif-cv2-purposes"
-                                                            title="Purpose from CDIF CV2 (or any IRI)"
-                                                            placeholder="Purpose (CDIF CV2)"
-                                                            value={c.rightOperand}
-                                                            onChange={(e) => {
-                                                                const next = [...permissions];
-                                                                next[pIdx].constraints[cIdx].rightOperand = e.target.value;
-                                                                setPermissions(next);
-                                                            }}
-                                                            className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
 
                                         {/* Other Constraints Section */}
