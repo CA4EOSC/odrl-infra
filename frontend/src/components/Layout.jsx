@@ -177,24 +177,7 @@ export default function Layout({ children }) {
                                 dangerouslySetInnerHTML={{ __html: headerHtml }}
                             />
                         ) : (
-                            <div className="flex items-center gap-3">
-                                {logoUrl && (
-                                    <a
-                                        href="https://cdif4eosc.eu"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2 group transition-opacity hover:opacity-80"
-                                        title="CDIF4EOSC Project"
-                                    >
-                                        <img
-                                            src={logoUrl}
-                                            alt="CDIF4EOSC Logo"
-                                            className="h-8 max-w-[180px] object-contain rounded"
-                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                        />
-                                    </a>
-                                )}
-                            </div>
+                            <div />
                         )}
 
                         <div className="flex items-center gap-4 ml-auto">
@@ -237,49 +220,15 @@ export default function Layout({ children }) {
                     </div>
                 </div>
 
-                {/* Footer with theming and templates support */}
-                <footer className="mt-auto border-t border-gray-200 dark:border-white/10 bg-white/70 dark:bg-black/40 backdrop-blur-md px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
-                    {footerHtml ? (
+                {/* Main page footer (renders custom footer template if provided) */}
+                {footerHtml && (
+                    <footer className="mt-auto border-t border-gray-200 dark:border-white/10 bg-white/70 dark:bg-black/40 backdrop-blur-md px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
                         <div
                             className="custom-footer-template"
                             dangerouslySetInnerHTML={{ __html: footerHtml }}
                         />
-                    ) : (
-                        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                {logoUrl && (
-                                    <a
-                                        href="https://cdif4eosc.eu"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="shrink-0 transition-opacity hover:opacity-80"
-                                    >
-                                        <img
-                                            src={logoUrl}
-                                            alt="CDIF4EOSC"
-                                            className="h-6 w-auto max-w-[120px] object-contain"
-                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                        />
-                                    </a>
-                                )}
-                                <p className="leading-relaxed text-gray-600 dark:text-gray-300">
-                                    {footerText}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-4 shrink-0 text-[11px] font-medium text-gray-400 dark:text-gray-500">
-                                <a
-                                    href="https://cdif4eosc.eu"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 transition-colors"
-                                >
-                                    cdif4eosc.eu
-                                    <ExternalLink size={12} />
-                                </a>
-                            </div>
-                        </div>
-                    )}
-                </footer>
+                    </footer>
+                )}
             </main>
         </div>
     );
