@@ -84,3 +84,33 @@ To issue a VC:
 ```bash
 oydid vc-issue --issuer did:oyd:issuer... --subject did:oyd:subject...
 ```
+
+## Testing Suite
+
+All automated tests are located in the `tests/` directory:
+- `tests/test_bookmark_did.py`: Bookmark DID creation and RDF resolution.
+- `tests/test_cdif_vocab.py`: CDIF SKOS vocabularies, action mappings, and policy validation.
+- `tests/test_did_api.py`: Core DID API endpoints lifecycle.
+- `tests/test_existing_policies.py`: Policy listing, full-text searching, and indexing.
+- `tests/test_google_check.py`: Google Verifiable Credential issuing.
+- `tests/test_oac.py`, `tests/test_oac_example.py`: ODRL Access Control Profile (OAC) policies.
+- `tests/test_oauth_vc.py`: GitHub and ORCID OAuth VC issuing.
+- `tests/test_oydid.py`: Local CLI lifecycle testing (skips when CLI is not installed on host).
+- `tests/test_policy_metadata.py`: Policy metadata date stamping and versioning.
+- `tests/test_rdf_did.py`: RDF Turtle DID creation and multilingual queries.
+- `tests/test_ssh_vc.py`: SSH VC issuing and signature verification.
+- `tests/test_theme.py`: UI branding/theme configuration endpoints.
+
+### Running All Tests
+
+Execute the automated test runner script from the repository root:
+```bash
+./test_all.script
+# or
+./test_all.sh
+```
+
+This runs:
+1. Python unit, integration, and vocabulary tests with `pytest tests/ -v`.
+2. Frontend production build with `npm run build` in `frontend/`.
+

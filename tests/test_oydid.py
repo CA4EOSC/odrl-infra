@@ -1,9 +1,12 @@
 import subprocess
+import shutil
 import json
 import pytest
 
 def run_oydid_command(args, input_data=None):
     """Helper to run oydid commands"""
+    if not shutil.which("oydid"):
+        pytest.skip("oydid CLI not installed on host (runs inside Docker container)")
     cmd = ["oydid"] + args
     
     # If input_data is a dict, convert to JSON string
