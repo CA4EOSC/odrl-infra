@@ -11,8 +11,10 @@ authors = [
 ]
 dependencies = [
     "requests>=2.25.0",
+    "rdflib>=7.0",
+    "pyshacl>=0.26",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.scripts]
 odrl-cli = "bin.odrl_cli:main"
