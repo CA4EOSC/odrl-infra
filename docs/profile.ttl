@@ -137,13 +137,98 @@ cdif-access:actionsCollection a skos:Collection ;
 	skos:member cdif-access:StoreData ; # why not use http://www.w3.org/ns/odrl/2/archive (Definition: To store the Asset (in a non-transient form))?
 	skos:member cdif-access:SubmitAnalysisOutputsForChecking ;
 	skos:member cdif-access:TakeScreenShot ;
-	skos:member cdif-access:View .
+	skos:member cdif-access:View ;
+	# duty actions
+	skos:member cdif-access:Authenticate ;
+	skos:member odrl:compensate ; # I don't think you need Payment as an action, ODRL already has odrl:compensate
+	skos:member cdif-access:GetEthicsApproval ;
+	skos:member cdif-access:ObtainCompletedAgreement ;
+	skos:member cdif-access:ThirdPartyAuthorization ;
+	skos:member cdif-access:VerifyProjectContext ;
+	skos:member cdif-access:VerifyAccreditation ;
+	skos:member cdif-access:VerifyTraining ;
+	skos:member cdif-access:CompleteRegistration ;
+	skos:member cdif-access:DesignateResponsiblePerson ;
+	skos:member cdif-access:ProvideSecureEnvironment ;
+	skos:member cdif-access:Pseudonymise .
+
+cdif-access:Pseudonymise a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ProvideSecureEnvironment a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:DesignateResponsiblePerson a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:CompleteRegistration a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:CompleteRegistration a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:VerifyTraining a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:VerifyAccreditation a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:VerifyProjectContext a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ThirdPartyAuthorization a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ObtainCompletedAgreement a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:GetEthicsApproval a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Authenticate a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
 
 cdif-access:Download a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 	rdfs:isDefinedBy cdif-access: ;
-	rdfs:label "download"@en ;
-	skos:definition "define download"@en ;
-	skos:note "for usage notes"@en .
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
 
 cdif-access:AccreditedTrainingCompleted a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 	rdfs:isDefinedBy cdif-access: ;
