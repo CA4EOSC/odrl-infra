@@ -15,7 +15,7 @@ DEFAULT_FOOTER_TEXT = (
 
 
 def _load_template_file(filename: str) -> Optional[str]:
-    """Loads a custom HTML/text snippet from the templates directory if present."""
+    """Loads a custom HTML/text snippet from the templates directory if present and not just comments."""
     if not os.path.isdir(TEMPLATES_DIR):
         return None
     filepath = os.path.join(TEMPLATES_DIR, filename)
@@ -23,7 +23,14 @@ def _load_template_file(filename: str) -> Optional[str]:
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 content = f.read().strip()
-                return content if content else None
+                if not content:
+                    return None
+                # If file only contains HTML comments <!-- ... -->, treat as unset
+                stripped = content
+                while stripped.startswith("<!--") and "-->" in stripped:
+                    end_idx = stripped.index("-->") + 3
+                    stripped = stripped[end_idx:].strip()
+                return content if stripped else None
         except Exception as e:
             print(f"Warning: could not read template {filepath}: {e}")
     return None
@@ -35,7 +42,8 @@ async def get_theme_config():
     Returns theme configuration for header and footer.
     Values can be overridden by templates/ (custom HTML/text) or environment variables (e.g. LOGO_URL).
     """
-    logo_url = os.getenv("LOGO_URL", DEFAULT_LOGO_URL)
+    raw_logo = os.getenv("LOGO_URL")
+    logo_url = raw_logo.strip() if raw_logo and raw_logo.strip() else DEFAULT_LOGO_URL
     header_html = _load_template_file("header.html")
     footer_html = _load_template_file("footer.html")
     footer_text = _load_template_file("footer.txt") or DEFAULT_FOOTER_TEXT
