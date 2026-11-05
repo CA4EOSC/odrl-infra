@@ -72,3 +72,28 @@ def test_validate_returns_warnings():
     r = client.post("/api/policy/validate", json={"policy": policy})
     assert r.status_code == 200
     assert any("deprecated" in w for w in r.json()["warnings"])
+
+
+def test_cv4_duty_actions_loaded():
+    cv4 = cdif_vocab.load_scheme("cv4")
+    assert cv4["available"]
+    values = {c["value"] for c in cv4["concepts"]}
+    assert "cv4:completeRegistration" in values
+    assert "odrl:anonymize" in values  # exactMatch to ODRL is preferred
+
+
+def test_permission_duty_action_warnings():
+    policy = {
+        "odrl:permission": [{
+            "odrl:action": "cv1:download",
+            "odrl:duty": [
+                {"odrl:action": "cv4:getEthicsApproval",
+                 "odrl:constraint": [{"odrl:leftOperand": "odrl:event", "odrl:operator": "odrl:lt",
+                                      "odrl:rightOperand": {"@id": "odrl:policyUsage"}}]},
+                {"odrl:action": [{"rdf:value": {"@id": "cv4:verifyTraining"}}]},
+                {"odrl:action": "cv1:notADuty"},
+            ],
+        }]
+    }
+    warnings = cdif_vocab.policy_warnings(policy)
+    assert warnings == ["odrl:permission[0].duty[2]: action 'cv1:notADuty' is not a CDIF CV4 duty action."]

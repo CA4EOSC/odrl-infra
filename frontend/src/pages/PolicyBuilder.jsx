@@ -87,6 +87,19 @@ const DEFAULT_PERMISSION_ACTION = 'cv1:download';
 const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // CDIF CV2 cv2:AcademicResearch
 const newPurposeConstraint = () => ({ title: '', leftOperand: 'oac:Purpose', operator: 'odrl:isA', rightOperand: DEFAULT_PURPOSE });
 
+// Duty actions (CDIF CV4) attached to a permission (odrl:duty). "beforeUse" adds the constraint
+// event lt odrl:policyUsage: the duty must be fulfilled before the permission is exercised.
+const DEFAULT_DUTY_ACTION = 'cv4:completeRegistration';
+const newDutyAction = () => ({ action: DEFAULT_DUTY_ACTION, beforeUse: true });
+const isBeforeUseConstraint = (c) => {
+    const left = c['odrl:leftOperand'] || c['leftOperand'];
+    const op = c['odrl:operator'] || c['operator'];
+    const right = c['odrl:rightOperand'] || c['rightOperand'];
+    const rightId = typeof right === 'object' && right !== null ? right['@id'] : right;
+    return ['odrl:event', 'event'].includes(left) && ['odrl:lt', 'lt'].includes(op)
+        && ['odrl:policyUsage', 'policyUsage'].includes(rightId);
+};
+
 // Semantic categories for the ODRL 2.2 left operands in the browse window.
 const LEFT_OPERAND_CATEGORIES = {
     Time: ['dateTime', 'delayPeriod', 'elapsedTime', 'meteredTime', 'timeInterval'],
@@ -239,11 +252,23 @@ export default function PolicyBuilder() {
     const [policyTarget, setPolicyTarget] = useState('duodrl:TemplateDataset');
     const [policyAssigner, setPolicyAssigner] = useState('https://solidweb.me/besteves4/profile/card#me');
 
+    // Descriptive metadata (dcterms + owl:versionInfo)
+    const [creator, setCreator] = useState('');
+    const [publisher, setPublisher] = useState('');
+    const [source, setSource] = useState('');
+    const [versionInfo, setVersionInfo] = useState('1.0');
+    // System-generated dates (YYYY-MM-DD). created/issued are kept from a loaded policy;
+    // modified is always today. The backend stamps the final values on save.
+    const [createdDate, setCreatedDate] = useState(null);
+    const [issuedDate, setIssuedDate] = useState(null);
+    const today = new Date().toISOString().slice(0, 10);
+
     // Rules
     const [permissions, setPermissions] = useState([
         {
             action: 'oac:Read',
             refinements: [],
+            duties: [],
             constraints: [
                 {
                     title: 'Purpose for access is to verify the identity of the assigner.',
@@ -328,6 +353,12 @@ export default function PolicyBuilder() {
     });
     const cdifPurposes = cdifVocab?.purposes?.concepts || [];
     const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
+    // CDIF CV4 duty actions ("value" is the ODRL term when the duty maps to one, e.g. odrl:anonymize)
+    const cv4DutyTerms = (cdifVocab?.duties?.concepts || []).filter(c => !c.deprecated).map(c => ({
+        value: c.value,
+        label: humanize(c.label),
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
+    }));
     // CV3 holds ODRL left operands selected for CDIF ("value" is odrl:<term>, or the cv3 id when
     // there is no exact ODRL match) plus broader restriction categories; deprecated operands are hidden.
     const cv3Term = (c) => ({
@@ -395,8 +426,12 @@ export default function PolicyBuilder() {
             if (data['odrl:uid'] || data['uid']) setUid(data['odrl:uid'] || data['uid']);
             if (data['odrl:profile']) setProfile(data['odrl:profile']);
             if (data['dcterms:description']) setDescription(data['dcterms:description']);
-            if (data['dcterms:creator']) setCreator(data['dcterms:creator']);
-            if (data['dcterms:source']) setSource(Array.isArray(data['dcterms:source']) ? data['dcterms:source'].join(', ') : data['dcterms:source']);
+            setCreator(data['dcterms:creator'] || '');
+            setPublisher(data['dcterms:publisher'] || '');
+            setSource(Array.isArray(data['dcterms:source']) ? data['dcterms:source'].join(', ') : (data['dcterms:source'] || ''));
+            setVersionInfo(data['owl:versionInfo'] || '1.0');
+            setCreatedDate(data['dcterms:created']?.slice(0, 10) || null);
+            setIssuedDate(data['dcterms:issued']?.slice(0, 10) || null);
             if (data['odrl:target'] || data['target']) setPolicyTarget(data['odrl:target'] || data['target'] || '');
             if (data['odrl:assigner'] || data['assigner']) setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
 
@@ -441,10 +476,26 @@ export default function PolicyBuilder() {
                     c.leftOperand !== 'odrl:purpose' &&
                     c.leftOperand !== 'purpose'
                 );
+                const rawPermDuties = p['odrl:duty'] || p['duty'] || [];
+                const permDuties = (Array.isArray(rawPermDuties) ? rawPermDuties : [rawPermDuties]).map(d => {
+                    const rawDutyAction = d['odrl:action'] || d['action'];
+                    const { actionName: dutyAction, refinements: dutyRefinements } =
+                        parseActionAndRefinements(Array.isArray(rawDutyAction) ? rawDutyAction[0] : rawDutyAction);
+                    const dc = d['odrl:constraint'] || d['constraint'] || [];
+                    const dutyConstraints = Array.isArray(dc) ? dc : [dc];
+                    return {
+                        action: dutyAction,
+                        beforeUse: dutyConstraints.some(isBeforeUseConstraint),
+                        // kept as loaded so presets round-trip; not editable in the UI
+                        refinements: dutyRefinements,
+                        extraConstraints: dutyConstraints.filter(c => !isBeforeUseConstraint(c)),
+                    };
+                });
                 return {
                     target: p['odrl:target'] || p['target'] || '',
                     action: actionName,
                     refinements: refinements,
+                    duties: permDuties,
                     hasContext: p['dpv:hasContext'] || p['hasContext'] || '',
                     assigner: p['odrl:assigner'] || p['assigner'] || '',
                     constraints: purposes.length > 0 || other.length === 0 ? purposes : rawConstraints,
@@ -509,16 +560,27 @@ export default function PolicyBuilder() {
                     "cc": "http://creativecommons.org/ns#",
                     "cv1": "https://odrl.codata.org/cv1/",
                     "cv2": "https://odrl.codata.org/cv2/",
-                    "cv3": "https://odrl.codata.org/cv3/"
+                    "cv3": "https://odrl.codata.org/cv3/",
+                    "cv4": "https://odrl.codata.org/cv4/",
+                    "dcterms": "http://purl.org/dc/terms/",
+                    "owl": "http://www.w3.org/2002/07/owl#"
                 }
             ],
             "@type": policyType,
             "type": policyType,
             "odrl:uid": uid,
-            "odrl:profile": profile,
-            "dcterms:description": description,
-            "dcterms:issued": new Date().toISOString()
+            "odrl:profile": profile
         };
+
+        if (creator.trim()) policy["dcterms:creator"] = creator.trim();
+        if (publisher.trim()) policy["dcterms:publisher"] = publisher.trim();
+        if (description.trim()) policy["dcterms:description"] = description.trim();
+        const sources = source.split(',').map(s => s.trim()).filter(Boolean);
+        if (sources.length) policy["dcterms:source"] = sources.length === 1 ? sources[0] : sources;
+        policy["dcterms:created"] = createdDate || today;
+        policy["dcterms:modified"] = today;
+        policy["dcterms:issued"] = issuedDate || today;
+        policy["owl:versionInfo"] = versionInfo.trim() || '1.0';
 
         if (policyTarget.trim()) {
             policy["odrl:target"] = policyTarget.trim();
@@ -571,6 +633,22 @@ export default function PolicyBuilder() {
                         if (c.title) constraintObj["dcterms:title"] = c.title;
                         if (c.category) constraintObj["dcterms:type"] = { "@id": c.category };
                         return constraintObj;
+                    });
+                }
+                const permDuties = (p.duties || []).filter(d => d.action);
+                if (permDuties.length > 0) {
+                    rule["odrl:duty"] = permDuties.map(d => {
+                        const duty = { "odrl:action": formatAction(d.action, d.refinements) };
+                        const dutyConstraints = [
+                            ...(d.beforeUse ? [{
+                                "odrl:leftOperand": "odrl:event",
+                                "odrl:operator": "odrl:lt",
+                                "odrl:rightOperand": { "@id": "odrl:policyUsage" }
+                            }] : []),
+                            ...(d.extraConstraints || [])
+                        ];
+                        if (dutyConstraints.length > 0) duty["odrl:constraint"] = dutyConstraints;
+                        return duty;
                     });
                 }
                 return rule;
@@ -663,6 +741,8 @@ export default function PolicyBuilder() {
             return res.data;
         },
         onSuccess: (data) => {
+            if (data.policy?.['dcterms:created']) setCreatedDate(data.policy['dcterms:created']);
+            if (data.policy?.['dcterms:issued']) setIssuedDate(data.policy['dcterms:issued']);
             setShaclFeedback({
                 status: 'success',
                 message: `Policy anchored successfully! UID / DID: ${data.uid}`
@@ -689,6 +769,7 @@ export default function PolicyBuilder() {
             {
                 action: DEFAULT_PERMISSION_ACTION,
                 refinements: [],
+                duties: [],
                 constraints: [newPurposeConstraint()],
                 otherConstraints: []
             }
@@ -699,21 +780,21 @@ export default function PolicyBuilder() {
         setPermissions(permissions.filter((_, i) => i !== index));
     };
 
-    const addPermissionRefinement = (pIndex) => {
+    const addPermissionDuty = (pIndex) => {
         const next = [...permissions];
-        if (!next[pIndex].refinements) next[pIndex].refinements = [];
-        next[pIndex].refinements.push({
-            title: '',
-            leftOperand: 'odrl:purpose',
-            operator: 'odrl:eq',
-            rightOperand: 'odrl:research'
-        });
+        next[pIndex].duties = [...(next[pIndex].duties || []), newDutyAction()];
         setPermissions(next);
     };
 
-    const removePermissionRefinement = (pIndex, rIndex) => {
+    const updatePermissionDuty = (pIndex, dIndex, field, value) => {
         const next = [...permissions];
-        next[pIndex].refinements = next[pIndex].refinements.filter((_, i) => i !== rIndex);
+        next[pIndex].duties[dIndex] = { ...next[pIndex].duties[dIndex], [field]: value };
+        setPermissions(next);
+    };
+
+    const removePermissionDuty = (pIndex, dIndex) => {
+        const next = [...permissions];
+        next[pIndex].duties = next[pIndex].duties.filter((_, i) => i !== dIndex);
         setPermissions(next);
     };
 
@@ -1169,6 +1250,71 @@ export default function PolicyBuilder() {
                                 </div>
                             </div>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Author / Contributor (dcterms:creator)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. https://orcid.org/0000-0002-1825-0097"
+                                        value={creator}
+                                        onChange={(e) => setCreator(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Publisher (dcterms:publisher)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. https://ror.org/02nkf1q06"
+                                        value={publisher}
+                                        onChange={(e) => setPublisher(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_10rem] gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Source (dcterms:source, comma-separated)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="optional"
+                                        value={source}
+                                        onChange={(e) => setSource(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Version (owl:versionInfo)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="1.0"
+                                        value={versionInfo}
+                                        onChange={(e) => setVersionInfo(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl bg-gray-50 dark:bg-black/20 border border-dashed border-gray-300 dark:border-white/10 px-3 py-2">
+                                <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">
+                                    System-generated dates
+                                </div>
+                                <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-1 text-xs font-mono text-gray-700 dark:text-gray-300">
+                                    <div><dt className="text-gray-500">dcterms:created</dt><dd>{createdDate || today}</dd></div>
+                                    <div><dt className="text-gray-500">dcterms:modified</dt><dd>{today}</dd></div>
+                                    <div><dt className="text-gray-500">dcterms:issued</dt><dd>{issuedDate || today}</dd></div>
+                                </dl>
+                            </div>
+
                             {/* Wizard Navigation */}
                             <div className="pt-4 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
                                 <span className="text-xs text-gray-400">Step 1 of 4: Specification</span>
@@ -1194,7 +1340,7 @@ export default function PolicyBuilder() {
                                         Permissions List ({permissions.length})
                                     </h2>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        Specify allowed actions, action refinements, and access purposes.
+                                        Specify allowed actions, the duties that come with them, and access purposes.
                                     </p>
                                 </div>
                                 <button
@@ -1243,10 +1389,10 @@ export default function PolicyBuilder() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => addPermissionRefinement(pIdx)}
+                                                            onClick={() => addPermissionDuty(pIdx)}
                                                             className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
                                                         >
-                                                            <Plus size={11} /> Add refinement
+                                                            <Plus size={11} /> Add duty action
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1269,78 +1415,70 @@ export default function PolicyBuilder() {
                                             </div>
                                         </div>
 
-                                        {/* Action Refinements Section */}
-                                        {p.refinements && p.refinements.length > 0 && (
+                                        {/* Duty Actions Section (odrl:duty, CDIF CV4) */}
+                                        {p.duties && p.duties.length > 0 && (
                                             <div className="pt-2 pl-3 border-l-2 border-indigo-400 dark:border-indigo-600 bg-indigo-50/30 dark:bg-indigo-950/20 p-2.5 rounded-r-lg">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase flex items-center gap-1">
                                                         <Sparkles size={12} />
-                                                        Action Refinements ({p.refinements.length})
+                                                        Duty Actions ({p.duties.length})
                                                     </span>
                                                     <button
                                                         type="button"
-                                                        onClick={() => addPermissionRefinement(pIdx)}
+                                                        onClick={() => addPermissionDuty(pIdx)}
                                                         className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
                                                     >
-                                                        <Plus size={12} /> Add refinement
+                                                        <Plus size={12} /> Add duty action
                                                     </button>
                                                 </div>
+                                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">
+                                                    What the assignee must do to exercise this permission (CDIF CV4 duty actions).
+                                                </p>
 
-                                                {p.refinements.map((r, rIdx) => (
-                                                    <div key={rIdx} className="p-2 mb-2 rounded-lg bg-white dark:bg-black/30 border border-indigo-100 dark:border-indigo-900/40 text-xs space-y-2">
-                                                        <div className="flex items-center justify-between">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Refinement Title (dcterms:title)"
-                                                                value={r.title || ''}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].title = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removePermissionRefinement(pIdx, rIdx)}
-                                                                className="text-rose-500 hover:text-rose-700"
-                                                            >
-                                                                <Trash2 size={12} />
-                                                            </button>
+                                                {p.duties.map((d, dIdx) => {
+                                                    const term = cv4DutyTerms.find(t => t.value === d.action);
+                                                    return (
+                                                        <div key={dIdx} className="p-2 mb-2 rounded-lg bg-white dark:bg-black/30 border border-indigo-100 dark:border-indigo-900/40 text-xs space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <select
+                                                                    value={d.action || ''}
+                                                                    title={term ? `${term.value} — ${term.description}` : d.action}
+                                                                    onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'action', e.target.value)}
+                                                                    className="flex-1 min-w-0 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
+                                                                >
+                                                                    {!term && d.action && <option value={d.action}>{d.action}</option>}
+                                                                    {cv4DutyTerms.map(t => (
+                                                                        <option key={t.value} value={t.value} title={t.description}>
+                                                                            {t.label} ({t.value})
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                                <label
+                                                                    className="flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300 whitespace-nowrap"
+                                                                    title="Adds the constraint odrl:event odrl:lt odrl:policyUsage"
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={!!d.beforeUse}
+                                                                        onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'beforeUse', e.target.checked)}
+                                                                    />
+                                                                    Before use
+                                                                </label>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removePermissionDuty(pIdx, dIdx)}
+                                                                    className="text-rose-500 hover:text-rose-700"
+                                                                    title="Remove duty action"
+                                                                >
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            </div>
+                                                            {term && term.description !== term.label && (
+                                                                <p className="text-[11px] text-gray-500 dark:text-gray-400">{term.description}</p>
+                                                            )}
                                                         </div>
-                                                        <div className="grid grid-cols-3 gap-2">
-                                                            <LeftOperandSelect
-                                                                value={r.leftOperand}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].leftOperand = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                            />
-                                                            <OperatorSelect
-                                                                value={r.operator}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].operator = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                            />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Right Operand"
-                                                                value={r.rightOperand}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].rightOperand = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         )}
 
