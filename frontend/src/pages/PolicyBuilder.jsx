@@ -190,6 +190,11 @@ function PurposeSelect({ value, concepts, onChange, className }) {
     );
 }
 
+// Rule types that are not operable yet: their tabs are greyed out and their content is
+// not written to the JSON-LD. Remove a key here to enable it again.
+const RULES_NOT_YET_AVAILABLE = { prohibitions: true, duties: true };
+const NOT_YET_AVAILABLE_TITLE = 'Not available yet: nothing from this tab goes into the JSON-LD';
+
 export default function PolicyBuilder() {
     // Basic Policy Metadata
     const [policyType, setPolicyType] = useState('Offer');
@@ -572,7 +577,7 @@ export default function PolicyBuilder() {
             });
         }
 
-        if (prohibitions.length > 0) {
+        if (!RULES_NOT_YET_AVAILABLE.prohibitions && prohibitions.length > 0) {
             policy["odrl:prohibition"] = prohibitions.map(p => {
                 const rule = {
                     "odrl:target": p.target,
@@ -594,7 +599,7 @@ export default function PolicyBuilder() {
             });
         }
 
-        if (duties.length > 0) {
+        if (!RULES_NOT_YET_AVAILABLE.duties && duties.length > 0) {
             policy["odrl:obligation"] = duties.map(d => {
                 const rule = {
                     "odrl:action": formatAction(d.action, d.refinements)
@@ -1021,6 +1026,11 @@ export default function PolicyBuilder() {
                 >
                     <CheckCircle2 size={16} /> Permissions ({permissions.length})
                 </button>
+                {RULES_NOT_YET_AVAILABLE.prohibitions ? (
+                    <button type="button" disabled aria-disabled="true" title={NOT_YET_AVAILABLE_TITLE} className="pb-3 text-sm font-bold border-b-2 border-transparent flex items-center gap-2 text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                        <AlertCircle size={16} /> Prohibitions
+                    </button>
+                ) : (
                 <button
                     onClick={() => setActiveTab('prohibitions')}
                     className={cn(
@@ -1032,6 +1042,12 @@ export default function PolicyBuilder() {
                 >
                     <AlertCircle size={16} /> Prohibitions ({prohibitions.length})
                 </button>
+                )}
+                {RULES_NOT_YET_AVAILABLE.duties ? (
+                    <button type="button" disabled aria-disabled="true" title={NOT_YET_AVAILABLE_TITLE} className="pb-3 text-sm font-bold border-b-2 border-transparent flex items-center gap-2 text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                        <FileCheck size={16} /> Duty
+                    </button>
+                ) : (
                 <button
                     onClick={() => setActiveTab('duodrl')}
                     className={cn(
@@ -1043,6 +1059,7 @@ export default function PolicyBuilder() {
                 >
                     <FileCheck size={16} /> Duty ({duties.length})
                 </button>
+                )}
             </div>
 
             {/* Layout Grid: Tab Content on the Left, Policy Operations on the Right */}
@@ -1550,6 +1567,7 @@ export default function PolicyBuilder() {
                                     <ArrowLeft size={14} />
                                     <span>Previous: Specification</span>
                                 </button>
+                                {!RULES_NOT_YET_AVAILABLE.prohibitions && (
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('prohibitions')}
@@ -1558,12 +1576,13 @@ export default function PolicyBuilder() {
                                     <span>Next: Prohibitions ({prohibitions.length})</span>
                                     <ArrowRight size={14} />
                                 </button>
+                                )}
                             </div>
                         </div>
                     )}
 
                     {/* TAB 3: PROHIBITIONS */}
-                    {activeTab === 'prohibitions' && (
+                    {activeTab === 'prohibitions' && !RULES_NOT_YET_AVAILABLE.prohibitions && (
                         <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/5 pb-3">
                                 <div>
@@ -1853,7 +1872,7 @@ export default function PolicyBuilder() {
                     )}
 
                     {/* TAB 4: DUTIES / OBLIGATIONS */}
-                    {activeTab === 'duodrl' && (
+                    {activeTab === 'duodrl' && !RULES_NOT_YET_AVAILABLE.duties && (
                         <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/5 pb-3">
                                 <div>
@@ -2166,15 +2185,25 @@ export default function PolicyBuilder() {
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Permissions</span>
                             </div>
-                            <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30">
-                                <span className="block text-base font-extrabold text-rose-600 dark:text-rose-400">
-                                    {prohibitions.length}
+                            <div
+                                title={RULES_NOT_YET_AVAILABLE.prohibitions ? NOT_YET_AVAILABLE_TITLE : undefined}
+                                className={cn("p-2 rounded-xl border", RULES_NOT_YET_AVAILABLE.prohibitions
+                                    ? "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60"
+                                    : "bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/30")}
+                            >
+                                <span className={cn("block text-base font-extrabold", RULES_NOT_YET_AVAILABLE.prohibitions ? "text-gray-400 dark:text-gray-500" : "text-rose-600 dark:text-rose-400")}>
+                                    {RULES_NOT_YET_AVAILABLE.prohibitions ? '–' : prohibitions.length}
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Prohibitions</span>
                             </div>
-                            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30">
-                                <span className="block text-base font-extrabold text-amber-600 dark:text-amber-400">
-                                    {duties.length}
+                            <div
+                                title={RULES_NOT_YET_AVAILABLE.duties ? NOT_YET_AVAILABLE_TITLE : undefined}
+                                className={cn("p-2 rounded-xl border", RULES_NOT_YET_AVAILABLE.duties
+                                    ? "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60"
+                                    : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30")}
+                            >
+                                <span className={cn("block text-base font-extrabold", RULES_NOT_YET_AVAILABLE.duties ? "text-gray-400 dark:text-gray-500" : "text-amber-600 dark:text-amber-400")}>
+                                    {RULES_NOT_YET_AVAILABLE.duties ? '–' : duties.length}
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Duties</span>
                             </div>
