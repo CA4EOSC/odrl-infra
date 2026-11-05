@@ -376,6 +376,7 @@ export default function PolicyBuilder() {
     // there is no exact ODRL match) plus broader restriction categories; deprecated operands are hidden.
     const cv3Term = (c) => ({
         value: c.value,
+        label: c.label,
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
         ...conceptFields(c),
     });

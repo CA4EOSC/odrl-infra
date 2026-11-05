@@ -135,29 +135,54 @@
         cv3:absoluteSize,
         cv3:absoluteSpatialPosition,
         cv3:absoluteTemporalPosition,
+        cv3:aiSystem,
         cv3:count,
+        cv3:data,
+        cv3:dataController,
+        cv3:dataProcessor,
+        cv3:dataSource,
+        cv3:dataSubject,
         cv3:dateTime,
         cv3:delayPeriod,
         cv3:deliveryChannel,
         cv3:device,
+        cv3:dpvPurpose,
+        cv3:dpvRecipient,
+        cv3:duration,
         cv3:elapsedTime,
+        cv3:entity,
         cv3:event,
         cv3:fileFormat,
+        cv3:frequency,
+        cv3:humanSubject,
         cv3:industry,
+        cv3:justification,
         cv3:language,
+        cv3:law,
+        cv3:legalBasis,
+        cv3:legalMeasure,
         cv3:location,
         cv3:media,
         cv3:meteredTime,
+        cv3:model,
+        cv3:organisationalMeasure,
         cv3:payAmount,
         cv3:percentage,
+        cv3:personalData,
+        cv3:physicalMeasure,
         cv3:product,
         cv3:purpose,
         cv3:recipient,
         cv3:resolution,
+        cv3:right,
+        cv3:risk,
         cv3:spatial,
         cv3:spatialCoordinates,
         cv3:system,
         cv3:systemDevice,
+        cv3:technicalMeasure,
+        cv3:technicalOrganisationalMeasure,
+        cv3:technology,
         cv3:timeInterval,
         cv3:unitOfCount,
         cv3:version,
@@ -170,13 +195,14 @@
     skos:prefLabel "Left operands without a known UKDS/Sikt use case"@en .
 
 <https://odrl.codata.org/cv3/collection/restrictionCategories> a skos:Collection ;
-    skos:member cv3:EnvironmentalRestriction,
-        cv3:FinancialRestrictions,
-        cv3:IdentityAndAccessRestrictions,
-        cv3:LegalAndRegulatoryRestrictions,
-        cv3:PersonRestrictions,
-        cv3:RoleRestrictions,
-        cv3:UsageContextRestrictions ;
+    skos:member cv3:AddNewConstraintsBelowThisLineToBeValidated,
+        cv3:EnvironmentalConstraints,
+        cv3:FinancialConstraints,
+        cv3:IdentityAndAccessConstraints,
+        cv3:LegalAndRegulatoryConstraints,
+        cv3:PersonConstraints,
+        cv3:RoleConstraints,
+        cv3:UsageContextConstraints ;
     skos:prefLabel "Restriction categories (under investigation)"@en .
 
 cv2:AcademicResearch a skos:Concept ;
@@ -192,6 +218,13 @@ cv2:AccountManagement a skos:Concept ;
     skos:exactMatch dpv:AccountManagement ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "AccountManagement"@en .
+
+cv2:AddNewPurposesBelowThisLineToBeValidated a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:AddNewPurposesBelowThisLineToBeValidated ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Add New purposes below this line - to be validated"@en .
 
 cv2:Advertising a skos:Concept ;
     skos:broader cv2:Marketing ;
@@ -214,6 +247,13 @@ cv2:CustomerManagement a skos:Concept ;
     skos:exactMatch dpv:CustomerManagement ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "CustomerManagement"@en .
+
+cv2:Education a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Education ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Education"@en .
 
 cv2:EnforceSecurity a skos:Concept ;
     skos:broader cv2:Purpose ;
@@ -238,12 +278,26 @@ cv2:OrganisationGovernance a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "OrganisationGovernance"@en .
 
+cv2:Outreach a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Outreach ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Outreach"@en .
+
 cv2:Personalisation a skos:Concept ;
     skos:broader cv2:Purpose ;
     skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
     skos:exactMatch dpv:Personalisation ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "Personalisation"@en .
+
+cv2:Promotional a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Promotional ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Promotional"@en .
 
 cv2:PublicBenefit a skos:Concept ;
     skos:broader cv2:Purpose ;
@@ -266,6 +320,20 @@ cv2:ScientificResearch a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "Scientific Research"@en .
 
+cv2:Teaching a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Teaching ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Teaching"@en .
+
+cv2:Training a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Training ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Training"@en .
+
 cv2:VendorManagement a skos:Concept ;
     skos:broader cv2:Purpose ;
     skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
@@ -281,8 +349,10 @@ cv4:anonymise a skos:Concept ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:authenticate a skos:Concept ;
+    skos:definition "Use an accepted authentication method to prove the identity"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "Authenticate"@en ;
+    skos:scopeNote "The set of accepted authentication methods will depend on the requirements of the asset owner and the possible constraints imposed by the nature of the asset (e.g. multi-factor authentication required for clinical data). The authentication process should allow verifying membership in project teams, organisations and groups of users holding specific rights based on their role [C.f. odrl:Party?]."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:compensation a skos:Concept ;
@@ -301,19 +371,25 @@ cv4:designateResponsiblePerson a skos:Concept ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:getEthicsApproval a skos:Concept ;
+    skos:definition "Any action on the asset requires a proof of ethics approval"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "GetEthicsApproval"@en ;
+    skos:scopeNote "Performing the action on the asset needs to be linked to an ethics approval using methods that fulfill the relevant legal and governance requirements that are relevant to the asset and the legal entity controlling the access to the asset. [typically the ethics approval is reviewed by the asset controller and linked to the user's account? C.f. odrl:reviewPolicy?]"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:obtainCompletedAgreement a skos:Concept ;
+    skos:definition "The action requires an agreement with all involved parties"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "e,g, EUL (refinement will specify what form, what signature type etc.)"@en ;
     skos:prefLabel "ObtainCompletedAgreement"@en ;
-    skos:scopeNote "e,g, EUL (refinement will specify what form, what signature type etc.)"@en ;
+    skos:scopeNote "The action on an asset requires verifiable consent of all relevant stakeholders, e.g. signature of an End User Agreement or agreements needed for secure transfer of data into a trusted research environment."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:payment a skos:Concept ;
+    skos:definition "Any action on the asset requires a payment"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "Payment"@en ;
+    skos:scopeNote "Performing an action on the asset requires a fee and a commitment to pay linked to the access request. The legal entity controlling the access determines the modalities of acceptable payment modalities (e.g. proof of payment required before the access, post-access invoicing or using credits assigned to the project or organisation the requesting party belongs to)."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:provisionSecureEnvironment a skos:Concept ;
@@ -327,20 +403,26 @@ cv4:pseudonymise a skos:Concept ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:thirdPartyAuthorization a skos:Concept ;
+    skos:definition "The action on an asset requires an additional authorisation from a third party"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "e.g. GetApproval from DataOwner"@en ;
     skos:prefLabel "ThirdPartyAuthorization"@en ;
-    skos:scopeNote "e.g. GetApproval from DataOwner"@en ;
+    skos:scopeNote "The action on an asset requires an authorisation from a third party (or third parties); for example, GetApproval from the data owner [c.f. odrl:obtainConsent? GetApproval hanging reference?]"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:verifyAccreditation a skos:Concept ;
+    skos:definition "The action requires verification of accreditation"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "VerifyAccreditation"@en ;
+    skos:scopeNote "Performing the action on the asset requires verification of an accreditation (certification, membership in a skills- or competence-based organisation or professional body)."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:verifyProjectContext a skos:Concept ;
+    skos:definition "The action requires verification of the project"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "Submit a project description or research protocol"@en ;
     skos:prefLabel "VerifyProjectContext"@en ;
-    skos:scopeNote "Submit a project description or research protocol"@en ;
+    skos:scopeNote "The action requires review of the project context, e.g. analysis of the project description or research protocol. Typically this will create a new role or set of roles that can be used in the authentication context"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:verifyTraining a skos:Concept ;
@@ -829,49 +911,63 @@ cv2:ServiceProvision a skos:Concept ;
     skos:narrower cv2:AccountManagement ;
     skos:prefLabel "ServiceProvision"@en .
 
-cv3:EnvironmentalRestriction a skos:Concept ;
+cv3:AddNewConstraintsBelowThisLineToBeValidated a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "Add New Constraints below this line - to be validated"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:EnvironmentalConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "EnvironmentalRestriction"@en ;
+    skos:prefLabel "EnvironmentalConstraints"@en ;
     skos:scopeNote "Characteristics of ReUse Environment e.g. TRE (cf. \"Safe Settings\""@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-cv3:FinancialRestrictions a skos:Concept ;
+cv3:FinancialConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "FinancialRestrictions"@en ;
+    skos:prefLabel "FinancialConstraints"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-cv3:IdentityAndAccessRestrictions a skos:Concept ;
+cv3:IdentityAndAccessConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "IdentityAndAccessRestrictions"@en ;
+    skos:prefLabel "IdentityAndAccessConstraints"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-cv3:LegalAndRegulatoryRestrictions a skos:Concept ;
+cv3:LegalAndRegulatoryConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "LegalAndRegulatoryRestrictions"@en ;
+    skos:prefLabel "LegalAndRegulatoryConstraints"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-cv3:PersonRestrictions a skos:Concept ;
+cv3:PersonConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "PersonRestrictions"@en ;
+    skos:prefLabel "PersonConstraints"@en ;
     skos:scopeNote "e.g. Training Status (this implies a Duty Action of \"Complete Training\" - although not formally modelled"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-cv3:RoleRestrictions a skos:Concept ;
+cv3:RoleConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "RoleRestrictions"@en ;
+    skos:prefLabel "RoleConstraints"@en ;
     skos:scopeNote "How to handle multiple role context of a single agent (could be Individual or Organisation, or machine)"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
-cv3:UsageContextRestrictions a skos:Concept ;
+cv3:UsageContextConstraints a skos:Concept ;
     skos:editorialNote "Status: Investigate DPV options (purpose plus other context like \"Research Project\""@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "UsageContextRestrictions"@en ;
+    skos:prefLabel "UsageContextConstraints"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:aiSystem a skos:Concept ;
+    skos:closeMatch <https://w3id.org/dpv/ai#AISystem> ;
+    skos:editorialNote "Source sheet names 'ai:AISystem'; mapped during SKOS conversion."@en ;
+    skos:example "ai:AISystem eq NameOfAISystem"@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "ai:AISystem"@en ;
+    skos:scopeNote "e.g. ai:AISystem eq \"Claude\""@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:count a skos:Concept ;
@@ -881,6 +977,43 @@ cv3:count a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "count"@en ;
     skos:scopeNote "How many times you can download"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:data a skos:Concept ;
+    skos:closeMatch dpv:Data ;
+    skos:editorialNote "Source sheet names 'dpv:Data'; mapped during SKOS conversion."@en ;
+    skos:example "dpv:Data eq UID"@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Data"@en ;
+    skos:scopeNote "e.g. Data eq \"UKDS-SN12345\"; Data eq DOI"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:dataController a skos:Concept ;
+    skos:closeMatch dpv:DataController ;
+    skos:editorialNote "Source sheet names 'dpv:DataController'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:DataController"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:dataProcessor a skos:Concept ;
+    skos:closeMatch dpv:DataProcessor ;
+    skos:editorialNote "Source sheet names 'dpv:DataProcessor'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:DataProcessor"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:dataSource a skos:Concept ;
+    skos:closeMatch dpv:DataSource ;
+    skos:editorialNote "Source sheet names 'dpv:DataSource'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:DataSource"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:dataSubject a skos:Concept ;
+    skos:closeMatch dpv:DataSubject ;
+    skos:editorialNote "Source sheet names 'dpv:DataSubject'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:DataSubject"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:dateTime a skos:Concept ;
@@ -910,6 +1043,28 @@ cv3:deliveryChannel a skos:Concept ;
     skos:scopeNote "Data only access thr safepod network"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
+cv3:dpvPurpose a skos:Concept ;
+    skos:closeMatch dpv:Purpose ;
+    skos:editorialNote "Marked 'SEE PURPOSE TAB' in source sheet."@en,
+        "Source sheet names 'dpv:Purpose'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Purpose"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:dpvRecipient a skos:Concept ;
+    skos:closeMatch dpv:Recipient ;
+    skos:editorialNote "Source sheet names 'dpv:Recipient'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Recipient"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:duration a skos:Concept ;
+    skos:closeMatch dpv:Duration ;
+    skos:editorialNote "Source sheet names 'dpv:Duration'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Duration"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
 cv3:elapsedTime a skos:Concept ;
     dct:source <https://www.w3.org/TR/odrl-vocab/#term-elapsedTime> ;
     skos:exactMatch odrl:elapsedTime ;
@@ -917,6 +1072,14 @@ cv3:elapsedTime a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "elapsedTime"@en ;
     skos:scopeNote "How long you can exercise the Action"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:entity a skos:Concept ;
+    skos:closeMatch dpv:Entity ;
+    skos:editorialNote "Source sheet names 'dpv:Entity'; mapped during SKOS conversion."@en ;
+    skos:example "dpv:Entity eq \"EntityName\" or \"EntityCollection\""@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Entity"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:event a skos:Concept ;
@@ -936,12 +1099,33 @@ cv3:fileFormat a skos:Concept ;
     skos:prefLabel "fileFormat"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
+cv3:frequency a skos:Concept ;
+    skos:closeMatch dpv:Frequency ;
+    skos:editorialNote "Source sheet names 'dpv:Frequency'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Frequency"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:humanSubject a skos:Concept ;
+    skos:closeMatch dpv:HumanSubject ;
+    skos:editorialNote "Source sheet names 'dpv:HumanSubject'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:HumanSubject"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
 cv3:industry a skos:Concept ;
     dct:source <https://www.w3.org/TR/odrl-vocab/#term-industry> ;
     skos:exactMatch odrl:industry ;
     skos:example "industry eq Financial"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "industry"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:justification a skos:Concept ;
+    skos:closeMatch dpv:Justification ;
+    skos:editorialNote "Source sheet names 'dpv:Justification'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Justification"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:language a skos:Concept ;
@@ -952,9 +1136,31 @@ cv3:language a skos:Concept ;
     skos:prefLabel "language"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
+cv3:law a skos:Concept ;
+    skos:closeMatch dpv:Law ;
+    skos:editorialNote "Source sheet names 'dpv:Law'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Law"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:legalBasis a skos:Concept ;
+    skos:closeMatch dpv:LegalBasis ;
+    skos:editorialNote "Source sheet names 'dpv:LegalBasis'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:LegalBasis"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:legalMeasure a skos:Concept ;
+    skos:closeMatch dpv:LegalMeasure ;
+    skos:editorialNote "Source sheet names 'dpv:LegalMeasure'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:LegalMeasure"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
 cv3:location a skos:Concept ;
+    skos:altLabel "dpv:Location"@en ;
     skos:closeMatch dpv:Location ;
-    skos:editorialNote "Source sheet names 'dpv:location' (DPV ODRL Profile); mapped to the DPV concept during SKOS conversion."@en ;
+    skos:editorialNote "Source sheet names 'dpv:location' (DPV ODRL Profile); mapped during SKOS conversion."@en ;
     skos:example "dpv:location eq IRI"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "dpv:location"@en ;
@@ -968,6 +1174,22 @@ cv3:meteredTime a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "meteredTime"@en ;
     skos:scopeNote "non-contigiouus blocks of time"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:model a skos:Concept ;
+    skos:closeMatch <https://w3id.org/dpv/ai#Model> ;
+    skos:editorialNote "Source sheet names 'ai:Model'; mapped during SKOS conversion."@en ;
+    skos:example "ai:Model eq NameOfAIModel"@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "ai:Model"@en ;
+    skos:scopeNote "ai:Model eq \"Qwen4.2\""@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:organisationalMeasure a skos:Concept ;
+    skos:closeMatch dpv:OrganisationalMeasure ;
+    skos:editorialNote "Source sheet names 'dpv:OrganisationalMeasure'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:OrganisationalMeasure"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:payAmount a skos:Concept ;
@@ -985,6 +1207,21 @@ cv3:percentage a skos:Concept ;
     skos:example "percentage lt 50"@en ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "percentage"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:personalData a skos:Concept ;
+    skos:closeMatch dpv:PersonalData ;
+    skos:editorialNote "Source sheet names 'dpv:PersonalData' (Note details in DPV Extension \"Personal Data\": https://w3c-cg.github.io/dpv/2.3/dpv/modules/personal_data#sensitive-special-data); mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:PersonalData"@en ;
+    skos:scopeNote "No Current Examples, but will occur"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:physicalMeasure a skos:Concept ;
+    skos:closeMatch dpv:PhysicalMeasure ;
+    skos:editorialNote "Source sheet names 'dpv:PhysicalMeasure'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:PhysicalMeasure"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:purpose a skos:Concept ;
@@ -1013,6 +1250,20 @@ cv3:resolution a skos:Concept ;
     skos:scopeNote "e.g. print at 1200 DPI"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
+cv3:right a skos:Concept ;
+    skos:closeMatch dpv:Right ;
+    skos:editorialNote "Source sheet names 'dpv:Right'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Right"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:risk a skos:Concept ;
+    skos:closeMatch dpv:Risk ;
+    skos:editorialNote "Source sheet names 'dpv:Risk'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Risk"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
 cv3:spatial a skos:Concept ;
     dct:source <https://www.w3.org/TR/odrl-vocab/#term-spatial> ;
     skos:exactMatch odrl:spatial ;
@@ -1036,6 +1287,29 @@ cv3:systemDevice a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv3> ;
     skos:prefLabel "systemDevice"@en ;
     skos:scopeNote "or safepod for example"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:technicalMeasure a skos:Concept ;
+    skos:closeMatch dpv:TechnicalMeasure ;
+    skos:editorialNote "Source sheet names 'dpv:TechnicalMeasure'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:TechnicalMeasure"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:technicalOrganisationalMeasure a skos:Concept ;
+    skos:closeMatch dpv:TechnicalOrganisationalMeasure ;
+    skos:editorialNote "Source sheet names 'dpv:TechnicalOrganisationalMeasure'; mapped during SKOS conversion."@en ;
+    skos:example "dpv:TechnicalOrganisationalMeasure eq \"dpv/tech:Class"@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:TechnicalOrganisationalMeasure"@en ;
+    skos:scopeNote "e.g. dpv/tech:API eq \"https://api.tech.cessda.eu/\""@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv3> .
+
+cv3:technology a skos:Concept ;
+    skos:closeMatch dpv:Technology ;
+    skos:editorialNote "Source sheet names 'dpv:Technology'; mapped during SKOS conversion."@en ;
+    skos:inScheme <https://odrl.codata.org/cv3> ;
+    skos:prefLabel "dpv:Technology"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv3> .
 
 cv3:timeInterval a skos:Concept ;
@@ -1116,13 +1390,15 @@ cv1:depositDerivedDataProduct a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv1> ;
     skos:note "Duty"@en ;
     skos:prefLabel "DepositDerivedDataProduct"@en ;
-    skos:scopeNote "The derived datasets need to be curated and preserved by depositing them in a repository."@en ;
+    skos:scopeNote "The derived data products (datasets, publications,...) need to be curated and preserved by depositing them in a repository [do we want to qualify repository? \"A repository with known operational practices and sustainability plans? Do we want to state that the metadata should be accessible to the original authors?]"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv1> .
 
 cv1:destroyData a skos:Concept ;
+    skos:definition "Any copies or extracted parts of the data assets need to be destroyed after the end of the project"@en ;
     skos:inScheme <https://odrl.codata.org/cv1> ;
     skos:note "Duty at end of project"@en ;
     skos:prefLabel "DestroyData"@en ;
+    skos:scopeNote "The user needs to commit to deletion of all full or partial copies of the original data asset after the end of the project in a way that fully erases information contained in them. The deletion needs to be completed as soon as technically possible and take into account on- and offline backups on network-accessible or removable media as well as printed copies of the datasets."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv1> .
 
 cv1:encryptDataLocally a skos:Concept ;
@@ -1294,19 +1570,25 @@ cv2:Purpose a skos:Concept ;
     skos:definition "The end-goal or reason for which personal data is processed."@en ;
     skos:exactMatch dpv:Purpose ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
-    skos:narrower cv2:CommercialPurpose,
+    skos:narrower cv2:AddNewPurposesBelowThisLineToBeValidated,
+        cv2:CommercialPurpose,
         cv2:CommunicationManagement,
         cv2:CustomerManagement,
+        cv2:Education,
         cv2:EnforceSecurity,
         cv2:HumanResourceManagement,
         cv2:Marketing,
         cv2:NonCommercialPurpose,
         cv2:OrganisationGovernance,
+        cv2:Outreach,
         cv2:Personalisation,
+        cv2:Promotional,
         cv2:PublicBenefit,
         cv2:RecordManagement,
         cv2:ResearchAndDevelopment,
         cv2:ServiceProvision,
+        cv2:Teaching,
+        cv2:Training,
         cv2:VendorManagement ;
     skos:prefLabel "Purpose"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv2> .
@@ -1343,40 +1625,66 @@ cv2:Purpose a skos:Concept ;
     dct:description "Other constraints describing the scope of applicability of a CDIF access policy: the ODRL left operands selected for CDIF, and broader restriction categories (environment, legal, usage context, person, identity, role, financial) still under investigation."@en ;
     dct:source <https://www.w3.org/TR/odrl-vocab/#term-LeftOperand> ;
     dct:title "CDIF Other Constraints (CV3)"@en ;
-    skos:hasTopConcept cv3:EnvironmentalRestriction,
-        cv3:FinancialRestrictions,
-        cv3:IdentityAndAccessRestrictions,
-        cv3:LegalAndRegulatoryRestrictions,
-        cv3:PersonRestrictions,
-        cv3:RoleRestrictions,
-        cv3:UsageContextRestrictions,
+    skos:hasTopConcept cv3:AddNewConstraintsBelowThisLineToBeValidated,
+        cv3:EnvironmentalConstraints,
+        cv3:FinancialConstraints,
+        cv3:IdentityAndAccessConstraints,
+        cv3:LegalAndRegulatoryConstraints,
+        cv3:PersonConstraints,
+        cv3:RoleConstraints,
+        cv3:UsageContextConstraints,
         cv3:absolutePosition,
         cv3:absoluteSize,
         cv3:absoluteSpatialPosition,
         cv3:absoluteTemporalPosition,
+        cv3:aiSystem,
         cv3:count,
+        cv3:data,
+        cv3:dataController,
+        cv3:dataProcessor,
+        cv3:dataSource,
+        cv3:dataSubject,
         cv3:dateTime,
         cv3:delayPeriod,
         cv3:deliveryChannel,
         cv3:device,
+        cv3:dpvPurpose,
+        cv3:dpvRecipient,
+        cv3:duration,
         cv3:elapsedTime,
+        cv3:entity,
         cv3:event,
         cv3:fileFormat,
+        cv3:frequency,
+        cv3:humanSubject,
         cv3:industry,
+        cv3:justification,
         cv3:language,
+        cv3:law,
+        cv3:legalBasis,
+        cv3:legalMeasure,
         cv3:location,
         cv3:media,
         cv3:meteredTime,
+        cv3:model,
+        cv3:organisationalMeasure,
         cv3:payAmount,
         cv3:percentage,
+        cv3:personalData,
+        cv3:physicalMeasure,
         cv3:product,
         cv3:purpose,
         cv3:recipient,
         cv3:resolution,
+        cv3:right,
+        cv3:risk,
         cv3:spatial,
         cv3:spatialCoordinates,
         cv3:system,
         cv3:systemDevice,
+        cv3:technicalMeasure,
+        cv3:technicalOrganisationalMeasure,
+        cv3:technology,
         cv3:timeInterval,
         cv3:unitOfCount,
         cv3:version,

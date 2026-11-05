@@ -90,7 +90,8 @@ export function leftOperandTree(groups, odrlTerms) {
     const nodes = groups.map(g => ({
         key: g.label,
         label: g.label,
-        children: g.terms.map(t => ({ ...term(g.label)(t), label: humanize(t.value.split(':').pop()) })),
+        // prefixed sheet labels ("ai:AISystem", "dpv:Purpose") are shown as written
+        children: g.terms.map(t => ({ ...term(g.label)(t), label: t.label?.includes(':') ? t.label : humanize(t.value.split(':').pop()) })),
     }));
     const categories = [];
     odrlTerms.forEach(t => {

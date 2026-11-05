@@ -60,10 +60,14 @@ ODRL_LEFT_OPERANDS = {t.lower(): t for t in (
     "relativeTemporalPosition resolution spatial spatialCoordinates system systemDevice timeInterval "
     "unitOfCount version virtualLocation").split()}
 OPERATORS = {"<": "lt", ">": "gt", "=": "eq", "<=": "lteq", ">=": "gteq", "!=": "neq"}
+ODRL_OPERATORS = {"eq", "neq", "gt", "gteq", "lt", "lteq", "isA", "hasPart", "isPartOf", "isAllOf", "isAnyOf", "isNoneOf"}
+
+# Prefixed left operands in the CV3 sheet ("dpv:Location", "ai:AISystem") map to these vocabularies.
+CV3_PREFIXES = {"dpv": "https://w3id.org/dpv#", "ai": "https://w3id.org/dpv/ai#"}
 
 SHEET_CV1 = "CV1-Actions"
 SHEET_CV2 = "CV2-Purpose Constraints"
-SHEET_CV3 = ("CV3-OtherContsraints", "CV3-Other Constraints")   # sheet name has a typo in the source
+SHEET_CV3 = ("CV3-OtherConstraints", "CV3-OtherContsraints", "CV3-Other Constraints")   # older copies had a typo
 SHEET_CV4 = "CV4-DutyActions"
 
 
@@ -79,7 +83,14 @@ def camel(label, upper):
     parts = [p for p in re.split(r"[^0-9A-Za-z]+", label) if p]
     if upper:
         return "".join(p[0].upper() + p[1:] for p in parts)
-    head = parts[0].lower() if parts[0].isupper() else parts[0][0].lower() + parts[0][1:]  # "AI" -> "ai"
+    first = parts[0]
+    m = re.match(r"^([A-Z]+)([A-Z][a-z].*)$", first)   # leading acronym: "AISystem" -> "aiSystem"
+    if first.isupper():
+        head = first.lower()                             # "AI" -> "ai"
+    elif m:
+        head = m.group(1).lower() + m.group(2)
+    else:
+        head = first[0].lower() + first[1:]
     return head + "".join(p[0].upper() + p[1:] for p in parts[1:])
 
 
@@ -258,19 +269,32 @@ def build_cv3(ws):
         prefix, _, local = label.rpartition(":")
         if local.lower() in ODRL_LEFT_OPERANDS or prefix:
             uri = CV3[camel(local, upper=False)]
+            ns = CV3_PREFIXES.get(prefix.lower()) if prefix else None
+            target = URIRef(ns + local[0].upper() + local[1:]) if ns else None
+            if (uri, RDF.type, SKOS.Concept) in g:
+                if target is not None and (uri, SKOS.closeMatch, target) in g:
+                    # same external concept written twice, e.g. "dpv:location" and "dpv:Location"
+                    g.add((uri, SKOS.altLabel, Literal(label, lang="en")))
+                    print(f"CV3: '{label}' is the same concept as {uri}; added as altLabel", file=sys.stderr)
+                    continue
+                # a different concept with the same local name, e.g. dpv:Purpose next to odrl:purpose
+                uri = CV3[camel(f"{prefix} {local}", upper=False)]
             concept(g, s, uri, label)
             operands.append(uri)
-            if prefix.lower() == "dpv":
-                g.add((uri, SKOS.closeMatch, DPV[local[0].upper() + local[1:]]))
+            if prefix:
+                if target is not None:
+                    g.add((uri, SKOS.closeMatch, target))
                 g.add((uri, SKOS.editorialNote, Literal(
-                    f"Source sheet names '{label}' ({extra or 'DPV'}); mapped to the DPV concept "
-                    "during SKOS conversion.", lang="en")))
+                    f"Source sheet names '{label}'" + (f" ({extra})" if extra else "")
+                    + ("; mapped during SKOS conversion." if ns else "; prefix not recognised, no mapping."),
+                    lang="en")))
             else:
                 g.add((uri, SKOS.exactMatch, ODRL[ODRL_LEFT_OPERANDS[local.lower()]]))
                 g.add((uri, DCTERMS.source,
                        URIRef(f"https://www.w3.org/TR/odrl-vocab/#term-{ODRL_LEFT_OPERANDS[local.lower()]}")))
                 text(g, uri, SKOS.editorialNote, extra)
             status = op.upper()
+            odrl_op = OPERATORS.get(op, op)
             if status in ("DON'T USE", "DEPRECATED"):
                 g.add((uri, OWL.deprecated, Literal(True)))
                 g.add((uri, SKOS.editorialNote, Literal(f"Marked '{op}' in source sheet.", lang="en")))
@@ -278,9 +302,10 @@ def build_cv3(ws):
             elif "NO USE CASE" in status:
                 g.add((uri, SKOS.editorialNote, Literal(op, lang="en")))
                 no_use_case.append(uri)
-            elif op:
-                odrl_op = OPERATORS.get(op, op)
+            elif odrl_op in ODRL_OPERATORS:
                 g.add((uri, SKOS.example, Literal(f"{label} {odrl_op} {ro}".strip(), lang="en")))
+            elif op:   # a status such as "SEE PURPOSE TAB"
+                g.add((uri, SKOS.editorialNote, Literal(f"Marked '{op}' in source sheet.", lang="en")))
             text(g, uri, SKOS.scopeNote, example)
         else:
             uri = CV3[camel(label, upper=True)]
@@ -301,19 +326,24 @@ def build_cv3(ws):
 
 # --------------------------------------------------------------------------- CV4
 def build_cv4(ws, cv1):
-    """Columns: DUTY ACTIONS | note."""
+    """Columns: DUTY ACTIONS | skos:definition | skos:dnote | Notes (same handling as CV1)."""
     g = new_graph()
     s = scheme(g, CV4, "CDIF Duty Actions (CV4)",
                "Actions that an assignee must perform (ODRL duties) before or while exercising a "
                "permission in a CDIF access policy.",
                "https://www.w3.org/TR/odrl-vocab/#term-Duty")
     cv1_labels = {str(o).lower(): sub for sub, o in cv1.subject_objects(SKOS.prefLabel)}
-    for (label, note), _ in rows(ws, 5, 2):
+    for (label, definition, dnote, note), _ in rows(ws, 5, 4):
         if not label:
             continue
         uri = CV4[camel(label, upper=False)]
         concept(g, s, uri, label)
-        text(g, uri, SKOS.scopeNote, note)
+        # definitions that are still open questions are editorial, as in CV1
+        if definition and definition != "?":
+            text(g, uri, SKOS.editorialNote if definition.endswith("?") else SKOS.definition, definition)
+        if dnote and dnote != "?":
+            text(g, uri, SKOS.scopeNote, dnote)
+        text(g, uri, SKOS.note, note)
         same = cv1_labels.get(label.lower())
         if same is not None:
             g.add((uri, SKOS.exactMatch, same))
