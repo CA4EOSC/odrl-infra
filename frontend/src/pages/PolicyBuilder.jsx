@@ -26,6 +26,7 @@ import {
 import api from '../services/api';
 import { cn } from '../lib/utils';
 import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
+import PolicySearch from '../components/PolicySearch';
 import { BrowseContext, useBrowse, humanize, purposeTree, flatTree, actionTree, conceptFields } from '../lib/vocabTree';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
@@ -331,25 +332,22 @@ export default function PolicyBuilder() {
     // (a loaded policy can still use one, and validation warns about it)
     const currentActionsList = cdifCv1Actions.filter(a => !a.deprecated);
 
-    // Preset loader mutation
-    const loadPresetMutation = useMutation({
-        mutationFn: async (presetName) => {
-            const res = await api.get(`/policy/presets/${presetName}`);
-            return res.data;
-        },
-        onSuccess: (data) => {
-            if (data['@type'] || data['type']) setPolicyType(data['@type'] || data['type']);
-            if (data['odrl:uid'] || data['uid']) setUid(data['odrl:uid'] || data['uid']);
-            if (data['odrl:profile']) setProfile(data['odrl:profile']);
-            if (data['dcterms:description']) setDescription(data['dcterms:description']);
+    // Fill every field of the builder from a policy (preset or stored policy).
+    // Fields the policy does not have are cleared, so nothing from the previous policy is left.
+    const loadPolicy = (data, message) => {
+            const asList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+            setPolicyType(data['@type'] || data['type'] || 'Set');
+            setUid(data['odrl:uid'] || data['uid'] || data['@id'] || `did:oyd:${crypto.randomUUID()}`);
+            setProfile(data['odrl:profile'] || data['profile'] || '');
+            setDescription(data['dcterms:description'] || data['skos:editorialNote'] || '');
             setCreator(data['dcterms:creator'] || '');
             setPublisher(data['dcterms:publisher'] || '');
             setSource(Array.isArray(data['dcterms:source']) ? data['dcterms:source'].join(', ') : (data['dcterms:source'] || ''));
             setVersionInfo(data['owl:versionInfo'] || '1.0');
             setCreatedDate(data['dcterms:created']?.slice(0, 10) || null);
             setIssuedDate(data['dcterms:issued']?.slice(0, 10) || null);
-            if (data['odrl:target'] || data['target']) setPolicyTarget(data['odrl:target'] || data['target'] || '');
-            if (data['odrl:assigner'] || data['assigner']) setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
+            setPolicyTarget(data['odrl:target'] || data['target'] || '');
+            setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
 
             // Helper to parse action and its refinements
             const parseActionAndRefinements = (rawAction) => {
@@ -372,9 +370,9 @@ export default function PolicyBuilder() {
             };
 
             // Parse Permissions
-            const perms = (data['odrl:permission'] || data['permission'] || []).map(p => {
+            const perms = asList(data['odrl:permission'] || data['permission']).map(p => {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
-                const rawConstraints = (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
+                const rawConstraints = asList(p['odrl:constraint'] || p['constraint']).map(c => ({
                     title: c['dcterms:title'] || c['title'] || '',
                     category: c['dcterms:type']?.['@id'] || c['dcterms:type'] || '',
                     leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
@@ -421,14 +419,14 @@ export default function PolicyBuilder() {
             setPermissions(perms);
 
             // Parse Prohibitions
-            const prohibs = (data['odrl:prohibition'] || data['prohibition'] || []).map(p => {
+            const prohibs = asList(data['odrl:prohibition'] || data['prohibition']).map(p => {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
                 return {
                     target: p['odrl:target'] || p['target'] || '',
                     action: actionName,
                     refinements: refinements,
                     output: p['odrl:output'] || p['output'] || '',
-                    constraints: (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
+                    constraints: asList(p['odrl:constraint'] || p['constraint']).map(c => ({
                         title: c['dcterms:title'] || c['title'] || '',
                         leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                         operator: c['odrl:operator'] || c['operator'] || 'odrl:lt',
@@ -439,7 +437,7 @@ export default function PolicyBuilder() {
             setProhibitions(prohibs);
 
             // Parse Obligations / Duties
-            const rawDuties = data['odrl:obligation'] || data['obligation'] || data['odrl:duty'] || data['duty'] || [];
+            const rawDuties = asList(data['odrl:obligation'] || data['obligation'] || data['odrl:duty'] || data['duty']);
             const parsedDuties = rawDuties.map(d => {
                 const { actionName, refinements } = parseActionAndRefinements(d['odrl:action'] || d['action']);
                 return {
@@ -447,7 +445,7 @@ export default function PolicyBuilder() {
                     target: d['odrl:target'] || d['target'] || '',
                     assignee: d['odrl:assignee'] || d['assignee'] || '',
                     refinements: refinements,
-                    constraints: (d['odrl:constraint'] || d['constraint'] || []).map(c => ({
+                    constraints: asList(d['odrl:constraint'] || d['constraint']).map(c => ({
                         title: c['dcterms:title'] || c['title'] || '',
                         leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                         operator: c['odrl:operator'] || c['operator'] || 'odrl:eq',
@@ -455,11 +453,17 @@ export default function PolicyBuilder() {
                     }))
                 };
             });
-            if (parsedDuties.length > 0) {
-                setDuties(parsedDuties);
-            }
-            setShaclFeedback({ status: 'info', message: 'Preset loaded successfully!' });
-        }
+            setDuties(parsedDuties);
+            setShaclFeedback({ status: 'info', message });
+    };
+
+    // Preset loader mutation
+    const loadPresetMutation = useMutation({
+        mutationFn: async (presetName) => {
+            const res = await api.get(`/policy/presets/${presetName}`);
+            return res.data;
+        },
+        onSuccess: (data) => loadPolicy(data, 'Preset loaded successfully!'),
     });
 
     // Compile JSON-LD
@@ -963,6 +967,11 @@ export default function PolicyBuilder() {
                     </button>
                 </div>
             </div>
+
+            {/* Search existing policies: picking one fills all fields */}
+            <PolicySearch
+                onSelect={(policy, r) => loadPolicy(policy, `Loaded ${r.source === 'stored' ? 'stored policy' : 'preset'} ${r.uid}`)}
+            />
 
             {/* Validation Feedback Banner */}
             {shaclFeedback && (

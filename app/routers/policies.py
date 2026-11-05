@@ -94,6 +94,76 @@ async def get_cdif_vocabulary(scheme: str):
     return cdif_vocab.load_scheme(scheme)
 
 
+PRESET_NAMES = ["listing-4.2", "read-only"] + [k.lower().replace("_", "-") for k in DUODRL_MAPPINGS]
+
+
+def _as_text(value: Any) -> str:
+    if isinstance(value, dict):
+        return str(value.get("@value") or value.get("@id") or "")
+    if isinstance(value, list):
+        return ", ".join(_as_text(v) for v in value)
+    return "" if value is None else str(value)
+
+
+def _policy_summary(policy: Dict[str, Any], uid: Optional[str], source: str, preset: Optional[str] = None) -> Dict[str, Any]:
+    """Short description of a policy for the search list in the Policy Builder."""
+    rules = [policy.get(k) or [] for k in ("odrl:permission", "permission", "odrl:prohibition", "prohibition")]
+    targets = {_as_text(r.get("odrl:target") or r.get("target")) for group in rules for r in (group if isinstance(group, list) else [group]) if isinstance(r, dict)}
+    return {
+        "uid": uid or _as_text(policy.get("odrl:uid") or policy.get("uid") or policy.get("@id")),
+        "source": source,  # "stored" (saved via /policy/create or /oac/policy) or "preset"
+        "preset": preset,
+        "type": _as_text(policy.get("@type") or policy.get("type")),
+        "title": _as_text(policy.get("dcterms:title") or policy.get("rdfs:label")),
+        "description": _as_text(policy.get("dcterms:description") or policy.get("skos:editorialNote")),
+        "target": _as_text(policy.get("odrl:target") or policy.get("target")) or ", ".join(sorted(t for t in targets if t)),
+        "creator": _as_text(policy.get("dcterms:creator")),
+        "publisher": _as_text(policy.get("dcterms:publisher")),
+        "version": _as_text(policy.get("owl:versionInfo")),
+        "created": _as_text(policy.get("dcterms:created") or policy.get("dcterms:issued")),
+        "policy": policy,
+    }
+
+
+def _matches(summary: Dict[str, Any], words: List[str]) -> bool:
+    text = " ".join(str(v) for k, v in summary.items() if k != "policy").lower()
+    # also search the rules (actions, purposes, constraint values)
+    text += " " + json.dumps(summary["policy"], ensure_ascii=False).lower()
+    return all(w in text for w in words)
+
+
+@router.get("/existing")
+async def list_existing_policies(
+    q: str = "",
+    include_presets: bool = True,
+    limit: int = 50,
+):
+    """Existing policies for the Policy Builder search box: stored policies (Qdrant 'policy' collection)
+    and the built-in presets. `q` keeps policies whose fields contain every word of the query."""
+    summaries: List[Dict[str, Any]] = []
+    stored_available = True
+    try:
+        for doc in qdrant_service.list_documents("policy"):
+            summaries.append(_policy_summary(doc["json_ld"], doc["did"], "stored"))
+    except Exception as e:
+        print(f"Warning: could not list stored policies: {e}")
+        stored_available = False
+    # newest stored policies first
+    summaries.sort(key=lambda s: s["created"], reverse=True)
+
+    if include_presets:
+        for name in PRESET_NAMES:
+            summaries.append(_policy_summary(await get_preset(name), None, "preset", preset=name))
+
+    words = q.lower().split()
+    matches = [s for s in summaries if _matches(s, words)] if words else summaries
+    return {
+        "total": len(matches),
+        "stored_available": stored_available,
+        "results": matches[:limit],
+    }
+
+
 @router.get("/presets/{preset_name}")
 async def get_preset(preset_name: str):
     """Returns pre-configured policy templates such as listing-4.2, duo-0000042, duo-0000024, or any DUODRL code."""
