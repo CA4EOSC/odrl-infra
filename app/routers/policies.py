@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Body
 from typing import Dict, Any, List, Optional
 import os
 import json
+import uuid
 from pydantic import BaseModel, Field
 
 from cli.create_policy import (
@@ -22,6 +23,7 @@ from cli.create_policy import (
 from ..services.oydid import run_oydid_command
 from ..services.qdrant_service import qdrant_service
 from ..services import cdif_vocab
+from ..services.policy_metadata import stamp_policy_metadata
 
 router = APIRouter(prefix="/policy", tags=["ODRL & OAC Policy Service"])
 
@@ -80,15 +82,15 @@ async def get_vocab_helpers():
 
 @router.get("/vocab/cdif")
 async def get_cdif_vocabularies():
-    """Returns the CDIF access vocabularies (SKOS): CV1 actions, CV2 purposes, CV3 other constraints."""
+    """Returns the CDIF access vocabularies (SKOS): CV1 actions, CV2 purposes, CV3 other constraints, CV4 duty actions."""
     return cdif_vocab.all_schemes()
 
 
 @router.get("/vocab/cdif/{scheme}")
 async def get_cdif_vocabulary(scheme: str):
-    """Returns one CDIF vocabulary: cv1 (actions), cv2 (purposes) or cv3 (other constraints)."""
+    """Returns one CDIF vocabulary: cv1 (actions), cv2 (purposes), cv3 (other constraints) or cv4 (duty actions)."""
     if scheme not in cdif_vocab.SCHEMES:
-        raise HTTPException(status_code=404, detail=f"Unknown vocabulary '{scheme}', use cv1, cv2 or cv3")
+        raise HTTPException(status_code=404, detail=f"Unknown vocabulary '{scheme}', use cv1, cv2, cv3 or cv4")
     return cdif_vocab.load_scheme(scheme)
 
 
@@ -137,7 +139,7 @@ async def create_policy(request: CreatePolicyApiRequest):
     """
     Validates and stores an ODRL/OAC Policy, optionally anchoring it as a DID and indexing in Qdrant.
     """
-    policy = request.policy
+    policy = stamp_policy_metadata(request.policy)
     is_valid, errors = Validator.validate_policy(policy)
     if not is_valid:
         raise HTTPException(status_code=422, detail={"message": "Policy validation failed", "errors": errors})

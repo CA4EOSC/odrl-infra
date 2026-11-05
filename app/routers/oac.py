@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Optional
 from ..models_oac import OacPolicyCreateRequest
 from ..services.oydid import run_oydid_command
 from ..services.qdrant_service import qdrant_service
+from ..services.policy_metadata import stamp_policy_metadata
 import json
 
 router = APIRouter(prefix="/oac", tags=["ODRL Access Control Profile"])
@@ -15,7 +16,7 @@ async def create_oac_policy(policy: OacPolicyCreateRequest):
     """
     try:
         # Prepare payload
-        policy_dict = policy.dict(by_alias=True)
+        policy_dict = stamp_policy_metadata(policy.dict(by_alias=True, exclude_none=True))
         
         # Use OYDID to create a DID with this policy as payload
         result = run_oydid_command(["create", "--json-output"], input_data=policy_dict)
