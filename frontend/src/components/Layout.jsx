@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, ScrollText, PlayCircle, Sun, Moon, LogOut, CheckCircle, Menu, X, FileText, Database, ShieldCheck, FileKey, Play, MessageSquare, FileJson, Users } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { LayoutDashboard, Wallet, ScrollText, PlayCircle, Sun, Moon, LogOut, CheckCircle, Menu, X, FileText, Database, ShieldCheck, FileKey, Play, MessageSquare, FileJson, Users, ExternalLink } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ThemeToggle } from './ThemeToggle';
 import { useUser } from '../context/UserContext';
+import { THEME_CONFIG } from '../config';
+import api from '../services/api';
 
 const NavItem = ({ to, icon: Icon, label, description, isActive }) => {
     return (
@@ -57,14 +60,48 @@ export default function Layout({ children }) {
     const location = useLocation();
     const { user } = useUser();
 
+    // Fetch theme configuration from backend (supports templates and environment variables)
+    const { data: themeConfig } = useQuery({
+        queryKey: ['theme-config'],
+        queryFn: async () => {
+            try {
+                const res = await api.get('/theme/config');
+                return res.data;
+            } catch (err) {
+                console.warn('Could not load theme config from backend, using defaults', err);
+                return null;
+            }
+        },
+        staleTime: 60 * 1000
+    });
+
+    const logoUrl = themeConfig?.logo_url || THEME_CONFIG.defaultLogoUrl;
+    const footerText = themeConfig?.footer_text || THEME_CONFIG.defaultFooterText;
+    const headerHtml = themeConfig?.header_html;
+    const footerHtml = themeConfig?.footer_html;
+
     return (
         <div className="flex h-screen bg-white text-gray-900 dark:bg-[#050505] dark:text-white overflow-hidden selection:bg-indigo-500/30">
             {/* Sidebar */}
             <aside className="w-72 glass border-r border-gray-200 dark:border-white/5 flex flex-col relative z-20">
                 <div className="p-6 mb-2">
                     <div className="flex items-center gap-3 mb-2 group cursor-default">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform duration-500">
-                            <ShieldCheck className="text-white" size={24} />
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform duration-500 overflow-hidden shrink-0">
+                            {logoUrl ? (
+                                <img
+                                    src={logoUrl}
+                                    alt="Logo"
+                                    className="w-full h-full object-contain p-1"
+                                    onError={(e) => {
+                                        // Fallback to ShieldCheck if image fails to load
+                                        e.currentTarget.style.display = 'none';
+                                        if (e.currentTarget.nextElementSibling) {
+                                            e.currentTarget.nextElementSibling.style.display = 'block';
+                                        }
+                                    }}
+                                />
+                            ) : null}
+                            <ShieldCheck className={logoUrl ? "hidden text-white" : "text-white"} size={24} />
                         </div>
                         <div>
                             <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-gray-900 via-indigo-800 to-gray-900 dark:from-white dark:via-indigo-300 dark:to-white bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent">
@@ -102,45 +139,119 @@ export default function Layout({ children }) {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar bg-[#fdfdfd] dark:bg-[#0a0a0a] relative h-full flex flex-col">
-                {/* Top Bar */}
-                <header className="sticky top-0 z-30 flex items-center justify-end gap-4 p-4 md:px-8 glass border-b border-gray-200 dark:border-white/5 animate-in slide-in-from-top-4 duration-500">
-                    {user ? (
-                        <Link
-                            to="/profile"
-                            className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm dark:bg-[#242424] dark:border-white/10 dark:hover:bg-white/5"
-                        >
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user.name || 'Profile'}</span>
-                            {user.picture ? (
-                                <img src={user.picture} alt="Profile" className="w-7 h-7 rounded-full object-cover" />
+            <main className="flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar bg-[#fdfdfd] dark:bg-[#0a0a0a] relative h-full flex flex-col justify-between">
+                <div>
+                    {/* Top Bar */}
+                    <header className="sticky top-0 z-30 flex items-center justify-between gap-4 p-4 md:px-8 glass border-b border-gray-200 dark:border-white/5 animate-in slide-in-from-top-4 duration-500">
+                        {headerHtml ? (
+                            <div
+                                className="custom-header-template flex items-center"
+                                dangerouslySetInnerHTML={{ __html: headerHtml }}
+                            />
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                {logoUrl && (
+                                    <a
+                                        href="https://cdif4eosc.eu"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 group transition-opacity hover:opacity-80"
+                                        title="CDIF4EOSC Project"
+                                    >
+                                        <img
+                                            src={logoUrl}
+                                            alt="CDIF4EOSC Logo"
+                                            className="h-8 max-w-[180px] object-contain rounded"
+                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                        />
+                                    </a>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="flex items-center gap-4 ml-auto">
+                            {user ? (
+                                <Link
+                                    to="/profile"
+                                    className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm dark:bg-[#242424] dark:border-white/10 dark:hover:bg-white/5"
+                                >
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user.name || 'Profile'}</span>
+                                    {user.picture ? (
+                                        <img src={user.picture} alt="Profile" className="w-7 h-7 rounded-full object-cover" />
+                                    ) : (
+                                        <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                            <Users size={14} />
+                                        </div>
+                                    )}
+                                </Link>
                             ) : (
-                                <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                                    <Users size={14} />
-                                </div>
+                                <Link
+                                    to="/vcs"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95 group"
+                                >
+                                    <Wallet size={16} className="group-hover:rotate-12 transition-transform" />
+                                    Login
+                                </Link>
                             )}
-                        </Link>
-                    ) : (
-                        <Link
-                            to="/vcs"
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-95 group"
-                        >
-                            <Wallet size={16} className="group-hover:rotate-12 transition-transform" />
-                            Login
-                        </Link>
-                    )}
-                    <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-1" />
-                    <ThemeToggle />
-                </header>
+                            <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-1" />
+                            <ThemeToggle />
+                        </div>
+                    </header>
 
-                <div className="relative flex-1">
-                    {/* Background Decorations */}
-                    <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-indigo-500/5 blur-[120px] pointer-events-none rounded-full -translate-y-1/2 translate-x-1/4" />
-                    <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-purple-500/5 blur-[100px] pointer-events-none rounded-full translate-y-1/2 -translate-x-1/4" />
+                    <div className="relative flex-1">
+                        {/* Background Decorations */}
+                        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-indigo-500/5 blur-[120px] pointer-events-none rounded-full -translate-y-1/2 translate-x-1/4" />
+                        <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-purple-500/5 blur-[100px] pointer-events-none rounded-full translate-y-1/2 -translate-x-1/4" />
 
-                    <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {children}
+                        <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            {children}
+                        </div>
                     </div>
                 </div>
+
+                {/* Footer with theming and templates support */}
+                <footer className="mt-auto border-t border-gray-200 dark:border-white/10 bg-white/70 dark:bg-black/40 backdrop-blur-md px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
+                    {footerHtml ? (
+                        <div
+                            className="custom-footer-template"
+                            dangerouslySetInnerHTML={{ __html: footerHtml }}
+                        />
+                    ) : (
+                        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                {logoUrl && (
+                                    <a
+                                        href="https://cdif4eosc.eu"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="shrink-0 transition-opacity hover:opacity-80"
+                                    >
+                                        <img
+                                            src={logoUrl}
+                                            alt="CDIF4EOSC"
+                                            className="h-6 w-auto max-w-[120px] object-contain"
+                                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                        />
+                                    </a>
+                                )}
+                                <p className="leading-relaxed text-gray-600 dark:text-gray-300">
+                                    {footerText}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-4 shrink-0 text-[11px] font-medium text-gray-400 dark:text-gray-500">
+                                <a
+                                    href="https://cdif4eosc.eu"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 transition-colors"
+                                >
+                                    cdif4eosc.eu
+                                    <ExternalLink size={12} />
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </footer>
             </main>
         </div>
     );
