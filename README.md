@@ -119,6 +119,12 @@ See the [ODRL CLI Guide](./docs/odrl-cli-guide.md) for full documentation.
 
     *Note: The frontend is built and served directly by the FastAPI container.*
 
+    To show the deployed git commit in the UI (sidebar footer, links to the commit on GitHub), build with:
+    ```bash
+    bin/docker-build
+    ```
+    It sets `VITE_GIT_SHA`, `VITE_GIT_BRANCH`, `VITE_GIT_DATE` and `VITE_GIT_DIRTY` and runs `docker compose build` and `up -d`. A plain `docker compose up --build` shows "unknown" as version.
+
 ### 3. Install ODRL CLI
 You can install the CLI tool directly using `pip`:
 ```bash

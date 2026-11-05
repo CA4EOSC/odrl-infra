@@ -1,4 +1,5 @@
 import React from 'react';
+import BuildVersion from './BuildVersion';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Wallet, ScrollText, PlayCircle, Sun, Moon, LogOut, CheckCircle, Menu, X, FileText, Database, ShieldCheck, FileKey, Play, MessageSquare, FileJson, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -98,6 +99,7 @@ export default function Layout({ children }) {
                         </div>
                         <span className="text-[11px] font-extrabold text-gray-500 dark:text-gray-400 tracking-tight uppercase">System Online</span>
                     </div>
+                    <BuildVersion />
                 </div>
             </aside>
 
