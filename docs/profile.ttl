@@ -303,25 +303,30 @@ cdif-access:View a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 
 cdif-access:purposeCollection a skos:Collection ;
     skos:prefLabel "ODRL CDIF Access profile - purpose concepts"@en ;
+	skos:scopeNote "Any purposes from the DPV specification (https://w3id.org/dpv) can be used."@en ;
+    skos:member odrl:purpose .
+
+cdif-access:leftOperandsCollection a skos:Collection ;
+    skos:prefLabel "ODRL CDIF Access profile - left operands concepts"@en ;
     skos:scopeNote ""@en ;
-    skos:member odrl:purpose ;
-	skos:member dpv:AcademicResearch ;
-	skos:member dpv:AccountManagement ;
-	skos:member dpv:Advertising ;
-	skos:member dpv:CommercialPurpose;
-	skos:member dpv:CommunicationManagement ;
-	skos:member dpv:CustomerManagement ;
-	skos:member dpv:EnforceSecurity ;
-	skos:member dpv:HumanResourceManagement ;
-	skos:member dpv:Marketing ;
-	skos:member dpv:NonCommercialPurpose ;
-	skos:member dpv:OrganisationGovernance ;
-	skos:member dpv:Personalisation ;
-	skos:member dpv:PublicBenefit ;
-	skos:member dpv:RecordManagement ;
-	skos:member dpv:ResearchAndDevelopment ;
-	skos:member dpv:ServiceProvision ;
-	skos:member dpv:VendorManagement ;
-	skos:member dpv:CommercialResearch ;
-	skos:member dpv:NonCommercialResearch  ;
-	skos:member dpv:ScientificResearch .
+    skos:member odrl:count ;
+    skos:member odrl:dateTime ;
+    skos:member odrl:delayPeriod ;
+    skos:member odrl:deliveryChannel ;
+	skos:member odrl:elapsedTime ;
+	skos:member odrl:event ;
+	skos:member odrl:fileFormat ;
+	skos:member odrl:industry ;
+	skos:member odrl:language ;
+	skos:member odrl:meteredTime ;
+	skos:member odrl:PayAmount ;
+	skos:member odrl:percentage ;
+	skos:member odrl:recipient ;
+	skos:member odrl:resolution ;
+	skos:member odrl:spatial ; # dpv-odrl:Location needs to be added
+	skos:member odrl:spatialCoordinates ;
+	skos:member odrl:systemDevice ;
+	skos:member odrl:timeInterval ;
+	skos:member odrl:unitOfCount ;
+	skos:member odrl:version ;
+	skos:member odrl:virtualLocation .
