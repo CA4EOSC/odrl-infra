@@ -1,19 +1,20 @@
-PREFIX dpv:     <https://w3id.org/dpv#>
-PREFIX bibo:    <http://purl.org/ontology/bibo/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
-PREFIX odrl:    <http://www.w3.org/ns/odrl/2/>
-PREFIX owl:     <http://www.w3.org/2002/07/owl#>
-PREFIX profile: <http://www.w3.org/ns/dx/prof/>
-PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX role:    <http://www.w3.org/ns/dx/prof/role/>
-PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
-PREFIX sw:      <http://www.w3.org/2003/06/sw-vocab-status/ns#>
-PREFIX vann:    <http://purl.org/vocab/vann/>
-PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
-PREFIX cc:      <http://creativecommons.org/ns#>
-
+PREFIX dpv-odrl: <https://w3id.org/dpv/mappings/odrl#>
+PREFIX dpv:      <https://w3id.org/dpv#>
+PREFIX bibo:     <http://purl.org/ontology/bibo/>
+PREFIX dcterms:  <http://purl.org/dc/terms/>
+PREFIX foaf:     <http://xmlns.com/foaf/0.1/>
+PREFIX odrl:     <http://www.w3.org/ns/odrl/2/>
+PREFIX owl:      <http://www.w3.org/2002/07/owl#>
+PREFIX profile:  <http://www.w3.org/ns/dx/prof/>
+PREFIX rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX role:     <http://www.w3.org/ns/dx/prof/role/>
+PREFIX skos:     <http://www.w3.org/2004/02/skos/core#>
+PREFIX sw:       <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+PREFIX vann:     <http://purl.org/vocab/vann/>
+PREFIX xsd:      <http://www.w3.org/2001/XMLSchema#>
+PREFIX cc:       <http://creativecommons.org/ns#>
+ 
 PREFIX cdif-access: <https://w3id.org/cdif/access#>
 
 # ------------ Ontology Metadata ------------------ #
@@ -408,10 +409,34 @@ cdif-access:leftOperandsCollection a skos:Collection ;
 	skos:member odrl:percentage ;
 	skos:member odrl:recipient ;
 	skos:member odrl:resolution ;
-	skos:member odrl:spatial ; # dpv-odrl:Location needs to be added
+	skos:member odrl:spatial ;
 	skos:member odrl:spatialCoordinates ;
 	skos:member odrl:systemDevice ;
 	skos:member odrl:timeInterval ;
 	skos:member odrl:unitOfCount ;
 	skos:member odrl:version ;
-	skos:member odrl:virtualLocation .
+	skos:member odrl:virtualLocation ;
+	skos:member dpv-odrl:Entity ;
+	skos:member dpv-odrl:Data ;
+	skos:member dpv-odrl:PersonalData ;
+	skos:member dpv-odrl:AISystem ;
+	skos:member dpv-odrl:AIModel ;
+	skos:member dpv-odrl:TechnicalOrganisationalMeasure ;
+	skos:member dpv-odrl:TechnicalMeasure ;
+	skos:member dpv-odrl:OrganisationalMeasure ;
+	skos:member dpv-odrl:LegalMeasure ;
+	skos:member dpv-odrl:PhysicalMeasure ;
+	skos:member dpv-odrl:Location ;
+	skos:member dpv-odrl:Law ;
+	skos:member dpv-odrl:LegalBasis ;
+	skos:member dpv-odrl:Right ;
+	skos:member dpv-odrl:Risk ;
+	skos:member dpv-odrl:DataController ;
+	skos:member dpv-odrl:DataProcessor ;
+	skos:member dpv-odrl:HumanSubject ;
+	skos:member dpv-odrl:DataSubject ;
+	skos:member dpv-odrl:Duration ;
+	skos:member dpv-odrl:Frequency ;
+	skos:member dpv-odrl:Justification ;
+	skos:member dpv-odrl:Technology ;
+	skos:member dpv-odrl:DataSource .

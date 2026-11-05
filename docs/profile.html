@@ -138,6 +138,8 @@
     table.terms { width: 100%; }
     table.terms td:first-child { white-space: nowrap; }
     table.terms tr.deprecated td:first-child code { text-decoration: line-through; }
+    table.overview { border-collapse: collapse; }
+    table.overview th, table.overview td { border: 1px solid rgba(127, 127, 127, .35); padding: .35em .6em; }
     table.overview td:not(:first-child), table.overview th:not(:first-child) { text-align: right; }
     .tbd { color: #b25e00; font-style: italic; }
     .badge { display: inline-block; padding: 0 .45em; border: 1px solid currentColor; border-radius: .7em;
@@ -186,9 +188,9 @@
       <tbody>
         <tr>
           <td><a href="#leftOperandsCollection">Left operands concepts</a></td>
-          <td>21</td>
+          <td>45</td>
           <td>0</td>
-          <td>21 ODRL</td>
+          <td>21 ODRL, 24 dpv-odrl</td>
           <td>0</td>
         </tr>
         <tr>
@@ -234,6 +236,11 @@
           <td><code>dcterms</code></td>
           <td><code>http://purl.org/dc/terms/</code></td>
           <td><a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/">DCMI Metadata Terms</a></td>
+        </tr>
+        <tr>
+          <td><code>dpv-odrl</code></td>
+          <td><code>https://w3id.org/dpv/mappings/odrl#</code></td>
+          <td></td>
         </tr>
         <tr>
           <td><code>foaf</code></td>
@@ -328,7 +335,7 @@
   <h2>Profile vocabulary</h2>
   <p>
     Every concept used by this profile is a member of one of the SKOS collections below, whether this profile
-    defines it or adopts it from another vocabulary (<a href="https://www.w3.org/TR/odrl-vocab/">ODRL Vocabulary &amp; Expression 2.2</a> [[ODRL-VOCAB]], <a href="https://creativecommons.org/ns">Creative Commons Rights Expression Language (ccREL)</a> [[CC-REL]]).
+    defines it or adopts it from another vocabulary (<a href="https://www.w3.org/TR/odrl-vocab/">ODRL Vocabulary &amp; Expression 2.2</a> [[ODRL-VOCAB]], <a href="https://creativecommons.org/ns">Creative Commons Rights Expression Language (ccREL)</a> [[CC-REL]], dpv-odrl).
     Terms defined by this profile link to their definition in <a href="#terms"></a>; adopted terms link to the
     documentation of their source vocabulary.
   </p>
@@ -336,13 +343,157 @@
   <section id="leftOperandsCollection">
     <h3>Left operands concepts</h3>
     <p>
-      The collection <code title="https://w3id.org/cdif/access#leftOperandsCollection">cdif-access:leftOperandsCollection</code> (&ldquo;ODRL CDIF Access profile - left operands concepts&rdquo;) has 21 members:
-      0 defined by this profile, 21 from ODRL.
+      The collection <code title="https://w3id.org/cdif/access#leftOperandsCollection">cdif-access:leftOperandsCollection</code> (&ldquo;ODRL CDIF Access profile - left operands concepts&rdquo;) has 45 members:
+      0 defined by this profile, 21 from ODRL, 24 from dpv-odrl.
     </p>
-    <p><input type="search" class="term-filter" data-table="table-leftOperandsCollection" placeholder="Filter the 21 terms" aria-label="Filter the terms of Left operands concepts"></p>
+    <p><input type="search" class="term-filter" data-table="table-leftOperandsCollection" placeholder="Filter the 45 terms" aria-label="Filter the terms of Left operands concepts"></p>
     <table class="simple terms" id="table-leftOperandsCollection">
       <thead><tr><th>Term</th><th>Label</th><th>Definition</th><th>Source</th></tr></thead>
       <tbody>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#AIModel" title="https://w3id.org/dpv/mappings/odrl#AIModel"><code>dpv-odrl:AIModel</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#AISystem" title="https://w3id.org/dpv/mappings/odrl#AISystem"><code>dpv-odrl:AISystem</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Data" title="https://w3id.org/dpv/mappings/odrl#Data"><code>dpv-odrl:Data</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#DataController" title="https://w3id.org/dpv/mappings/odrl#DataController"><code>dpv-odrl:DataController</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#DataProcessor" title="https://w3id.org/dpv/mappings/odrl#DataProcessor"><code>dpv-odrl:DataProcessor</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#DataSource" title="https://w3id.org/dpv/mappings/odrl#DataSource"><code>dpv-odrl:DataSource</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#DataSubject" title="https://w3id.org/dpv/mappings/odrl#DataSubject"><code>dpv-odrl:DataSubject</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Duration" title="https://w3id.org/dpv/mappings/odrl#Duration"><code>dpv-odrl:Duration</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Entity" title="https://w3id.org/dpv/mappings/odrl#Entity"><code>dpv-odrl:Entity</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Frequency" title="https://w3id.org/dpv/mappings/odrl#Frequency"><code>dpv-odrl:Frequency</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#HumanSubject" title="https://w3id.org/dpv/mappings/odrl#HumanSubject"><code>dpv-odrl:HumanSubject</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Justification" title="https://w3id.org/dpv/mappings/odrl#Justification"><code>dpv-odrl:Justification</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Law" title="https://w3id.org/dpv/mappings/odrl#Law"><code>dpv-odrl:Law</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#LegalBasis" title="https://w3id.org/dpv/mappings/odrl#LegalBasis"><code>dpv-odrl:LegalBasis</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#LegalMeasure" title="https://w3id.org/dpv/mappings/odrl#LegalMeasure"><code>dpv-odrl:LegalMeasure</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Location" title="https://w3id.org/dpv/mappings/odrl#Location"><code>dpv-odrl:Location</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#OrganisationalMeasure" title="https://w3id.org/dpv/mappings/odrl#OrganisationalMeasure"><code>dpv-odrl:OrganisationalMeasure</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#PersonalData" title="https://w3id.org/dpv/mappings/odrl#PersonalData"><code>dpv-odrl:PersonalData</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#PhysicalMeasure" title="https://w3id.org/dpv/mappings/odrl#PhysicalMeasure"><code>dpv-odrl:PhysicalMeasure</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Right" title="https://w3id.org/dpv/mappings/odrl#Right"><code>dpv-odrl:Right</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Risk" title="https://w3id.org/dpv/mappings/odrl#Risk"><code>dpv-odrl:Risk</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#TechnicalMeasure" title="https://w3id.org/dpv/mappings/odrl#TechnicalMeasure"><code>dpv-odrl:TechnicalMeasure</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#TechnicalOrganisationalMeasure" title="https://w3id.org/dpv/mappings/odrl#TechnicalOrganisationalMeasure"><code>dpv-odrl:TechnicalOrganisationalMeasure</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
+        <tr>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#Technology" title="https://w3id.org/dpv/mappings/odrl#Technology"><code>dpv-odrl:Technology</code></a></td>
+          <td></td>
+          <td></td>
+          <td><a href="https://w3id.org/dpv/mappings/odrl#">dpv-odrl</a></td>
+        </tr>
         <tr>
           <td><a href="https://www.w3.org/TR/odrl-vocab/#term-count" title="http://www.w3.org/ns/odrl/2/count"><code>odrl:count</code></a></td>
           <td>Count</td>

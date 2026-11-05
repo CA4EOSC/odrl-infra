@@ -8,6 +8,10 @@ services:
         - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
         - VITE_REDIRECT_URI=${VITE_REDIRECT_URI}
         - VITE_ORCID_CLIENT_ID=${VITE_ORCID_CLIENT_ID}
+        - VITE_GIT_SHA=${VITE_GIT_SHA:-}
+        - VITE_GIT_BRANCH=${VITE_GIT_BRANCH:-}
+        - VITE_GIT_DATE=${VITE_GIT_DATE:-}
+        - VITE_GIT_DIRTY=${VITE_GIT_DIRTY:-}
     volumes:
       - .:/usr/src/app
     ports:

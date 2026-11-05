@@ -26,7 +26,8 @@ import {
 import api from '../services/api';
 import { cn } from '../lib/utils';
 import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
-import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, ruleGroupLabel } from '../lib/vocabTree';
+import PolicySearch from '../components/PolicySearch';
+import { BrowseContext, useBrowse, humanize, purposeTree, flatTree, actionTree, conceptFields } from '../lib/vocabTree';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
 const ODRL_OPERATORS = [
@@ -44,64 +45,23 @@ const ODRL_OPERATORS = [
     { value: 'odrl:isNoneOf', label: 'isNoneOf', description: 'is none of' },
 ];
 
-// ODRL 2.2 left operands (instances of odrl:LeftOperand) — https://www.w3.org/TR/odrl-vocab/#term-LeftOperand
-const ODRL_LEFT_OPERANDS = [
-    { value: 'odrl:absolutePosition', label: 'absolutePosition', description: 'absolute position of the asset' },
-    { value: 'odrl:absoluteSize', label: 'absoluteSize', description: 'absolute size of the asset' },
-    { value: 'odrl:absoluteSpatialPosition', label: 'absoluteSpatialPosition', description: 'absolute spatial position (e.g. pixels)' },
-    { value: 'odrl:absoluteTemporalPosition', label: 'absoluteTemporalPosition', description: 'absolute temporal position in a media stream' },
-    { value: 'odrl:count', label: 'count', description: 'number of times the action may be exercised' },
-    { value: 'odrl:dateTime', label: 'dateTime', description: 'date and time of exercising the action' },
-    { value: 'odrl:delayPeriod', label: 'delayPeriod', description: 'delay before exercising the action' },
-    { value: 'odrl:deliveryChannel', label: 'deliveryChannel', description: 'delivery channel used' },
-    { value: 'odrl:device', label: 'device', description: 'device used (deprecated: use systemDevice)' },
-    { value: 'odrl:elapsedTime', label: 'elapsedTime', description: 'elapsed time of exercising the action' },
-    { value: 'odrl:event', label: 'event', description: 'identified event' },
-    { value: 'odrl:fileFormat', label: 'fileFormat', description: 'file format' },
-    { value: 'odrl:industry', label: 'industry', description: 'industry sector' },
-    { value: 'odrl:language', label: 'language', description: 'natural language' },
-    { value: 'odrl:media', label: 'media', description: 'media type or category' },
-    { value: 'odrl:meteredTime', label: 'meteredTime', description: 'accumulated time of exercising the action' },
-    { value: 'odrl:payAmount', label: 'payAmount', description: 'amount of a financial payment' },
-    { value: 'odrl:percentage', label: 'percentage', description: 'percentage of the asset' },
-    { value: 'odrl:product', label: 'product', description: 'product or service category' },
-    { value: 'odrl:purpose', label: 'purpose', description: 'purpose of exercising the action' },
-    { value: 'odrl:recipient', label: 'recipient', description: 'party receiving the result' },
-    { value: 'odrl:relativePosition', label: 'relativePosition', description: 'relative position within the asset' },
-    { value: 'odrl:relativeSize', label: 'relativeSize', description: 'relative size of the asset' },
-    { value: 'odrl:relativeSpatialPosition', label: 'relativeSpatialPosition', description: 'relative spatial position' },
-    { value: 'odrl:relativeTemporalPosition', label: 'relativeTemporalPosition', description: 'relative temporal position' },
-    { value: 'odrl:resolution', label: 'resolution', description: 'rendering resolution' },
-    { value: 'odrl:spatial', label: 'spatial', description: 'named geospatial area' },
-    { value: 'odrl:spatialCoordinates', label: 'spatialCoordinates', description: 'geospatial coordinates' },
-    { value: 'odrl:system', label: 'system', description: 'system used (deprecated: use systemDevice)' },
-    { value: 'odrl:systemDevice', label: 'systemDevice', description: 'system or device used' },
-    { value: 'odrl:timeInterval', label: 'timeInterval', description: 'recurring period of time' },
-    { value: 'odrl:unitOfCount', label: 'unitOfCount', description: 'unit of measure for count' },
-    { value: 'odrl:version', label: 'version', description: 'version of the asset' },
-    { value: 'odrl:virtualLocation', label: 'virtualLocation', description: 'virtual (IT) location' },
-];
-
 // Defaults for new rules and rows: a new permission starts as "download" for academic research.
-const DEFAULT_PERMISSION_ACTION = 'cv1:download';
-const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // CDIF CV2 cv2:AcademicResearch
+const DEFAULT_PERMISSION_ACTION = 'cdif-access:Download';
+const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // a DPV purpose (CDIF CV2)
 const newPurposeConstraint = () => ({ title: '', leftOperand: 'oac:Purpose', operator: 'odrl:isA', rightOperand: DEFAULT_PURPOSE });
 
-// Semantic categories for the ODRL 2.2 left operands in the browse window.
-const LEFT_OPERAND_CATEGORIES = {
-    Time: ['dateTime', 'delayPeriod', 'elapsedTime', 'meteredTime', 'timeInterval'],
-    Location: ['spatial', 'spatialCoordinates', 'virtualLocation'],
-    'Quantity & payment': ['count', 'unitOfCount', 'percentage', 'payAmount'],
-    'Part of the asset': ['absolutePosition', 'absoluteSize', 'absoluteSpatialPosition', 'absoluteTemporalPosition',
-        'relativePosition', 'relativeSize', 'relativeSpatialPosition', 'relativeTemporalPosition'],
-    'Usage context': ['purpose', 'recipient', 'industry', 'language', 'product', 'event', 'deliveryChannel'],
-    Technical: ['fileFormat', 'media', 'resolution', 'systemDevice', 'version', 'device', 'system'],
+// Duty actions (CDIF CV4) attached to a permission (odrl:duty). "beforeUse" adds the constraint
+// event lt odrl:policyUsage: the duty must be fulfilled before the permission is exercised.
+const DEFAULT_DUTY_ACTION = 'cdif-access:CompleteRegistration';
+const newDutyAction = () => ({ action: DEFAULT_DUTY_ACTION, beforeUse: true });
+const isBeforeUseConstraint = (c) => {
+    const left = c['odrl:leftOperand'] || c['leftOperand'];
+    const op = c['odrl:operator'] || c['operator'];
+    const right = c['odrl:rightOperand'] || c['rightOperand'];
+    const rightId = typeof right === 'object' && right !== null ? right['@id'] : right;
+    return ['odrl:event', 'event'].includes(left) && ['odrl:lt', 'lt'].includes(op)
+        && ['odrl:policyUsage', 'policyUsage'].includes(rightId);
 };
-const ODRL_LEFT_OPERAND_TERMS = ODRL_LEFT_OPERANDS.map(t => ({
-    ...t,
-    group: Object.keys(LEFT_OPERAND_CATEGORIES).find(k => LEFT_OPERAND_CATEGORIES[k].includes(t.label)) || 'Other',
-    deprecated: t.description.includes('deprecated'),
-}));
 
 // Compact select for ODRL terms: short names in the list, the description as tooltip.
 // Select for vocabulary terms: shows the prefixed term (e.g. odrl:isA), description as tooltip.
@@ -119,16 +79,16 @@ function TermSelect({ value, terms, groups = [], name, placeholder, ...props }) 
             {placeholder && <option value="" disabled>{placeholder}</option>}
             {!selected && value && <option value={value}>{value}</option>}
             {groups.map(g => <optgroup key={g.label} label={g.label}>{g.terms.map(option)}</optgroup>)}
-            {groups.length > 0 ? <optgroup label="ODRL 2.2">{terms.map(option)}</optgroup> : terms.map(option)}
+            {terms.map(option)}
         </select>
     );
 }
 
-// Left operand select with a browse icon that opens the hierarchical browser.
-function LeftOperandSelect({ className, groups = [], onChange, ...props }) {
+// Left operand select (CDIF CV3 from the profile) with a browse icon that opens the browser.
+function LeftOperandSelect({ className, onChange, ...props }) {
     const browse = useBrowse();
     const select = (
-        <TermSelect terms={ODRL_LEFT_OPERANDS} groups={groups} name="Left operand" placeholder="Left Operand"
+        <TermSelect terms={browse?.leftOperandTerms || []} name="Left operand" placeholder="Left Operand"
             onChange={onChange} className={cn(className, browse && 'flex-1 min-w-0')} {...props} />
     );
     if (!browse) return select;
@@ -137,7 +97,7 @@ function LeftOperandSelect({ className, groups = [], onChange, ...props }) {
             {select}
             <BrowseIconButton
                 title="Browse left operands"
-                onClick={() => browse.openLeftOperands({ value: props.value, groups, onSelect: v => onChange({ target: { value: v } }) })}
+                onClick={() => browse.openLeftOperands({ value: props.value, onSelect: v => onChange({ target: { value: v } }) })}
             />
         </div>
     );
@@ -230,6 +190,11 @@ function PurposeSelect({ value, concepts, onChange, className }) {
     );
 }
 
+// Rule types that are not operable yet: their tabs are greyed out and their content is
+// not written to the JSON-LD. Remove a key here to enable it again.
+const RULES_NOT_YET_AVAILABLE = { prohibitions: true, duties: true };
+const NOT_YET_AVAILABLE_TITLE = 'Not available yet: nothing from this tab goes into the JSON-LD';
+
 export default function PolicyBuilder() {
     // Basic Policy Metadata
     const [policyType, setPolicyType] = useState('Offer');
@@ -239,11 +204,23 @@ export default function PolicyBuilder() {
     const [policyTarget, setPolicyTarget] = useState('duodrl:TemplateDataset');
     const [policyAssigner, setPolicyAssigner] = useState('https://solidweb.me/besteves4/profile/card#me');
 
+    // Descriptive metadata (dcterms + owl:versionInfo)
+    const [creator, setCreator] = useState('');
+    const [publisher, setPublisher] = useState('');
+    const [source, setSource] = useState('');
+    const [versionInfo, setVersionInfo] = useState('1.0');
+    // System-generated dates (YYYY-MM-DD). created/issued are kept from a loaded policy;
+    // modified is always today. The backend stamps the final values on save.
+    const [createdDate, setCreatedDate] = useState(null);
+    const [issuedDate, setIssuedDate] = useState(null);
+    const today = new Date().toISOString().slice(0, 10);
+
     // Rules
     const [permissions, setPermissions] = useState([
         {
             action: 'oac:Read',
             refinements: [],
+            duties: [],
             constraints: [
                 {
                     title: 'Purpose for access is to verify the identity of the assigner.',
@@ -291,7 +268,6 @@ export default function PolicyBuilder() {
 
     const [copied, setCopied] = useState(false);
     // Action Vocabulary Profile Selection: W3C ODRL 2.2 vs CDIF ODRL v2.3
-    const [actionVocabProfile, setActionVocabProfile] = useState('https://www.w3.org/TR/odrl-vocab/#actionConcepts');
     const [actionPickerTarget, setActionPickerTarget] = useState(null); // { type: 'permission'|'prohibition'|'duty', index: number } | null
     // Hierarchical browse window for purposes / left operands: { title, subtitle, nodes, value, selectLabel, onSelect } | null
     const [browser, setBrowser] = useState(null);
@@ -328,69 +304,55 @@ export default function PolicyBuilder() {
     });
     const cdifPurposes = cdifVocab?.purposes?.concepts || [];
     const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
-    const cv3LeftOperandGroups = cdifConstraintTypes.length > 0 ? [{
-        label: 'CDIF other constraints (CV3)',
-        terms: cdifConstraintTypes.map(c => ({ value: c.id, description: c.notes?.[0] || humanize(c.label) }))
-    }] : [];
+    // CDIF CV4 duty actions ("value" is the ODRL term when the duty maps to one, e.g. odrl:anonymize)
+    const cv4DutyTerms = (cdifVocab?.duties?.concepts || []).filter(c => !c.deprecated).map(c => ({
+        value: c.value,
+        label: (l => l.charAt(0).toUpperCase() + l.slice(1))(humanize(c.label)),
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — '),
+    }));
+    // CV3: the left operands of the CDIF access profile; deprecated operands are hidden.
+    const cv3Term = (c) => ({
+        value: c.value,
+        label: c.label,
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
+        ...conceptFields(c),
+    });
+    const cv3LeftOperandTerms = cdifConstraintTypes.filter(c => !c.deprecated).map(cv3Term);
 
-    // CV1 actions; "value" is the ODRL/CC term when the CDIF action maps to one, else cv1:<name>
-    const ruleTypesOf = (c) => (c.collections || [])
-        .map(l => (l.match(/ODRL (Duty|Prohibition|Permission)/) || [])[1])
-        .filter(Boolean);
+    // CV1 actions from the CDIF access profile: ODRL/CC terms and cdif-access: terms
     const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(c => ({
         iri: c.value,
         name: c.label,
-        category: c.deprecated
-            ? 'Deprecated'
-            : (ruleTypesOf(c).join(' / ') || (c.value.startsWith('cv1:') ? 'CDIF extension' : 'ODRL Common')),
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ')
             + (c.replacedBy ? ` Use ${c.replacedBy} instead.` : ''),
+        ...conceptFields(c),
         deprecated: c.deprecated,
         id: c.id,
         collections: c.collections || []
     }));
 
-    // Fallback CDIF actions, used only until/if the CV1 vocabulary cannot be loaded
-    const cdifFallbackActions = [
-        { iri: "odrl:read", name: "read", category: "Data Access & Ingestion", description: "Read digital objects or record streams across domain gateways." },
-        { iri: "odrl:use", name: "use", category: "Data Access & Ingestion", description: "General use of digital cross-domain assets." },
-        { iri: "odrl:distribute", name: "distribute", category: "Dissemination & Federation", description: "Distribute or federate records to authenticated nodes." },
-        { iri: "odrl:grantUse", name: "grantUse", category: "Dissemination & Federation", description: "Grant downstream execution rights within federated space." },
-        { iri: "odrl:derive", name: "derive", category: "Transformation & Workflows", description: "Derive new scientific products or models via workflows (CWL)." },
-        { iri: "odrl:aggregate", name: "aggregate", category: "Transformation & Workflows", description: "Cross-domain semantic aggregation and data harmonization." },
-        { iri: "odrl:anonymize", name: "anonymize", category: "Transformation & Workflows", description: "Apply differential privacy or anonymization pipeline." },
-        { iri: "odrl:attribute", name: "attribute", category: "Duties & Governance", description: "Credit cross-domain contributors, PIDs, and funding bodies." },
-        { iri: "odrl:compensate", name: "compensate", category: "Duties & Governance", description: "Cost recovery or tokenized resource compensation." },
-        { iri: "odrl:nextPolicy", name: "nextPolicy", category: "Duties & Governance", description: "Bind downstream consumers to cascading CDIF interoperability policies." },
-        { iri: "odrl:obtainConsent", name: "obtainConsent", category: "Duties & Governance", description: "Verify consent or ethical governance approval prior to processing." },
-        { iri: "odrl:delete", name: "delete", category: "Lifecycle & Governance", description: "Enforce post-computation data hygiene or retention expiry." }
-    ];
+    const cv4Concepts = cdifVocab?.duties?.concepts || [];
 
-    // Selected action options depending on active profile
-    const currentActionsList = actionVocabProfile.includes('cdif.codata.org')
-        ? (cdifCv1Actions.length > 0 ? cdifCv1Actions : cdifFallbackActions)
-        : (vocabActions?.actions ? Object.entries(vocabActions.actions).map(([k, v]) => ({
-            iri: `odrl:${k}`,
-            name: k,
-            category: v.category,
-            description: v.description
-        })) : []);
+    // Actions in odrl:action fields: CDIF CV1 from the profile only; deprecated actions are hidden
+    // (a loaded policy can still use one, and validation warns about it)
+    const currentActionsList = cdifCv1Actions.filter(a => !a.deprecated);
 
-    // Preset loader mutation
-    const loadPresetMutation = useMutation({
-        mutationFn: async (presetName) => {
-            const res = await api.get(`/policy/presets/${presetName}`);
-            return res.data;
-        },
-        onSuccess: (data) => {
-            if (data['@type'] || data['type']) setPolicyType(data['@type'] || data['type']);
-            if (data['odrl:uid'] || data['uid']) setUid(data['odrl:uid'] || data['uid']);
-            if (data['odrl:profile']) setProfile(data['odrl:profile']);
-            if (data['dcterms:description']) setDescription(data['dcterms:description']);
-            if (data['dcterms:creator']) setCreator(data['dcterms:creator']);
-            if (data['dcterms:source']) setSource(Array.isArray(data['dcterms:source']) ? data['dcterms:source'].join(', ') : data['dcterms:source']);
-            if (data['odrl:target'] || data['target']) setPolicyTarget(data['odrl:target'] || data['target'] || '');
-            if (data['odrl:assigner'] || data['assigner']) setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
+    // Fill every field of the builder from a policy (preset or stored policy).
+    // Fields the policy does not have are cleared, so nothing from the previous policy is left.
+    const loadPolicy = (data, message) => {
+            const asList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+            setPolicyType(data['@type'] || data['type'] || 'Set');
+            setUid(data['odrl:uid'] || data['uid'] || data['@id'] || `did:oyd:${crypto.randomUUID()}`);
+            setProfile(data['odrl:profile'] || data['profile'] || '');
+            setDescription(data['dcterms:description'] || data['skos:editorialNote'] || '');
+            setCreator(data['dcterms:creator'] || '');
+            setPublisher(data['dcterms:publisher'] || '');
+            setSource(Array.isArray(data['dcterms:source']) ? data['dcterms:source'].join(', ') : (data['dcterms:source'] || ''));
+            setVersionInfo(data['owl:versionInfo'] || '1.0');
+            setCreatedDate(data['dcterms:created']?.slice(0, 10) || null);
+            setIssuedDate(data['dcterms:issued']?.slice(0, 10) || null);
+            setPolicyTarget(data['odrl:target'] || data['target'] || '');
+            setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
 
             // Helper to parse action and its refinements
             const parseActionAndRefinements = (rawAction) => {
@@ -413,9 +375,9 @@ export default function PolicyBuilder() {
             };
 
             // Parse Permissions
-            const perms = (data['odrl:permission'] || data['permission'] || []).map(p => {
+            const perms = asList(data['odrl:permission'] || data['permission']).map(p => {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
-                const rawConstraints = (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
+                const rawConstraints = asList(p['odrl:constraint'] || p['constraint']).map(c => ({
                     title: c['dcterms:title'] || c['title'] || '',
                     category: c['dcterms:type']?.['@id'] || c['dcterms:type'] || '',
                     leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
@@ -433,10 +395,26 @@ export default function PolicyBuilder() {
                     c.leftOperand !== 'odrl:purpose' &&
                     c.leftOperand !== 'purpose'
                 );
+                const rawPermDuties = p['odrl:duty'] || p['duty'] || [];
+                const permDuties = (Array.isArray(rawPermDuties) ? rawPermDuties : [rawPermDuties]).map(d => {
+                    const rawDutyAction = d['odrl:action'] || d['action'];
+                    const { actionName: dutyAction, refinements: dutyRefinements } =
+                        parseActionAndRefinements(Array.isArray(rawDutyAction) ? rawDutyAction[0] : rawDutyAction);
+                    const dc = d['odrl:constraint'] || d['constraint'] || [];
+                    const dutyConstraints = Array.isArray(dc) ? dc : [dc];
+                    return {
+                        action: dutyAction,
+                        beforeUse: dutyConstraints.some(isBeforeUseConstraint),
+                        // kept as loaded so presets round-trip; not editable in the UI
+                        refinements: dutyRefinements,
+                        extraConstraints: dutyConstraints.filter(c => !isBeforeUseConstraint(c)),
+                    };
+                });
                 return {
                     target: p['odrl:target'] || p['target'] || '',
                     action: actionName,
                     refinements: refinements,
+                    duties: permDuties,
                     hasContext: p['dpv:hasContext'] || p['hasContext'] || '',
                     assigner: p['odrl:assigner'] || p['assigner'] || '',
                     constraints: purposes.length > 0 || other.length === 0 ? purposes : rawConstraints,
@@ -446,14 +424,14 @@ export default function PolicyBuilder() {
             setPermissions(perms);
 
             // Parse Prohibitions
-            const prohibs = (data['odrl:prohibition'] || data['prohibition'] || []).map(p => {
+            const prohibs = asList(data['odrl:prohibition'] || data['prohibition']).map(p => {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
                 return {
                     target: p['odrl:target'] || p['target'] || '',
                     action: actionName,
                     refinements: refinements,
                     output: p['odrl:output'] || p['output'] || '',
-                    constraints: (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
+                    constraints: asList(p['odrl:constraint'] || p['constraint']).map(c => ({
                         title: c['dcterms:title'] || c['title'] || '',
                         leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                         operator: c['odrl:operator'] || c['operator'] || 'odrl:lt',
@@ -464,7 +442,7 @@ export default function PolicyBuilder() {
             setProhibitions(prohibs);
 
             // Parse Obligations / Duties
-            const rawDuties = data['odrl:obligation'] || data['obligation'] || data['odrl:duty'] || data['duty'] || [];
+            const rawDuties = asList(data['odrl:obligation'] || data['obligation'] || data['odrl:duty'] || data['duty']);
             const parsedDuties = rawDuties.map(d => {
                 const { actionName, refinements } = parseActionAndRefinements(d['odrl:action'] || d['action']);
                 return {
@@ -472,7 +450,7 @@ export default function PolicyBuilder() {
                     target: d['odrl:target'] || d['target'] || '',
                     assignee: d['odrl:assignee'] || d['assignee'] || '',
                     refinements: refinements,
-                    constraints: (d['odrl:constraint'] || d['constraint'] || []).map(c => ({
+                    constraints: asList(d['odrl:constraint'] || d['constraint']).map(c => ({
                         title: c['dcterms:title'] || c['title'] || '',
                         leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                         operator: c['odrl:operator'] || c['operator'] || 'odrl:eq',
@@ -480,11 +458,17 @@ export default function PolicyBuilder() {
                     }))
                 };
             });
-            if (parsedDuties.length > 0) {
-                setDuties(parsedDuties);
-            }
-            setShaclFeedback({ status: 'info', message: 'Preset loaded successfully!' });
-        }
+            setDuties(parsedDuties);
+            setShaclFeedback({ status: 'info', message });
+    };
+
+    // Preset loader mutation
+    const loadPresetMutation = useMutation({
+        mutationFn: async (presetName) => {
+            const res = await api.get(`/policy/presets/${presetName}`);
+            return res.data;
+        },
+        onSuccess: (data) => loadPolicy(data, 'Preset loaded successfully!'),
     });
 
     // Compile JSON-LD
@@ -499,18 +483,26 @@ export default function PolicyBuilder() {
                     "skos": "http://www.w3.org/2004/02/skos/core#",
                     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
                     "cc": "http://creativecommons.org/ns#",
-                    "cv1": "https://odrl.codata.org/cv1/",
-                    "cv2": "https://odrl.codata.org/cv2/",
-                    "cv3": "https://odrl.codata.org/cv3/"
+                    "cdif-access": "https://w3id.org/cdif/access#",
+                    "dcterms": "http://purl.org/dc/terms/",
+                    "owl": "http://www.w3.org/2002/07/owl#"
                 }
             ],
             "@type": policyType,
             "type": policyType,
             "odrl:uid": uid,
-            "odrl:profile": profile,
-            "dcterms:description": description,
-            "dcterms:issued": new Date().toISOString()
+            "odrl:profile": profile
         };
+
+        if (creator.trim()) policy["dcterms:creator"] = creator.trim();
+        if (publisher.trim()) policy["dcterms:publisher"] = publisher.trim();
+        if (description.trim()) policy["dcterms:description"] = description.trim();
+        const sources = source.split(',').map(s => s.trim()).filter(Boolean);
+        if (sources.length) policy["dcterms:source"] = sources.length === 1 ? sources[0] : sources;
+        policy["dcterms:created"] = createdDate || today;
+        policy["dcterms:modified"] = today;
+        policy["dcterms:issued"] = issuedDate || today;
+        policy["owl:versionInfo"] = versionInfo.trim() || '1.0';
 
         if (policyTarget.trim()) {
             policy["odrl:target"] = policyTarget.trim();
@@ -565,11 +557,27 @@ export default function PolicyBuilder() {
                         return constraintObj;
                     });
                 }
+                const permDuties = (p.duties || []).filter(d => d.action);
+                if (permDuties.length > 0) {
+                    rule["odrl:duty"] = permDuties.map(d => {
+                        const duty = { "odrl:action": formatAction(d.action, d.refinements) };
+                        const dutyConstraints = [
+                            ...(d.beforeUse ? [{
+                                "odrl:leftOperand": "odrl:event",
+                                "odrl:operator": "odrl:lt",
+                                "odrl:rightOperand": { "@id": "odrl:policyUsage" }
+                            }] : []),
+                            ...(d.extraConstraints || [])
+                        ];
+                        if (dutyConstraints.length > 0) duty["odrl:constraint"] = dutyConstraints;
+                        return duty;
+                    });
+                }
                 return rule;
             });
         }
 
-        if (prohibitions.length > 0) {
+        if (!RULES_NOT_YET_AVAILABLE.prohibitions && prohibitions.length > 0) {
             policy["odrl:prohibition"] = prohibitions.map(p => {
                 const rule = {
                     "odrl:target": p.target,
@@ -591,7 +599,7 @@ export default function PolicyBuilder() {
             });
         }
 
-        if (duties.length > 0) {
+        if (!RULES_NOT_YET_AVAILABLE.duties && duties.length > 0) {
             policy["odrl:obligation"] = duties.map(d => {
                 const rule = {
                     "odrl:action": formatAction(d.action, d.refinements)
@@ -655,6 +663,8 @@ export default function PolicyBuilder() {
             return res.data;
         },
         onSuccess: (data) => {
+            if (data.policy?.['dcterms:created']) setCreatedDate(data.policy['dcterms:created']);
+            if (data.policy?.['dcterms:issued']) setIssuedDate(data.policy['dcterms:issued']);
             setShaclFeedback({
                 status: 'success',
                 message: `Policy anchored successfully! UID / DID: ${data.uid}`
@@ -681,6 +691,7 @@ export default function PolicyBuilder() {
             {
                 action: DEFAULT_PERMISSION_ACTION,
                 refinements: [],
+                duties: [],
                 constraints: [newPurposeConstraint()],
                 otherConstraints: []
             }
@@ -691,21 +702,21 @@ export default function PolicyBuilder() {
         setPermissions(permissions.filter((_, i) => i !== index));
     };
 
-    const addPermissionRefinement = (pIndex) => {
+    const addPermissionDuty = (pIndex) => {
         const next = [...permissions];
-        if (!next[pIndex].refinements) next[pIndex].refinements = [];
-        next[pIndex].refinements.push({
-            title: '',
-            leftOperand: 'odrl:purpose',
-            operator: 'odrl:eq',
-            rightOperand: 'odrl:research'
-        });
+        next[pIndex].duties = [...(next[pIndex].duties || []), newDutyAction()];
         setPermissions(next);
     };
 
-    const removePermissionRefinement = (pIndex, rIndex) => {
+    const updatePermissionDuty = (pIndex, dIndex, field, value) => {
         const next = [...permissions];
-        next[pIndex].refinements = next[pIndex].refinements.filter((_, i) => i !== rIndex);
+        next[pIndex].duties[dIndex] = { ...next[pIndex].duties[dIndex], [field]: value };
+        setPermissions(next);
+    };
+
+    const removePermissionDuty = (pIndex, dIndex) => {
+        const next = [...permissions];
+        next[pIndex].duties = next[pIndex].duties.filter((_, i) => i !== dIndex);
         setPermissions(next);
     };
 
@@ -852,16 +863,23 @@ export default function PolicyBuilder() {
     const browseApi = {
         openPurposes: ({ value, onSelect, selectLabel = 'Use this purpose' }) => openBrowser({
             title: 'Browse purposes',
-            subtitle: 'CDIF CV2 purpose constraints. A broader purpose includes all purposes under it.',
+            subtitle: 'CDIF CV2: DPV purposes. A broader purpose includes all purposes under it.',
             nodes: purposeTree(cdifPurposes),
             value, selectLabel, onSelect,
         }),
-        openLeftOperands: ({ value, groups = [], onSelect, selectLabel = 'Use this left operand' }) => openBrowser({
+        openLeftOperands: ({ value, onSelect, selectLabel = 'Use this left operand' }) => openBrowser({
             title: 'Browse constraints',
-            subtitle: groups.length ? 'CDIF other constraints (CV3) and ODRL 2.2 left operands.' : 'ODRL 2.2 left operands.',
-            nodes: leftOperandTree(groups, ODRL_LEFT_OPERAND_TERMS),
+            subtitle: 'CDIF CV3: the left operands of the CDIF access profile.',
+            nodes: flatTree(cv3LeftOperandTerms),
             value, selectLabel, onSelect,
         }),
+        openDuties: ({ value, onSelect, selectLabel = 'Use this duty action' }) => openBrowser({
+            title: 'Browse duty actions',
+            subtitle: 'CDIF CV4 duty actions: what the assignee must do to exercise the permission.',
+            nodes: flatTree(cv4Concepts.filter(c => !c.deprecated).map(c => ({ ...c, ...conceptFields(c) }))),
+            value, selectLabel, onSelect,
+        }),
+        leftOperandTerms: cv3LeftOperandTerms,
     };
     // Handler to apply selected action to the active rule
     const selectActionForTarget = (actionIri) => {
@@ -955,6 +973,11 @@ export default function PolicyBuilder() {
                 </div>
             </div>
 
+            {/* Search existing policies: picking one fills all fields */}
+            <PolicySearch
+                onSelect={(policy, r) => loadPolicy(policy, `Loaded ${r.source === 'stored' ? 'stored policy' : 'preset'} ${r.uid}`)}
+            />
+
             {/* Validation Feedback Banner */}
             {shaclFeedback && (
                 <div className={cn(
@@ -1003,6 +1026,11 @@ export default function PolicyBuilder() {
                 >
                     <CheckCircle2 size={16} /> Permissions ({permissions.length})
                 </button>
+                {RULES_NOT_YET_AVAILABLE.prohibitions ? (
+                    <button type="button" disabled aria-disabled="true" title={NOT_YET_AVAILABLE_TITLE} className="pb-3 text-sm font-bold border-b-2 border-transparent flex items-center gap-2 text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                        <AlertCircle size={16} /> Prohibitions
+                    </button>
+                ) : (
                 <button
                     onClick={() => setActiveTab('prohibitions')}
                     className={cn(
@@ -1014,6 +1042,12 @@ export default function PolicyBuilder() {
                 >
                     <AlertCircle size={16} /> Prohibitions ({prohibitions.length})
                 </button>
+                )}
+                {RULES_NOT_YET_AVAILABLE.duties ? (
+                    <button type="button" disabled aria-disabled="true" title={NOT_YET_AVAILABLE_TITLE} className="pb-3 text-sm font-bold border-b-2 border-transparent flex items-center gap-2 text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                        <FileCheck size={16} /> Duty
+                    </button>
+                ) : (
                 <button
                     onClick={() => setActiveTab('duodrl')}
                     className={cn(
@@ -1025,31 +1059,7 @@ export default function PolicyBuilder() {
                 >
                     <FileCheck size={16} /> Duty ({duties.length})
                 </button>
-            </div>
-
-            {/* Action Concepts Vocabulary Profile Selector Banner */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-white/[0.03] border border-indigo-100 dark:border-white/10 text-xs">
-                <div className="flex items-center gap-2.5">
-                    <BookOpen size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <div>
-                        <span className="font-bold text-gray-900 dark:text-white mr-1.5">Action Concepts Vocabulary Profile:</span>
-                        <span className="text-gray-500 dark:text-gray-400">Controls available actions in Action (odrl:action) fields.</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <select
-                        value={actionVocabProfile}
-                        onChange={(e) => setActionVocabProfile(e.target.value)}
-                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">
-                            W3C ODRL 2.2 Core (https://www.w3.org/TR/odrl-vocab/#actionConcepts)
-                        </option>
-                        <option value="https://cdif.codata.org/odrl/v2.3">
-                            CDIF CV1 Actions (https://odrl.codata.org/cv1/)
-                        </option>
-                    </select>
-                </div>
+                )}
             </div>
 
             {/* Layout Grid: Tab Content on the Left, Policy Operations on the Right */}
@@ -1161,6 +1171,71 @@ export default function PolicyBuilder() {
                                 </div>
                             </div>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Author / Contributor (dcterms:creator)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. https://orcid.org/0000-0002-1825-0097"
+                                        value={creator}
+                                        onChange={(e) => setCreator(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Publisher (dcterms:publisher)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. https://ror.org/02nkf1q06"
+                                        value={publisher}
+                                        onChange={(e) => setPublisher(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_10rem] gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Source (dcterms:source, comma-separated)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="optional"
+                                        value={source}
+                                        onChange={(e) => setSource(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">
+                                        Version (owl:versionInfo)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="1.0"
+                                        value={versionInfo}
+                                        onChange={(e) => setVersionInfo(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-black/30 border border-gray-300 dark:border-white/10 text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl bg-gray-50 dark:bg-black/20 border border-dashed border-gray-300 dark:border-white/10 px-3 py-2">
+                                <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">
+                                    System-generated dates
+                                </div>
+                                <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-1 text-xs font-mono text-gray-700 dark:text-gray-300">
+                                    <div><dt className="text-gray-500">dcterms:created</dt><dd>{createdDate || today}</dd></div>
+                                    <div><dt className="text-gray-500">dcterms:modified</dt><dd>{today}</dd></div>
+                                    <div><dt className="text-gray-500">dcterms:issued</dt><dd>{issuedDate || today}</dd></div>
+                                </dl>
+                            </div>
+
                             {/* Wizard Navigation */}
                             <div className="pt-4 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
                                 <span className="text-xs text-gray-400">Step 1 of 4: Specification</span>
@@ -1186,7 +1261,7 @@ export default function PolicyBuilder() {
                                         Permissions List ({permissions.length})
                                     </h2>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        Specify allowed actions, action refinements, and access purposes.
+                                        Specify allowed actions, the duties that come with them, and access purposes.
                                     </p>
                                 </div>
                                 <button
@@ -1232,15 +1307,15 @@ export default function PolicyBuilder() {
                                                     <label className="block text-[11px] font-bold text-gray-500 uppercase">
                                                         Action (odrl:action)
                                                     </label>
-                                                    <div className="flex items-center gap-2">
+                                                    {!(p.duties && p.duties.length > 0) && (
                                                         <button
                                                             type="button"
-                                                            onClick={() => addPermissionRefinement(pIdx)}
+                                                            onClick={() => addPermissionDuty(pIdx)}
                                                             className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
                                                         >
-                                                            <Plus size={11} /> Add refinement
+                                                            <Plus size={11} /> Add duty action
                                                         </button>
-                                                    </div>
+                                                    )}
                                                 </div>
                                                 <div className="flex gap-1.5">
                                                     <input
@@ -1261,78 +1336,78 @@ export default function PolicyBuilder() {
                                             </div>
                                         </div>
 
-                                        {/* Action Refinements Section */}
-                                        {p.refinements && p.refinements.length > 0 && (
+                                        {/* Duty Actions Section (odrl:duty, CDIF CV4) */}
+                                        {p.duties && p.duties.length > 0 && (
                                             <div className="pt-2 pl-3 border-l-2 border-indigo-400 dark:border-indigo-600 bg-indigo-50/30 dark:bg-indigo-950/20 p-2.5 rounded-r-lg">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase flex items-center gap-1">
                                                         <Sparkles size={12} />
-                                                        Action Refinements ({p.refinements.length})
+                                                        Duty Actions ({p.duties.length})
                                                     </span>
                                                     <button
                                                         type="button"
-                                                        onClick={() => addPermissionRefinement(pIdx)}
+                                                        onClick={() => addPermissionDuty(pIdx)}
                                                         className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
                                                     >
-                                                        <Plus size={12} /> Add refinement
+                                                        <Plus size={12} /> Add duty action
                                                     </button>
                                                 </div>
+                                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">
+                                                    What the assignee must do to exercise this permission (CDIF CV4 duty actions).
+                                                </p>
 
-                                                {p.refinements.map((r, rIdx) => (
-                                                    <div key={rIdx} className="p-2 mb-2 rounded-lg bg-white dark:bg-black/30 border border-indigo-100 dark:border-indigo-900/40 text-xs space-y-2">
-                                                        <div className="flex items-center justify-between">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Refinement Title (dcterms:title)"
-                                                                value={r.title || ''}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].title = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="flex-1 mr-2 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removePermissionRefinement(pIdx, rIdx)}
-                                                                className="text-rose-500 hover:text-rose-700"
-                                                            >
-                                                                <Trash2 size={12} />
-                                                            </button>
+                                                <div className="space-y-2">
+                                                {p.duties.map((d, dIdx) => {
+                                                    const term = cv4DutyTerms.find(t => t.value === d.action);
+                                                    const openDutyBrowser = () => browseApi.openDuties({
+                                                        value: d.action,
+                                                        onSelect: (v) => updatePermissionDuty(pIdx, dIdx, 'action', v),
+                                                    });
+                                                    return (
+                                                        <div key={dIdx}>
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <label className="block text-[11px] font-bold text-gray-500 uppercase">
+                                                                    Duty action #{dIdx + 1}{term ? ` · ${term.label}` : ''}
+                                                                </label>
+                                                                <div className="flex items-center gap-3">
+                                                                    <label
+                                                                        className="flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300 whitespace-nowrap cursor-pointer"
+                                                                        title="Adds the constraint odrl:event odrl:lt odrl:policyUsage"
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={!!d.beforeUse}
+                                                                            onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'beforeUse', e.target.checked)}
+                                                                        />
+                                                                        Before use
+                                                                    </label>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removePermissionDuty(pIdx, dIdx)}
+                                                                        className="text-rose-500 hover:text-rose-700"
+                                                                        title="Remove duty action"
+                                                                    >
+                                                                        <Trash2 size={12} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-1.5">
+                                                                <input
+                                                                    type="text"
+                                                                    value={d.action || ''}
+                                                                    title={term ? `${term.value} — ${term.description}` : d.action}
+                                                                    onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'action', e.target.value)}
+                                                                    className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                                />
+                                                                <BrowseIconButton title="Browse duty actions" onClick={openDutyBrowser} />
+                                                            </div>
+                                                            {term?.description && (
+                                                                <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{term.description}</p>
+                                                            )}
                                                         </div>
-                                                        <div className="grid grid-cols-3 gap-2">
-                                                            <LeftOperandSelect
-                                                                value={r.leftOperand}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].leftOperand = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                            />
-                                                            <OperatorSelect
-                                                                value={r.operator}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].operator = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                            />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Right Operand"
-                                                                value={r.rightOperand}
-                                                                onChange={(e) => {
-                                                                    const next = [...permissions];
-                                                                    next[pIdx].refinements[rIdx].rightOperand = e.target.value;
-                                                                    setPermissions(next);
-                                                                }}
-                                                                className="px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
+                                                </div>
                                             </div>
                                         )}
 
@@ -1447,7 +1522,6 @@ export default function PolicyBuilder() {
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <LeftOperandSelect
                                                             value={c.leftOperand}
-                                                            groups={cv3LeftOperandGroups}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
                                                                 next[pIdx].otherConstraints[cIdx].leftOperand = e.target.value;
@@ -1493,6 +1567,7 @@ export default function PolicyBuilder() {
                                     <ArrowLeft size={14} />
                                     <span>Previous: Specification</span>
                                 </button>
+                                {!RULES_NOT_YET_AVAILABLE.prohibitions && (
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('prohibitions')}
@@ -1501,12 +1576,13 @@ export default function PolicyBuilder() {
                                     <span>Next: Prohibitions ({prohibitions.length})</span>
                                     <ArrowRight size={14} />
                                 </button>
+                                )}
                             </div>
                         </div>
                     )}
 
                     {/* TAB 3: PROHIBITIONS */}
-                    {activeTab === 'prohibitions' && (
+                    {activeTab === 'prohibitions' && !RULES_NOT_YET_AVAILABLE.prohibitions && (
                         <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/5 pb-3">
                                 <div>
@@ -1796,7 +1872,7 @@ export default function PolicyBuilder() {
                     )}
 
                     {/* TAB 4: DUTIES / OBLIGATIONS */}
-                    {activeTab === 'duodrl' && (
+                    {activeTab === 'duodrl' && !RULES_NOT_YET_AVAILABLE.duties && (
                         <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/5 pb-3">
                                 <div>
@@ -1864,7 +1940,7 @@ export default function PolicyBuilder() {
                                                 <div className="flex gap-1.5">
                                                     <input
                                                         type="text"
-                                                        placeholder="e.g. odrl:attribute, odrl:compensate"
+                                                        placeholder="e.g. cdif-access:CompleteRegistration"
                                                         value={d.action}
                                                         onChange={(e) => {
                                                             const next = [...duties];
@@ -1874,8 +1950,15 @@ export default function PolicyBuilder() {
                                                         className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
                                                     />
                                                     <BrowseIconButton
-                                                        title="Browse actions"
-                                                        onClick={() => setActionPickerTarget({ type: 'duty', index: dIdx })}
+                                                        title="Browse duty actions"
+                                                        onClick={() => browseApi.openDuties({
+                                                            value: d.action,
+                                                            onSelect: (v) => {
+                                                                const next = [...duties];
+                                                                next[dIdx].action = v;
+                                                                setDuties(next);
+                                                            },
+                                                        })}
                                                     />
                                                 </div>
                                             </div>
@@ -2102,15 +2185,25 @@ export default function PolicyBuilder() {
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Permissions</span>
                             </div>
-                            <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30">
-                                <span className="block text-base font-extrabold text-rose-600 dark:text-rose-400">
-                                    {prohibitions.length}
+                            <div
+                                title={RULES_NOT_YET_AVAILABLE.prohibitions ? NOT_YET_AVAILABLE_TITLE : undefined}
+                                className={cn("p-2 rounded-xl border", RULES_NOT_YET_AVAILABLE.prohibitions
+                                    ? "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60"
+                                    : "bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/30")}
+                            >
+                                <span className={cn("block text-base font-extrabold", RULES_NOT_YET_AVAILABLE.prohibitions ? "text-gray-400 dark:text-gray-500" : "text-rose-600 dark:text-rose-400")}>
+                                    {RULES_NOT_YET_AVAILABLE.prohibitions ? '–' : prohibitions.length}
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Prohibitions</span>
                             </div>
-                            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30">
-                                <span className="block text-base font-extrabold text-amber-600 dark:text-amber-400">
-                                    {duties.length}
+                            <div
+                                title={RULES_NOT_YET_AVAILABLE.duties ? NOT_YET_AVAILABLE_TITLE : undefined}
+                                className={cn("p-2 rounded-xl border", RULES_NOT_YET_AVAILABLE.duties
+                                    ? "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60"
+                                    : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30")}
+                            >
+                                <span className={cn("block text-base font-extrabold", RULES_NOT_YET_AVAILABLE.duties ? "text-gray-400 dark:text-gray-500" : "text-amber-600 dark:text-amber-400")}>
+                                    {RULES_NOT_YET_AVAILABLE.duties ? '–' : duties.length}
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Duties</span>
                             </div>
@@ -2283,32 +2376,15 @@ export default function PolicyBuilder() {
                 const { type, index } = actionPickerTarget;
                 const rules = { permission: permissions, prohibition: prohibitions, duty: duties }[type] || [];
                 const ruleType = type.charAt(0).toUpperCase() + type.slice(1);
-                const ruleGroup = ruleGroupLabel(ruleType);
-                const isCdif = actionVocabProfile.includes('cdif');
                 return (
                     <VocabBrowser
-                        key={actionVocabProfile}
                         title={`Select action for ${ruleType} #${index + 1}`}
-                        subtitle={isCdif
-                            ? 'CDIF CV1 actions, grouped by source and by the rule type they are typically used in.'
-                            : 'W3C ODRL 2.2 Core actions, grouped by category.'}
+                        subtitle="CDIF CV1 actions from the CDIF access profile: CDIF-specific actions and the ODRL Common Vocabulary."
                         nodes={actionTree(currentActionsList)}
                         value={rules[index]?.action}
-                        defaultExpanded={isCdif ? [`/CDIF-specific actions/${ruleGroup}`, `/ODRL Common Vocabulary/${ruleGroup}`] : []}
                         selectLabel="Use this action"
                         onSelect={selectActionForTarget}
                         onClose={() => setActionPickerTarget(null)}
-                        toolbar={
-                            <select
-                                value={actionVocabProfile}
-                                onChange={(e) => setActionVocabProfile(e.target.value)}
-                                title="Action vocabulary profile"
-                                className="px-2 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            >
-                                <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">W3C ODRL 2.2</option>
-                                <option value="https://cdif.codata.org/odrl/v2.3">CDIF CV1 Actions</option>
-                            </select>
-                        }
                     />
                 );
             })()}
