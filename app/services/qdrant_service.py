@@ -144,6 +144,28 @@ class QdrantService:
             print(f"ERROR in search_documents: {e}")
             raise e
 
+    def list_documents(self, collection: str, limit: int = 500) -> List[Dict[str, Any]]:
+        """All documents of one collection (no vector search), up to `limit`."""
+        if not self.client:
+            return []
+        documents: List[Dict[str, Any]] = []
+        offset = None
+        while len(documents) < limit:
+            points, offset = self.client.scroll(
+                collection_name=collection,
+                limit=min(100, limit - len(documents)),
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            documents.extend(
+                {"did": p.payload.get("did"), "json_ld": p.payload.get("json_ld") or {}}
+                for p in points
+            )
+            if offset is None:
+                break
+        return documents
+
     def _determine_collection(self, payload: Dict[str, Any]) -> str:
         # Logic to route payload to the correct collection
         

@@ -1,4 +1,4 @@
-"""Tests for the CDIF access vocabularies (config/cv1-3 *.ttl) and their API endpoints."""
+"""Tests for the CDIF access vocabularies (config/cv1-4 *.ttl, built from docs/profile.ttl) and their API endpoints."""
 
 from fastapi.testclient import TestClient
 
@@ -22,8 +22,9 @@ def test_schemes_load():
 def test_action_values_prefer_odrl_terms():
     actions = by_label("cv1")
     assert actions["Read"]["value"] == "odrl:read"
-    assert actions["DerivativeWorks"]["value"] == "cc:DerivativeWorks"
-    assert actions["Download"]["value"] == "cv1:download"  # CDIF-only action
+    assert actions["Derivative Works"]["value"] == "cc:DerivativeWorks"
+    assert actions["Download"]["value"] == "cdif-access:Download"  # CDIF-only action
+    assert actions["API Access"]["value"] == "cdif-access:APIAccess"  # label from the term name
 
 
 def test_deprecated_action_points_to_policy_term():
@@ -33,9 +34,9 @@ def test_deprecated_action_points_to_policy_term():
 
 
 def test_purposes_map_to_dpv_with_hierarchy():
-    academic = by_label("cv2")["AcademicResearch"]
+    academic = by_label("cv2")["Academic Research"]
     assert academic["value"] == "dpv:AcademicResearch"
-    assert "cv2:ResearchAndDevelopment" in academic["broader"]
+    assert "dpv:ResearchAndDevelopment" in academic["broader"]
 
 
 def test_policy_warnings():
@@ -72,3 +73,34 @@ def test_validate_returns_warnings():
     r = client.post("/api/policy/validate", json={"policy": policy})
     assert r.status_code == 200
     assert any("deprecated" in w for w in r.json()["warnings"])
+
+
+def test_cv4_duty_actions_loaded():
+    cv4 = cdif_vocab.load_scheme("cv4")
+    assert cv4["available"]
+    values = {c["value"] for c in cv4["concepts"]}
+    assert "cdif-access:CompleteRegistration" in values
+    assert "odrl:compensate" in values  # ODRL term listed under "# duty actions" in the profile
+    assert "cdif-access:Download" not in values  # actions before the marker stay in CV1
+
+
+def test_left_operands_from_profile():
+    values = {c["value"] for c in cdif_vocab.load_scheme("cv3")["concepts"]}
+    assert "odrl:payAmount" in values  # written odrl:PayAmount in the profile
+
+
+def test_permission_duty_action_warnings():
+    policy = {
+        "odrl:permission": [{
+            "odrl:action": "cdif-access:Download",
+            "odrl:duty": [
+                {"odrl:action": "cdif-access:GetEthicsApproval",
+                 "odrl:constraint": [{"odrl:leftOperand": "odrl:event", "odrl:operator": "odrl:lt",
+                                      "odrl:rightOperand": {"@id": "odrl:policyUsage"}}]},
+                {"odrl:action": [{"rdf:value": {"@id": "cdif-access:VerifyTraining"}}]},
+                {"odrl:action": "cdif-access:NotADuty"},
+            ],
+        }]
+    }
+    warnings = cdif_vocab.policy_warnings(policy)
+    assert warnings == ["odrl:permission[0].duty[2]: action 'cdif-access:NotADuty' is not a CDIF CV4 duty action."]
