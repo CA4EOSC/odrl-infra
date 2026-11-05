@@ -85,23 +85,29 @@ export default function Layout({ children }) {
             {/* Sidebar */}
             <aside className="w-72 glass border-r border-gray-200 dark:border-white/5 flex flex-col relative z-20">
                 <div className="p-6 mb-2">
-                    <div className="flex items-center gap-3 mb-2 group cursor-default">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform duration-500 overflow-hidden shrink-0">
-                            {logoUrl ? (
+                    {/* Logo on top of ODRL Infra & Protocol Layer */}
+                    {logoUrl && (
+                        <div className="mb-4">
+                            <a
+                                href="https://cdif4eosc.eu"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block transition-opacity hover:opacity-85"
+                                title="CDIF4EOSC Project"
+                            >
                                 <img
                                     src={logoUrl}
-                                    alt="Logo"
-                                    className="w-full h-full object-contain p-1"
-                                    onError={(e) => {
-                                        // Fallback to ShieldCheck if image fails to load
-                                        e.currentTarget.style.display = 'none';
-                                        if (e.currentTarget.nextElementSibling) {
-                                            e.currentTarget.nextElementSibling.style.display = 'block';
-                                        }
-                                    }}
+                                    alt="CDIF4EOSC Logo"
+                                    className="max-h-12 w-auto max-w-[200px] object-contain rounded"
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                 />
-                            ) : null}
-                            <ShieldCheck className={logoUrl ? "hidden text-white" : "text-white"} size={24} />
+                            </a>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3 group cursor-default">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform duration-500 overflow-hidden shrink-0">
+                            <ShieldCheck className="text-white" size={24} />
                         </div>
                         <div>
                             <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-gray-900 via-indigo-800 to-gray-900 dark:from-white dark:via-indigo-300 dark:to-white bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent">
@@ -127,14 +133,36 @@ export default function Layout({ children }) {
                     <NavItem to="/croissants" icon={FileJson} label="Croissants" description="AI-Ready data" isActive={location.pathname === "/croissants"} />
                 </div>
 
-                <div className="p-6 mt-auto border-t border-gray-100 dark:border-white/5">
-                    <div className="flex items-center gap-3">
-                        <div className="relative flex items-center justify-center">
-                            <div className="absolute w-2.5 h-2.5 rounded-full bg-green-500/40 animate-ping" />
-                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                {/* Sidebar footer on the same level as System Online */}
+                <div className="p-4 px-5 mt-auto border-t border-gray-100 dark:border-white/5 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex items-center justify-center">
+                                <div className="absolute w-2.5 h-2.5 rounded-full bg-green-500/40 animate-ping" />
+                                <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                            </div>
+                            <span className="text-[11px] font-extrabold text-gray-500 dark:text-gray-400 tracking-tight uppercase">System Online</span>
                         </div>
-                        <span className="text-[11px] font-extrabold text-gray-500 dark:text-gray-400 tracking-tight uppercase">System Online</span>
+                        <a
+                            href="https://cdif4eosc.eu"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 transition-colors"
+                        >
+                            cdif4eosc.eu
+                            <ExternalLink size={10} />
+                        </a>
                     </div>
+                    {footerHtml ? (
+                        <div
+                            className="custom-sidebar-footer text-[10px] text-gray-500 dark:text-gray-400"
+                            dangerouslySetInnerHTML={{ __html: footerHtml }}
+                        />
+                    ) : (
+                        <p className="text-[10px] leading-tight text-gray-500 dark:text-gray-400 line-clamp-3 hover:line-clamp-none transition-all">
+                            {footerText}
+                        </p>
+                    )}
                 </div>
             </aside>
 
