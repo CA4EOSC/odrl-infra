@@ -218,7 +218,7 @@ export default function PolicyBuilder() {
     // Rules
     const [permissions, setPermissions] = useState([
         {
-            action: 'oac:Read',
+            action: DEFAULT_PERMISSION_ACTION,
             refinements: [],
             duties: [],
             constraints: [
