@@ -1,0 +1,47 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    "https://w3id.org/oac/context.json"
+  ],
+  "@type": "Offer",
+  "type": "Offer",
+  "odrl:uid": "https://solidweb.me/besteves4/policies/offer1",
+  "odrl:profile": "oac:",
+  "dcterms:description": "Offer to read identifier data for identity verification and age data if purpose is not commercial research.",
+  "dcterms:creator": "https://solidweb.me/besteves4/profile/card#me",
+  "dcterms:source": [
+    "https://solidweb.me/besteves4/policies/requirement1",
+    "https://solidweb.me/besteves4/policies/preference1"
+  ],
+  "dcterms:issued": "2023-10-20T22:15:34Z",
+  "odrl:permission": [
+    {
+      "dpv:hasContext": "dpv:Required",
+      "odrl:assigner": "https://solidweb.me/besteves4/profile/card#me",
+      "odrl:action": "oac:Read",
+      "odrl:target": "oac:Identifier",
+      "odrl:constraint": [
+        {
+          "dcterms:title": "Purpose for access is to verify the identity of the assigner.",
+          "odrl:leftOperand": "oac:Purpose",
+          "odrl:operator": "odrl:isA",
+          "odrl:rightOperand": "dpv:IdentityVerification"
+        }
+      ]
+    },
+    {
+      "dpv:hasContext": "dpv:Optional",
+      "odrl:assigner": "https://solidweb.me/besteves4/profile/card#me",
+      "odrl:action": "oac:Read",
+      "odrl:target": "oac:Age",
+      "odrl:constraint": [
+        {
+          "dcterms:title": "Purpose for access is not commercial research.",
+          "odrl:leftOperand": "oac:Purpose",
+          "odrl:operator": "oac:isNotA",
+          "odrl:rightOperand": "dpv:CommercialResearch"
+        }
+      ]
+    }
+  ]
+}

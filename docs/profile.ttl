@@ -1,0 +1,327 @@
+PREFIX dpv:     <https://w3id.org/dpv#>
+PREFIX bibo:    <http://purl.org/ontology/bibo/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
+PREFIX odrl:    <http://www.w3.org/ns/odrl/2/>
+PREFIX owl:     <http://www.w3.org/2002/07/owl#>
+PREFIX profile: <http://www.w3.org/ns/dx/prof/>
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX role:    <http://www.w3.org/ns/dx/prof/role/>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX sw:      <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+PREFIX vann:    <http://purl.org/vocab/vann/>
+PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
+PREFIX cc:      <http://creativecommons.org/ns#>
+
+PREFIX cdif-access: <https://w3id.org/cdif/access#>
+
+# ------------ Ontology Metadata ------------------ #
+
+<https://w3id.org/cdif/access> a owl:Ontology, profile:Profile ;
+	profile:isProfileOf <http://www.w3.org/ns/odrl/2/core> ;
+	profile:hasResource cdif-access:html, cdif-access:ttl ;
+	dcterms:title "ODRL Profile for CDIF Access"@en ;
+	vann:preferredNamespacePrefix "cdif-access" ;
+    vann:preferredNamespaceUri "https://w3id.org/cdif/access#"^^xsd:string ;
+	rdfs:label "ODRL Profile for CDIF Access"@en ;
+	owl:versionInfo "0.1"^^xsd:string ;
+	owl:versionIRI <https://w3id.org/cdif/access/0.1> ;
+	# owl:priorVersion <https://w3id.org/cdif/0.1> ;
+	dcterms:created "2026-11-03"^^xsd:date ;
+	# dcterms:modified "2023-10-09"^^xsd:date ;
+	dcterms:issued "2026-11-03"^^xsd:date ;
+	dcterms:creator "Author/Contributor" ;
+	dcterms:publisher "Publisher" ;
+	dcterms:abstract "Abstract TBD"@en ;
+	dcterms:description "Abstract TBD"@en ;
+	dcterms:bibliographicCitation "Cite this vocabulary as: "@en ;
+	bibo:doi ""@en ;
+	foaf:logo <path/to/your/logo> ;
+	sw:term_status "draft"@en ;
+	# dcterms:source <http://www.w3.org/ns/odrl/2/> ;
+	dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+cdif-access:html a profile:ResourceDescriptor ;
+    profile:hasRole role:specification ;
+    profile:hasArtifact <path/to/the/profile/html> ;
+    dcterms:title "ODRL Profile for CDIF Access HTML specification"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/html> ;
+    dcterms:conformsTo <https://www.w3.org/TR/html/> .
+
+cdif-access:ttl a profile:ResourceDescriptor ;
+    profile:hasRole role:vocabulary ;
+    profile:hasArtifact <path/to/the/profile/turtle> ;
+    dcterms:title "ODRL Profile for CDIF Access Turtle vocabulary"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:conformsTo <https://www.w3.org/TR/turtle/> .
+
+cdif-access:actionsCollection a skos:Collection ;
+    skos:prefLabel "ODRL CDIF Access profile - action concepts"@en ;
+    skos:scopeNote ""@en ;
+    skos:member odrl:acceptTracking ;
+    skos:member odrl:adHocShare ; # deprecated
+    skos:member odrl:aggregate ;
+    skos:member odrl:annotate ;
+	skos:member odrl:anonymize ;
+	skos:member odrl:append ; # deprecated by http://www.w3.org/ns/odrl/2/modify
+	skos:member odrl:archive ;
+	skos:member odrl:concurrentUse ;
+	skos:member odrl:copy ; # deprecated by http://www.w3.org/ns/odrl/2/reproduce
+	skos:member odrl:delete ;
+	skos:member cc:DerivativeWorks ;
+	skos:member odrl:derive ;
+	skos:member odrl:digitize ;
+	skos:member odrl:display ;
+	skos:member odrl:distribute ;
+	skos:member cc:Distribution ;
+	skos:member odrl:execute ;
+	skos:member odrl:export ; # deprecated by http://www.w3.org/ns/odrl/2/transform
+	skos:member odrl:extract ;
+	skos:member odrl:extractChar ; # deprecated
+	skos:member odrl:extractPage ; # deprecated
+	skos:member odrl:extractWord ; # deprecated
+	skos:member odrl:give ;
+	skos:member odrl:grantUse ;
+	skos:member odrl:include ;
+	skos:member odrl:index ;
+	skos:member odrl:inform ;
+	skos:member odrl:install ;
+	skos:member odrl:modify ;
+	skos:member odrl:move ;
+	skos:member odrl:play ;
+	skos:member odrl:present ;
+	skos:member odrl:preview ; # deprecated
+	skos:member odrl:print ;
+	skos:member odrl:read ;
+	skos:member odrl:reproduce ;
+	skos:member cc:Reproduction ;
+	skos:member odrl:reviewPolicy ;
+	skos:member odrl:sell ;
+	skos:member odrl:share ; # deprecated by http://creativecommons.org/ns#Sharing
+	skos:member odrl:stream ;
+	skos:member odrl:synchronize ;
+	skos:member odrl:textToSpeech ;
+	skos:member odrl:transform ;
+	skos:member odrl:translate ;
+	skos:member odrl:watermark ;
+	skos:member odrl:write ; # deprecated by https://www.w3.org/ns/odrl/2/modify
+	skos:member odrl:writeTo ; # deprecated by https://www.w3.org/ns/odrl/2/modify
+    skos:member cdif-access:Download ;
+	skos:member cdif-access:AccreditedTrainingCompleted ;
+	skos:member cdif-access:AIAnalysis ;
+	skos:member cdif-access:AICuration ;
+	skos:member cdif-access:AISearch ;
+	skos:member cdif-access:AnalysisDevice ; # AnalysisDevice/Instrument - is this not a constraint?
+	skos:member cdif-access:APIAccess ;
+	skos:member cdif-access:AssociateWithResearchProject ;
+	skos:member cdif-access:Browse ;
+	skos:member cdif-access:CiteData ; # I would call it just Cite
+	skos:member cdif-access:CredentialDisclosure ;
+	skos:member cdif-access:DepositDerivedDataProduct ;
+	skos:member cdif-access:DestroyData ; # there's odrl:delete, so do you really need this?
+	skos:member cdif-access:EncryptDataLocally ;
+	skos:member cdif-access:Identify ; # Identify an individual, household or organisation
+	skos:member cdif-access:Link ; # Link to other data
+	skos:member cdif-access:MutuallyExclusiveAnalysis ;
+	skos:member cdif-access:Notify ; # there's http://www.w3.org/ns/odrl/2/inform, do you really need notify?
+	skos:member cdif-access:OnlineAnalysis ;
+	skos:member cdif-access:ProcureThirdPartyApproval ;
+	skos:member cdif-access:ReArchive ;
+	skos:member cdif-access:Republish ;
+	skos:member cdif-access:Reshare ;
+	skos:member cdif-access:Search ; # (in the content)
+	skos:member cdif-access:secondaryUse ; # secondary use is just using for a different purpose, so I would not define it as a separate action
+	skos:member cdif-access:SecureTransfer ;
+	skos:member cdif-access:SignAgreement ; # Sign/AcceptAgreement
+	skos:member cdif-access:StoreData ; # why not use http://www.w3.org/ns/odrl/2/archive (Definition: To store the Asset (in a non-transient form))?
+	skos:member cdif-access:SubmitAnalysisOutputsForChecking ;
+	skos:member cdif-access:TakeScreenShot ;
+	skos:member cdif-access:View .
+
+cdif-access:Download a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label "download"@en ;
+	skos:definition "define download"@en ;
+	skos:note "for usage notes"@en .
+
+cdif-access:AccreditedTrainingCompleted a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:AIAnalysis a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:AICuration a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:AISearch a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:AnalysisDevice a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:APIAccess a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:AssociateWithResearchProject a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Browse a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:CiteData a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:CredentialDisclosure a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:DepositDerivedDataProduct a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:EncryptDataLocally a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Identify a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Link a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:MutuallyExclusiveAnalysis a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:OnlineAnalysis a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ProcureThirdPartyApproval a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ReArchive a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Republish a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Reshare a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Search a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:SecureTransfer a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:SignAgreement a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:SubmitAnalysisOutputsForChecking a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:TakeScreenShot a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:View a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:purposeCollection a skos:Collection ;
+    skos:prefLabel "ODRL CDIF Access profile - purpose concepts"@en ;
+    skos:scopeNote ""@en ;
+    skos:member odrl:purpose ;
+	skos:member dpv:AcademicResearch ;
+	skos:member dpv:AccountManagement ;
+	skos:member dpv:Advertising ;
+	skos:member dpv:CommercialPurpose;
+	skos:member dpv:CommunicationManagement ;
+	skos:member dpv:CustomerManagement ;
+	skos:member dpv:EnforceSecurity ;
+	skos:member dpv:HumanResourceManagement ;
+	skos:member dpv:Marketing ;
+	skos:member dpv:NonCommercialPurpose ;
+	skos:member dpv:OrganisationGovernance ;
+	skos:member dpv:Personalisation ;
+	skos:member dpv:PublicBenefit ;
+	skos:member dpv:RecordManagement ;
+	skos:member dpv:ResearchAndDevelopment ;
+	skos:member dpv:ServiceProvision ;
+	skos:member dpv:VendorManagement ;
+	skos:member dpv:CommercialResearch ;
+	skos:member dpv:NonCommercialResearch  ;
+	skos:member dpv:ScientificResearch .

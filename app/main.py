@@ -9,6 +9,7 @@ from .routers.variables import router as variables_router
 from .routers.groups import router as groups_router
 from .routers.croissants import router as croissants_router
 from .routers.registry import router as registry_router
+from .routers.policies import router as policies_router
 
 app = FastAPI(title="ODRL API", description="API wrapper for OYDID CLI with VC Capabilities")
 
@@ -20,6 +21,7 @@ app.include_router(variables_router, prefix="/api")
 app.include_router(groups_router, prefix="/api")
 app.include_router(croissants_router, prefix="/api")
 app.include_router(registry_router, prefix="/api")
+app.include_router(policies_router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():

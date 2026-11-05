@@ -115,12 +115,29 @@ export default function VcWallet() {
             const res = await api.post(endpoint, data);
             return { data: res.data, submittedData: data };
         },
-        onSuccess: ({ data, submittedData }) => {
+        onSuccess: async ({ data, submittedData }) => {
             setResult(data);
             
             // Log the user in context to display profile
             const profile = socialProfile || { name: submittedData.username || 'User' };
             login(profile, submittedData.subject_did);
+
+            // Send webhook to callback URL if specified
+            const searchParams = new URLSearchParams(window.location.search);
+            const callbackUrl = searchParams.get('callback');
+            if (callbackUrl) {
+                try {
+                    await fetch(callbackUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } catch (err) {
+                    console.error("Failed to POST to callback URL:", err);
+                }
+            }
         },
         onError: (err) => alert(err.response?.data?.detail || "Failed to issue VC")
     });

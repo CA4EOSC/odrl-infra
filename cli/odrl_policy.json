@@ -1,0 +1,32 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    "https://w3id.org/oac/context.json"
+  ],
+  "@type": "Offer",
+  "type": "Offer",
+  "odrl:uid": "urn:uuid:82673ff6-9566-48bf-8d71-4f9f9cd4c7a0",
+  "odrl:profile": "oac:",
+  "dcterms:issued": "2026-11-03T12:55:35.559389+00:00",
+  "dcterms:description": "Offer to read identifier data for identity verification and age data if purpose is not commercial research.",
+  "dcterms:creator": "https://solidweb.me/besteves4/profile/card#me",
+  "dcterms:source": [
+    "https://solidweb.me/besteves4/policies/requirement1",
+    "https://solidweb.me/besteves4/policies/preference1"
+  ],
+  "odrl:permission": [
+    {
+      "odrl:target": "duodrl:TemplateDataset",
+      "odrl:action": "oac:Read",
+      "dpv:hasContext": "dpv:Required",
+      "odrl:assigner": "https://solidweb.me/besteves4/profile/card#me",
+      "odrl:constraint": [
+        {
+          "odrl:leftOperand": "oac:Purpose",
+          "odrl:operator": "odrl:isA",
+          "odrl:rightOperand": "duodrl:GRU"
+        }
+      ]
+    }
+  ]
+}
