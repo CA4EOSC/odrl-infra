@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BookOpen, ChevronDown, ChevronRight, Search, Layers } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { expandIri } from '../lib/vocabTree';
 
 // Hierarchical vocabulary browser (purposes, left operands, ...). Trees come from lib/vocabTree.js.
 
@@ -10,7 +11,8 @@ const countDescendants = (n) => (n.children || []).reduce((s, k) => s + 1 + coun
 const matches = (n, q) =>
     n.label.toLowerCase().includes(q) ||
     (n.value || '').toLowerCase().includes(q) ||
-    (n.description || '').toLowerCase().includes(q);
+    (n.definition || '').toLowerCase().includes(q) ||
+    (n.notes || []).some(x => x.toLowerCase().includes(q));
 
 export function VocabBrowser({ title, subtitle, nodes, value, selectLabel = 'Use this term', onSelect, onClose, toolbar, defaultExpanded = [] }) {
     const [query, setQuery] = useState('');
@@ -240,7 +242,32 @@ export function VocabBrowser({ title, subtitle, nodes, value, selectLabel = 'Use
                                     {n.value && <code className="font-mono text-[11px] text-indigo-600 dark:text-indigo-400 break-all">{n.value}</code>}
                                     {n.deprecated && <div className="text-[10px] font-semibold text-amber-600 mt-0.5">Deprecated</div>}
                                 </div>
-                                {n.description && <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{n.description}</p>}
+                                {n.value && (
+                                    <dl className="space-y-2.5">
+                                        <div>
+                                            <dt className="text-[10px] font-bold uppercase tracking-wide text-gray-500">Definition</dt>
+                                            <dd className={cn('leading-relaxed', n.definition ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500 italic')}>
+                                                {n.definition || 'No definition in the vocabulary.'}
+                                            </dd>
+                                        </div>
+                                        {n.notes?.length > 0 && (
+                                            <div>
+                                                <dt className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{n.notes.length === 1 ? 'Note' : 'Notes'}</dt>
+                                                {n.notes.map((x, i) => <dd key={i} className="text-gray-600 dark:text-gray-300 leading-relaxed">{x}</dd>)}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <dt className="text-[10px] font-bold uppercase tracking-wide text-gray-500">IRI</dt>
+                                            <dd className="font-mono text-[11px] text-gray-700 dark:text-gray-300 break-all">{expandIri(n.value)}</dd>
+                                        </div>
+                                        {n.concept && (
+                                            <div>
+                                                <dt className="text-[10px] font-bold uppercase tracking-wide text-gray-500">CDIF concept</dt>
+                                                <dd className="font-mono text-[11px] text-gray-700 dark:text-gray-300 break-all">{n.concept}</dd>
+                                            </div>
+                                        )}
+                                    </dl>
+                                )}
                                 {(n.meta?.length > 0 || n.alsoUnder?.length > 0) && (
                                     <dl className="space-y-1 text-[11px]">
                                         {n.alsoUnder?.length > 0 && (

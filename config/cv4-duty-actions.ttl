@@ -1,0 +1,116 @@
+@prefix cv1: <https://odrl.codata.org/cv1/> .
+@prefix cv4: <https://odrl.codata.org/cv4/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cv4:anonymise a skos:Concept ;
+    skos:exactMatch odrl:anonymize,
+        cv1:anonymise ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "anonymise"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:authenticate a skos:Concept ;
+    skos:definition "Use an accepted authentication method to prove the identity"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "Authenticate"@en ;
+    skos:scopeNote "The set of accepted authentication methods will depend on the requirements of the asset owner and the possible constraints imposed by the nature of the asset (e.g. multi-factor authentication required for clinical data). The authentication process should allow verifying membership in project teams, organisations and groups of users holding specific rights based on their role [C.f. odrl:Party?]."@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:compensation a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "Compensation"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:completeRegistration a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "CompleteRegistration"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:designateResponsiblePerson a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "designateResponsiblePerson"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:getEthicsApproval a skos:Concept ;
+    skos:definition "Any action on the asset requires a proof of ethics approval"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "GetEthicsApproval"@en ;
+    skos:scopeNote "Performing the action on the asset needs to be linked to an ethics approval using methods that fulfill the relevant legal and governance requirements that are relevant to the asset and the legal entity controlling the access to the asset. [typically the ethics approval is reviewed by the asset controller and linked to the user's account? C.f. odrl:reviewPolicy?]"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:obtainCompletedAgreement a skos:Concept ;
+    skos:definition "The action requires an agreement with all involved parties"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "e,g, EUL (refinement will specify what form, what signature type etc.)"@en ;
+    skos:prefLabel "ObtainCompletedAgreement"@en ;
+    skos:scopeNote "The action on an asset requires verifiable consent of all relevant stakeholders, e.g. signature of an End User Agreement or agreements needed for secure transfer of data into a trusted research environment."@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:payment a skos:Concept ;
+    skos:definition "Any action on the asset requires a payment"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "Payment"@en ;
+    skos:scopeNote "Performing an action on the asset requires a fee and a commitment to pay linked to the access request. The legal entity controlling the access determines the modalities of acceptable payment modalities (e.g. proof of payment required before the access, post-access invoicing or using credits assigned to the project or organisation the requesting party belongs to)."@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:provisionSecureEnvironment a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "provisionSecureEnvironment"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:pseudonymise a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "pseudonymise"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:thirdPartyAuthorization a skos:Concept ;
+    skos:definition "The action on an asset requires an additional authorisation from a third party"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "e.g. GetApproval from DataOwner"@en ;
+    skos:prefLabel "ThirdPartyAuthorization"@en ;
+    skos:scopeNote "The action on an asset requires an authorisation from a third party (or third parties); for example, GetApproval from the data owner [c.f. odrl:obtainConsent? GetApproval hanging reference?]"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:verifyAccreditation a skos:Concept ;
+    skos:definition "The action requires verification of accreditation"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "VerifyAccreditation"@en ;
+    skos:scopeNote "Performing the action on the asset requires verification of an accreditation (certification, membership in a skills- or competence-based organisation or professional body)."@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:verifyProjectContext a skos:Concept ;
+    skos:definition "The action requires verification of the project"@en ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "Submit a project description or research protocol"@en ;
+    skos:prefLabel "VerifyProjectContext"@en ;
+    skos:scopeNote "The action requires review of the project context, e.g. analysis of the project description or research protocol. Typically this will create a new role or set of roles that can be used in the authentication context"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+cv4:verifyTraining a skos:Concept ;
+    skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:prefLabel "VerifyTraining"@en ;
+    skos:topConceptOf <https://odrl.codata.org/cv4> .
+
+<https://odrl.codata.org/cv4> a skos:ConceptScheme ;
+    dct:created "2026-11-04"^^xsd:date ;
+    dct:description "Actions that an assignee must perform (ODRL duties) before or while exercising a permission in a CDIF access policy."@en ;
+    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Duty> ;
+    dct:title "CDIF Duty Actions (CV4)"@en ;
+    skos:hasTopConcept cv4:anonymise,
+        cv4:authenticate,
+        cv4:compensation,
+        cv4:completeRegistration,
+        cv4:designateResponsiblePerson,
+        cv4:getEthicsApproval,
+        cv4:obtainCompletedAgreement,
+        cv4:payment,
+        cv4:provisionSecureEnvironment,
+        cv4:pseudonymise,
+        cv4:thirdPartyAuthorization,
+        cv4:verifyAccreditation,
+        cv4:verifyProjectContext,
+        cv4:verifyTraining .
+
