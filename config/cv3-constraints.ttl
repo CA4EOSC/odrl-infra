@@ -1,668 +1,224 @@
-@prefix cv3: <https://odrl.codata.org/cv3/> .
-@prefix dct: <http://purl.org/dc/terms/> .
-@prefix dpv: <https://w3id.org/dpv#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix odrl: <http://www.w3.org/ns/odrl/2/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://odrl.codata.org/cv3/collection/deprecated> a skos:Collection ;
-    skos:member cv3:absolutePosition,
-        cv3:absoluteSize,
-        cv3:absoluteSpatialPosition,
-        cv3:absoluteTemporalPosition,
-        cv3:device,
-        cv3:system ;
-    skos:prefLabel "Left operands not to be used in CDIF"@en .
-
-<https://odrl.codata.org/cv3/collection/leftOperands> a skos:Collection ;
-    skos:member cv3:absolutePosition,
-        cv3:absoluteSize,
-        cv3:absoluteSpatialPosition,
-        cv3:absoluteTemporalPosition,
-        cv3:aiSystem,
-        cv3:count,
-        cv3:data,
-        cv3:dataController,
-        cv3:dataProcessor,
-        cv3:dataSource,
-        cv3:dataSubject,
-        cv3:dateTime,
-        cv3:delayPeriod,
-        cv3:deliveryChannel,
-        cv3:device,
-        cv3:dpvPurpose,
-        cv3:dpvRecipient,
-        cv3:duration,
-        cv3:elapsedTime,
-        cv3:entity,
-        cv3:event,
-        cv3:fileFormat,
-        cv3:frequency,
-        cv3:humanSubject,
-        cv3:industry,
-        cv3:justification,
-        cv3:language,
-        cv3:law,
-        cv3:legalBasis,
-        cv3:legalMeasure,
-        cv3:location,
-        cv3:media,
-        cv3:meteredTime,
-        cv3:model,
-        cv3:organisationalMeasure,
-        cv3:payAmount,
-        cv3:percentage,
-        cv3:personalData,
-        cv3:physicalMeasure,
-        cv3:product,
-        cv3:purpose,
-        cv3:recipient,
-        cv3:resolution,
-        cv3:right,
-        cv3:risk,
-        cv3:spatial,
-        cv3:spatialCoordinates,
-        cv3:system,
-        cv3:systemDevice,
-        cv3:technicalMeasure,
-        cv3:technicalOrganisationalMeasure,
-        cv3:technology,
-        cv3:timeInterval,
-        cv3:unitOfCount,
-        cv3:version,
-        cv3:virtualLocation ;
+<https://w3id.org/cdif/access/collection/odrl-left-operands-used-in-cdif> a skos:Collection ;
+    skos:member odrl:count,
+        odrl:dateTime,
+        odrl:delayPeriod,
+        odrl:deliveryChannel,
+        odrl:elapsedTime,
+        odrl:event,
+        odrl:fileFormat,
+        odrl:industry,
+        odrl:language,
+        odrl:meteredTime,
+        odrl:payAmount,
+        odrl:percentage,
+        odrl:recipient,
+        odrl:resolution,
+        odrl:spatial,
+        odrl:spatialCoordinates,
+        odrl:systemDevice,
+        odrl:timeInterval,
+        odrl:unitOfCount,
+        odrl:version,
+        odrl:virtualLocation ;
     skos:prefLabel "ODRL left operands used in CDIF"@en .
 
-<https://odrl.codata.org/cv3/collection/noKnownUseCase> a skos:Collection ;
-    skos:member cv3:media,
-        cv3:product ;
-    skos:prefLabel "Left operands without a known UKDS/Sikt use case"@en .
-
-<https://odrl.codata.org/cv3/collection/restrictionCategories> a skos:Collection ;
-    skos:member cv3:AddNewConstraintsBelowThisLineToBeValidated,
-        cv3:EnvironmentalConstraints,
-        cv3:FinancialConstraints,
-        cv3:IdentityAndAccessConstraints,
-        cv3:LegalAndRegulatoryConstraints,
-        cv3:PersonConstraints,
-        cv3:RoleConstraints,
-        cv3:UsageContextConstraints ;
-    skos:prefLabel "Restriction categories (under investigation)"@en .
-
-cv3:AddNewConstraintsBelowThisLineToBeValidated a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "Add New Constraints below this line - to be validated"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:EnvironmentalConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "EnvironmentalConstraints"@en ;
-    skos:scopeNote "Characteristics of ReUse Environment e.g. TRE (cf. \"Safe Settings\""@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:FinancialConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "FinancialConstraints"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:IdentityAndAccessConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "IdentityAndAccessConstraints"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:LegalAndRegulatoryConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "LegalAndRegulatoryConstraints"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:PersonConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "PersonConstraints"@en ;
-    skos:scopeNote "e.g. Training Status (this implies a Duty Action of \"Complete Training\" - although not formally modelled"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:RoleConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "RoleConstraints"@en ;
-    skos:scopeNote "How to handle multiple role context of a single agent (could be Individual or Organisation, or machine)"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:UsageContextConstraints a skos:Concept ;
-    skos:editorialNote "Status: Investigate DPV options (purpose plus other context like \"Research Project\""@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "UsageContextConstraints"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:aiSystem a skos:Concept ;
-    skos:closeMatch <https://w3id.org/dpv/ai#AISystem> ;
-    skos:editorialNote "Source sheet names 'ai:AISystem'; mapped during SKOS conversion."@en ;
-    skos:example "ai:AISystem eq NameOfAISystem"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "ai:AISystem"@en ;
-    skos:scopeNote "e.g. ai:AISystem eq \"Claude\""@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:count a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-count> ;
-    skos:exactMatch odrl:count ;
-    skos:example "count eq 1"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "count"@en ;
-    skos:scopeNote "How many times you can download"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:data a skos:Concept ;
-    skos:closeMatch dpv:Data ;
-    skos:editorialNote "Source sheet names 'dpv:Data'; mapped during SKOS conversion."@en ;
-    skos:example "dpv:Data eq UID"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Data"@en ;
-    skos:scopeNote "e.g. Data eq \"UKDS-SN12345\"; Data eq DOI"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dataController a skos:Concept ;
-    skos:closeMatch dpv:DataController ;
-    skos:editorialNote "Source sheet names 'dpv:DataController'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:DataController"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dataProcessor a skos:Concept ;
-    skos:closeMatch dpv:DataProcessor ;
-    skos:editorialNote "Source sheet names 'dpv:DataProcessor'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:DataProcessor"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dataSource a skos:Concept ;
-    skos:closeMatch dpv:DataSource ;
-    skos:editorialNote "Source sheet names 'dpv:DataSource'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:DataSource"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dataSubject a skos:Concept ;
-    skos:closeMatch dpv:DataSubject ;
-    skos:editorialNote "Source sheet names 'dpv:DataSubject'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:DataSubject"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dateTime a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-dateTime> ;
-    skos:exactMatch odrl:dateTime ;
-    skos:example "dateTime eq 2026-11-04"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dateTime"@en ;
-    skos:scopeNote "Multiple use cases"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:delayPeriod a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-delayPeriod> ;
-    skos:exactMatch odrl:delayPeriod ;
-    skos:example "delayPeriod eq 60 days"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "delayPeriod"@en ;
-    skos:scopeNote "must wait a time period before action"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:deliveryChannel a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-deliveryChannel> ;
-    skos:exactMatch odrl:deliveryChannel ;
-    skos:example "deliveryChannel eq SafePod"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "deliveryChannel"@en ;
-    skos:scopeNote "Data only access thr safepod network"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dpvPurpose a skos:Concept ;
-    skos:closeMatch dpv:Purpose ;
-    skos:editorialNote "Marked 'SEE PURPOSE TAB' in source sheet."@en,
-        "Source sheet names 'dpv:Purpose'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Purpose"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:dpvRecipient a skos:Concept ;
-    skos:closeMatch dpv:Recipient ;
-    skos:editorialNote "Source sheet names 'dpv:Recipient'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Recipient"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:duration a skos:Concept ;
-    skos:closeMatch dpv:Duration ;
-    skos:editorialNote "Source sheet names 'dpv:Duration'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Duration"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:elapsedTime a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-elapsedTime> ;
-    skos:exactMatch odrl:elapsedTime ;
-    skos:example "elapsedTime eq 3 years"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "elapsedTime"@en ;
-    skos:scopeNote "How long you can exercise the Action"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:entity a skos:Concept ;
-    skos:closeMatch dpv:Entity ;
-    skos:editorialNote "Source sheet names 'dpv:Entity'; mapped during SKOS conversion."@en ;
-    skos:example "dpv:Entity eq \"EntityName\" or \"EntityCollection\""@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Entity"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:event a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-event> ;
-    skos:exactMatch odrl:event ;
-    skos:example "event lt odrl:policyUsage"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "event"@en ;
-    skos:scopeNote "Duty must be completed before the Action is exercised"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:fileFormat a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-fileFormat> ;
-    skos:exactMatch odrl:fileFormat ;
-    skos:example "fileFormat eq SPSS"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "fileFormat"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:frequency a skos:Concept ;
-    skos:closeMatch dpv:Frequency ;
-    skos:editorialNote "Source sheet names 'dpv:Frequency'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Frequency"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:humanSubject a skos:Concept ;
-    skos:closeMatch dpv:HumanSubject ;
-    skos:editorialNote "Source sheet names 'dpv:HumanSubject'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:HumanSubject"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:industry a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-industry> ;
-    skos:exactMatch odrl:industry ;
-    skos:example "industry eq Financial"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "industry"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:justification a skos:Concept ;
-    skos:closeMatch dpv:Justification ;
-    skos:editorialNote "Source sheet names 'dpv:Justification'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Justification"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:language a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-language> ;
-    skos:exactMatch odrl:language ;
-    skos:example "language eq de"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "language"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:law a skos:Concept ;
-    skos:closeMatch dpv:Law ;
-    skos:editorialNote "Source sheet names 'dpv:Law'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Law"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:legalBasis a skos:Concept ;
-    skos:closeMatch dpv:LegalBasis ;
-    skos:editorialNote "Source sheet names 'dpv:LegalBasis'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:LegalBasis"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:legalMeasure a skos:Concept ;
-    skos:closeMatch dpv:LegalMeasure ;
-    skos:editorialNote "Source sheet names 'dpv:LegalMeasure'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:LegalMeasure"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:location a skos:Concept ;
-    skos:altLabel "dpv:Location"@en ;
-    skos:closeMatch dpv:Location ;
-    skos:editorialNote "Source sheet names 'dpv:location' (DPV ODRL Profile); mapped during SKOS conversion."@en ;
-    skos:example "dpv:location eq IRI"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:location"@en ;
-    skos:scopeNote "Handle user is in UK jurisdictyion for example"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:meteredTime a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-meteredTime> ;
-    skos:exactMatch odrl:meteredTime ;
-    skos:example "meteredTime eq 100 hours"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "meteredTime"@en ;
-    skos:scopeNote "non-contigiouus blocks of time"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:model a skos:Concept ;
-    skos:closeMatch <https://w3id.org/dpv/ai#Model> ;
-    skos:editorialNote "Source sheet names 'ai:Model'; mapped during SKOS conversion."@en ;
-    skos:example "ai:Model eq NameOfAIModel"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "ai:Model"@en ;
-    skos:scopeNote "ai:Model eq \"Qwen4.2\""@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:organisationalMeasure a skos:Concept ;
-    skos:closeMatch dpv:OrganisationalMeasure ;
-    skos:editorialNote "Source sheet names 'dpv:OrganisationalMeasure'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:OrganisationalMeasure"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:payAmount a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-payAmount> ;
-    skos:exactMatch odrl:payAmount ;
-    skos:example "PayAmount eq 100"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "PayAmount"@en ;
-    skos:scopeNote "with unit property for currency"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:percentage a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-percentage> ;
-    skos:exactMatch odrl:percentage ;
-    skos:example "percentage lt 50"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "percentage"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:personalData a skos:Concept ;
-    skos:closeMatch dpv:PersonalData ;
-    skos:editorialNote "Source sheet names 'dpv:PersonalData' (Note details in DPV Extension \"Personal Data\": https://w3c-cg.github.io/dpv/2.3/dpv/modules/personal_data#sensitive-special-data); mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:PersonalData"@en ;
-    skos:scopeNote "No Current Examples, but will occur"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:physicalMeasure a skos:Concept ;
-    skos:closeMatch dpv:PhysicalMeasure ;
-    skos:editorialNote "Source sheet names 'dpv:PhysicalMeasure'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:PhysicalMeasure"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:purpose a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-purpose> ;
-    skos:exactMatch odrl:purpose ;
-    skos:example "purpose eq dpv:Purpose"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "purpose"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:recipient a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-recipient> ;
-    skos:exactMatch odrl:recipient ;
-    skos:example "recipient eq IRI"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "recipient"@en ;
-    skos:scopeNote "e.g. which parties you might share with"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:resolution a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-resolution> ;
-    skos:exactMatch odrl:resolution ;
-    skos:example "resolution eq 1200"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "resolution"@en ;
-    skos:scopeNote "e.g. print at 1200 DPI"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:right a skos:Concept ;
-    skos:closeMatch dpv:Right ;
-    skos:editorialNote "Source sheet names 'dpv:Right'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Right"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:risk a skos:Concept ;
-    skos:closeMatch dpv:Risk ;
-    skos:editorialNote "Source sheet names 'dpv:Risk'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Risk"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:spatial a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-spatial> ;
-    skos:exactMatch odrl:spatial ;
-    skos:example "spatial eq IRI"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "spatial"@en ;
-    skos:scopeNote "\"named area\" - may not need"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:spatialCoordinates a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-spatialCoordinates> ;
-    skos:exactMatch odrl:spatialCoordinates ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "spatialCoordinates"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:systemDevice a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-systemDevice> ;
-    skos:exactMatch odrl:systemDevice ;
-    skos:example "systemDevice eq TRE"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "systemDevice"@en ;
-    skos:scopeNote "or safepod for example"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:technicalMeasure a skos:Concept ;
-    skos:closeMatch dpv:TechnicalMeasure ;
-    skos:editorialNote "Source sheet names 'dpv:TechnicalMeasure'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:TechnicalMeasure"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:technicalOrganisationalMeasure a skos:Concept ;
-    skos:closeMatch dpv:TechnicalOrganisationalMeasure ;
-    skos:editorialNote "Source sheet names 'dpv:TechnicalOrganisationalMeasure'; mapped during SKOS conversion."@en ;
-    skos:example "dpv:TechnicalOrganisationalMeasure eq \"dpv/tech:Class"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:TechnicalOrganisationalMeasure"@en ;
-    skos:scopeNote "e.g. dpv/tech:API eq \"https://api.tech.cessda.eu/\""@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:technology a skos:Concept ;
-    skos:closeMatch dpv:Technology ;
-    skos:editorialNote "Source sheet names 'dpv:Technology'; mapped during SKOS conversion."@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "dpv:Technology"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:timeInterval a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-timeInterval> ;
-    skos:exactMatch odrl:timeInterval ;
-    skos:example "timeInterval eq 100 d"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "timeInterval"@en ;
-    skos:scopeNote "wait time before Action"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:unitOfCount a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-unitOfCount> ;
-    skos:exactMatch odrl:unitOfCount ;
-    skos:example "unitOfCount eq 1"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "unitOfCount"@en ;
-    skos:scopeNote "e.g. once per user (as opposed to count)"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:version a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-version> ;
-    skos:exactMatch odrl:version ;
-    skos:example "version eq 3"@en ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "version"@en ;
-    skos:scopeNote "Only version 3 of the asset for example"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:virtualLocation a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-virtualLocation> ;
-    skos:exactMatch odrl:virtualLocation ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "virtualLocation"@en ;
-    skos:scopeNote "e.g. an IP range"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:absolutePosition a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-absolutePosition> ;
-    owl:deprecated true ;
-    skos:editorialNote "Marked 'DON'T USE' in source sheet."@en ;
-    skos:exactMatch odrl:absolutePosition ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "absolutePosition"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:absoluteSize a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-absoluteSize> ;
-    owl:deprecated true ;
-    skos:editorialNote "Marked 'DON'T USE' in source sheet."@en ;
-    skos:exactMatch odrl:absoluteSize ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "absoluteSize"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:absoluteSpatialPosition a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-absoluteSpatialPosition> ;
-    owl:deprecated true ;
-    skos:editorialNote "Marked 'DON'T USE' in source sheet."@en ;
-    skos:exactMatch odrl:absoluteSpatialPosition ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "absoluteSpatialPosition"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:absoluteTemporalPosition a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-absoluteTemporalPosition> ;
-    owl:deprecated true ;
-    skos:editorialNote "Marked 'DON'T USE' in source sheet."@en ;
-    skos:exactMatch odrl:absoluteTemporalPosition ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "absoluteTemporalPosition"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:device a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-device> ;
-    owl:deprecated true ;
-    skos:editorialNote "Marked 'DEPRECATED' in source sheet."@en ;
-    skos:exactMatch odrl:device ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "device"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:media a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-media> ;
-    skos:editorialNote "ukds/SIKT HAVE NO USE CASE BUT THERE MAY BE ONE ELSEWHERE"@en ;
-    skos:exactMatch odrl:media ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "media"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:product a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-product> ;
-    skos:editorialNote "ukds/SIKT HAVE NO USE CASE BUT THERE MAY BE ONE ELSEWHERE"@en ;
-    skos:exactMatch odrl:product ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "product"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-cv3:system a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-system> ;
-    owl:deprecated true ;
-    skos:editorialNote "Marked 'DEPRECATED' in source sheet."@en ;
-    skos:exactMatch odrl:system ;
-    skos:inScheme <https://odrl.codata.org/cv3> ;
-    skos:prefLabel "system"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv3> .
-
-<https://odrl.codata.org/cv3> a skos:ConceptScheme ;
-    dct:created "2026-11-04"^^xsd:date ;
-    dct:description "Other constraints describing the scope of applicability of a CDIF access policy: the ODRL left operands selected for CDIF, and broader restriction categories (environment, legal, usage context, person, identity, role, financial) still under investigation."@en ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-LeftOperand> ;
-    dct:title "CDIF Other Constraints (CV3)"@en ;
-    skos:hasTopConcept cv3:AddNewConstraintsBelowThisLineToBeValidated,
-        cv3:EnvironmentalConstraints,
-        cv3:FinancialConstraints,
-        cv3:IdentityAndAccessConstraints,
-        cv3:LegalAndRegulatoryConstraints,
-        cv3:PersonConstraints,
-        cv3:RoleConstraints,
-        cv3:UsageContextConstraints,
-        cv3:absolutePosition,
-        cv3:absoluteSize,
-        cv3:absoluteSpatialPosition,
-        cv3:absoluteTemporalPosition,
-        cv3:aiSystem,
-        cv3:count,
-        cv3:data,
-        cv3:dataController,
-        cv3:dataProcessor,
-        cv3:dataSource,
-        cv3:dataSubject,
-        cv3:dateTime,
-        cv3:delayPeriod,
-        cv3:deliveryChannel,
-        cv3:device,
-        cv3:dpvPurpose,
-        cv3:dpvRecipient,
-        cv3:duration,
-        cv3:elapsedTime,
-        cv3:entity,
-        cv3:event,
-        cv3:fileFormat,
-        cv3:frequency,
-        cv3:humanSubject,
-        cv3:industry,
-        cv3:justification,
-        cv3:language,
-        cv3:law,
-        cv3:legalBasis,
-        cv3:legalMeasure,
-        cv3:location,
-        cv3:media,
-        cv3:meteredTime,
-        cv3:model,
-        cv3:organisationalMeasure,
-        cv3:payAmount,
-        cv3:percentage,
-        cv3:personalData,
-        cv3:physicalMeasure,
-        cv3:product,
-        cv3:purpose,
-        cv3:recipient,
-        cv3:resolution,
-        cv3:right,
-        cv3:risk,
-        cv3:spatial,
-        cv3:spatialCoordinates,
-        cv3:system,
-        cv3:systemDevice,
-        cv3:technicalMeasure,
-        cv3:technicalOrganisationalMeasure,
-        cv3:technology,
-        cv3:timeInterval,
-        cv3:unitOfCount,
-        cv3:version,
-        cv3:virtualLocation .
+odrl:count a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "Numeric count of executions of the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:prefLabel "Count"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:dateTime a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "The date (and optional time and timezone) of exercising the action of the Rule. Right operand value MUST be an xsd:date or xsd:dateTime as defined by [[xmlschema11-2]]."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "The use of Timezone information is strongly recommended. The Rule may be exercised before (with operator lt/lteq) or after (with operator gt/gteq) the date(time) defined by the Right operand. <br />Example: <code>dateTime gteq 2017-12-31T06:00Z</code> means the Rule can only be exercised after (and including) 6:00AM on the 31st Decemeber 2017 UTC time."@en ;
+    skos:prefLabel "Datetime"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:delayPeriod a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A time delay period prior to exercising the action of the Rule. The point in time triggering this period MAY be defined by another temporal Constraint combined by a Logical Constraint (utilising the odrl:andSequence operand). Right operand value MUST be an xsd:duration as defined by [[xmlschema11-2]]."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Only the eq, gt, gteq operators SHOULD be used. <br />Example: <code>delayPeriod eq P60M</code> indicates a delay of 60 Minutes before exercising the action."@en ;
+    skos:prefLabel "Delay Period"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:deliveryChannel a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "The delivery channel used for exercising the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: the asset may be distributed only on mobile networks."@en ;
+    skos:prefLabel "Delivery Channel"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:elapsedTime a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A continuous elapsed time period which may be used for exercising of the action of the Rule. Right operand value MUST be an xsd:duration as defined by [[xmlschema11-2]]."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Only the eq, lt, lteq operators SHOULD be used. See also Metered Time. <br />Example: <code>elpasedTime eq P60M</code> indicates a total elapsed time of 60 Minutes."@en ;
+    skos:prefLabel "Elapsed Time"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:event a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "An identified event setting a context for exercising the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Events are temporal periods of time, and operators can be used to signal before (lt), during (eq) or after (gt) the event. <br />Example: May be taken during the “FIFA World Cup 2020” only."@en ;
+    skos:prefLabel "Event"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:fileFormat a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A transformed file format of the target Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: An asset may be transformed into JPEG format."@en ;
+    skos:prefLabel "File Format"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:industry a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A defined industry sector setting a context for exercising the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: publishing or financial industry."@en ;
+    skos:prefLabel "Industry Context"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:language a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A natural language used by the target Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: the asset can only be translated into Greek. Must use [[bcp47]] codes for language values."@en ;
+    skos:prefLabel "Language"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:meteredTime a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "An accumulated amount of one to many metered time periods which were used for exercising the action of the Rule. Right operand value MUST be an xsd:duration as defined by [[xmlschema11-2]]."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Only the eq, lt, lteq operators SHOULD be used. See also Elapsed Time. <br />Example: <code>meteredTime lteq P60M</code> indicates an accumulated period of 60 Minutes or less."@en ;
+    skos:prefLabel "Metered Time"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:payAmount a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "The amount of a financial payment. Right operand value MUST be an xsd:decimal. "@en ;
+    skos:editorialNote "Written 'odrl:PayAmount' in the profile; ODRL 2.2 term is odrl:payAmount."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Can be used for compensation duties with the unit property indicating the currency of the payment."@en ;
+    skos:prefLabel "Payment Amount"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:percentage a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A percentage amount of the target Asset relevant for exercising the action of the Rule. Right operand value MUST be an xsd:decimal from 0 to 100."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: Extract less than or equal to 50%."@en ;
+    skos:prefLabel "Asset Percentage"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:recipient a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "The party receiving the result/outcome of exercising the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "The Right Operand must identify one or more specific Parties or category/ies of the Party."@en ;
+    skos:prefLabel "Recipient"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:resolution a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "Resolution of the rendition of the target Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: the image may be printed at 1200dpi."@en ;
+    skos:prefLabel "Rendition Resolution"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:spatial a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A named and identified geospatial area with defined borders which is used for exercising the action of the Rule. An IRI MUST be used to represent this value."@en ;
+    skos:editorialNote "dpv-odrl:Location needs to be added"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "A code value for the area and source of the code must be presented in the Right Operand. <br />Example: the [[iso3166]] Country Codes or the Getty Thesaurus of Geographic Names. "@en ;
+    skos:prefLabel "Geospatial Named Area"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:spatialCoordinates a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A set of coordinates setting the borders of a geospatial area used for exercising the action of the Rule. The coordinates MUST include longitude and latitude, they MAY include altitude and the geodetic datum."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "The default values are the altitude of earth's surface at this location and the WGS 84 datum."@en ;
+    skos:prefLabel "Geospatial Coordinates"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:systemDevice a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "An identified computing system or computing device used for exercising the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: The system device can be identified by a unique code created from the used hardware."@en ;
+    skos:prefLabel "System Device"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:timeInterval a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "A recurring period of time before the next execution of the action of the Rule. Right operand value MUST be an xsd:duration as defined by [[xmlschema11-2]]."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Only the eq operator SHOULD be used. <br />Example: <code>timeInterval eq P7D</code> indicates a recurring 7 day period."@en ;
+    skos:prefLabel "Recurring Time Interval"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:unitOfCount a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "The unit of measure used for counting the executions of the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Note: Typically used with Duties to indicate the unit entity to be counted of the Action. <br />Example: A duty to compensate and a unitOfCount constraint of 'perUser' would indicate that the compensation by multiplied by the 'number of users'."@en ;
+    skos:prefLabel "Unit Of Count"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:version a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "The version of the target Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: Single Paperback or Multiple Issues or version 2.0 or higher."@en ;
+    skos:prefLabel "Version"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+odrl:virtualLocation a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "An identified location of the IT communication space which is relevant for exercising the action of the Rule."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv3> ;
+    skos:note "Example: an Internet domain or IP address range."@en ;
+    skos:prefLabel "Virtual IT Communication Location"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv3> .
+
+<https://w3id.org/cdif/access/cv3> a skos:ConceptScheme ;
+    dcterms:description "Left operands of the CDIF access profile (cdif-access:leftOperandsCollection)."@en ;
+    dcterms:source <https://w3id.org/cdif/access> ;
+    skos:prefLabel "CDIF Other Constraints (CV3)"@en .
 
