@@ -18,6 +18,13 @@ cv2:AccountManagement a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "AccountManagement"@en .
 
+cv2:AddNewPurposesBelowThisLineToBeValidated a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:AddNewPurposesBelowThisLineToBeValidated ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Add New purposes below this line - to be validated"@en .
+
 cv2:Advertising a skos:Concept ;
     skos:broader cv2:Marketing ;
     skos:definition "Purposes associated with conducting advertising i.e. process or artefact used to call attention to a product, service, etc. through announcements, notices, or other forms of communication"@en ;
@@ -39,6 +46,13 @@ cv2:CustomerManagement a skos:Concept ;
     skos:exactMatch dpv:CustomerManagement ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "CustomerManagement"@en .
+
+cv2:Education a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Education ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Education"@en .
 
 cv2:EnforceSecurity a skos:Concept ;
     skos:broader cv2:Purpose ;
@@ -63,12 +77,26 @@ cv2:OrganisationGovernance a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "OrganisationGovernance"@en .
 
+cv2:Outreach a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Outreach ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Outreach"@en .
+
 cv2:Personalisation a skos:Concept ;
     skos:broader cv2:Purpose ;
     skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
     skos:exactMatch dpv:Personalisation ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "Personalisation"@en .
+
+cv2:Promotional a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Promotional ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Promotional"@en .
 
 cv2:PublicBenefit a skos:Concept ;
     skos:broader cv2:Purpose ;
@@ -90,6 +118,20 @@ cv2:ScientificResearch a skos:Concept ;
     skos:exactMatch dpv:ScientificResearch ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
     skos:prefLabel "Scientific Research"@en .
+
+cv2:Teaching a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Teaching ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Teaching"@en .
+
+cv2:Training a skos:Concept ;
+    skos:broader cv2:Purpose ;
+    skos:editorialNote "Parent not given in source sheet; set to Purpose following the DPV hierarchy."@en ;
+    skos:exactMatch dpv:Training ;
+    skos:inScheme <https://odrl.codata.org/cv2> ;
+    skos:prefLabel "Training"@en .
 
 cv2:VendorManagement a skos:Concept ;
     skos:broader cv2:Purpose ;
@@ -162,19 +204,25 @@ cv2:Purpose a skos:Concept ;
     skos:definition "The end-goal or reason for which personal data is processed."@en ;
     skos:exactMatch dpv:Purpose ;
     skos:inScheme <https://odrl.codata.org/cv2> ;
-    skos:narrower cv2:CommercialPurpose,
+    skos:narrower cv2:AddNewPurposesBelowThisLineToBeValidated,
+        cv2:CommercialPurpose,
         cv2:CommunicationManagement,
         cv2:CustomerManagement,
+        cv2:Education,
         cv2:EnforceSecurity,
         cv2:HumanResourceManagement,
         cv2:Marketing,
         cv2:NonCommercialPurpose,
         cv2:OrganisationGovernance,
+        cv2:Outreach,
         cv2:Personalisation,
+        cv2:Promotional,
         cv2:PublicBenefit,
         cv2:RecordManagement,
         cv2:ResearchAndDevelopment,
         cv2:ServiceProvision,
+        cv2:Teaching,
+        cv2:Training,
         cv2:VendorManagement ;
     skos:prefLabel "Purpose"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv2> .
