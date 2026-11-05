@@ -1,0 +1,32 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    "https://w3id.org/oac/context.json",
+    {
+      "duodrl": "https://w3id.org/duodrl#",
+      "obo": "http://purl.obolibrary.org/obo/",
+      "skos": "http://www.w3.org/2004/02/skos/core#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+    }
+  ],
+  "@type": "Set",
+  "type": "Set",
+  "odrl:uid": "duodrl:DUO_0000042",
+  "odrl:profile": "oac:",
+  "rdfs:label": "DUO_0000042: This data use permission indicates that use is allowed for general research use for any research purpose (GRU - general research use)",
+  "skos:exactMatch": "obo:DUO_0000042",
+  "skos:editorialNote": "We interpreted this as a permission for a research purpose that is an instance of general research purposes (GRU). We note that the DUO concept description consists of specific areas of research which can be additionally indicated if meant as an exclusive list, i.e., purpose must be one of those, or provide as subclasses of GRU if meant to be provided as a selection, i.e., purpose can be expressed as one of those",
+  "odrl:permission": [
+    {
+      "odrl:action": "odrl:use",
+      "odrl:target": "duodrl:TemplateDataset",
+      "odrl:constraint": [
+        {
+          "odrl:leftOperand": "oac:Purpose",
+          "odrl:operator": "odrl:isA",
+          "odrl:rightOperand": "duodrl:GRU"
+        }
+      ]
+    }
+  ]
+}
