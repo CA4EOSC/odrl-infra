@@ -1,0 +1,2 @@
+The project “CDIF4EOSC: Developing and implementing the Cross-Domain Interoperability Framework for EOSC” is funded by the European Union under Grant Agreement 101292473.
+

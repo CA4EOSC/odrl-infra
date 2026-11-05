@@ -17,7 +17,6 @@
 ex:PolicyShape
     a sh:NodeShape ;
     sh:targetClass odrl:Policy, odrl:Offer, odrl:Agreement, odrl:Set, odrl:Request, oac:PrivacyPolicy ;
-    sh:targetNode odrl:Policy ;
     rdfs:label "ODRL / OAC Policy Shape" ;
     rdfs:comment "Validates an ODRL policy and ensures proper identifiers and rules." ;
     

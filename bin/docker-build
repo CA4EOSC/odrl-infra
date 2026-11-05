@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Build and start the app with docker compose, stamping the git commit into the UI footer.
+# Usage: bin/docker-build [extra docker compose up args]
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+export VITE_GIT_SHA="$(git rev-parse HEAD)"
+export VITE_GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+export VITE_GIT_DATE="$(git log -1 --format=%cI)"
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  export VITE_GIT_DIRTY=true
+else
+  export VITE_GIT_DIRTY=false
+fi
+
+note=""; [ "$VITE_GIT_DIRTY" = true ] && note=", with uncommitted changes"
+echo "Building ${VITE_GIT_SHA:0:7} (${VITE_GIT_BRANCH}${note})"
+docker compose build
+docker compose up -d "$@"

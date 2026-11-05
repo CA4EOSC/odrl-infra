@@ -26,7 +26,8 @@ import {
 import api from '../services/api';
 import { cn } from '../lib/utils';
 import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
-import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, dutyTree, ruleGroupLabel, conceptFields } from '../lib/vocabTree';
+import PolicySearch from '../components/PolicySearch';
+import { BrowseContext, useBrowse, humanize, purposeTree, flatTree, actionTree, conceptFields } from '../lib/vocabTree';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
 const ODRL_OPERATORS = [
@@ -44,52 +45,14 @@ const ODRL_OPERATORS = [
     { value: 'odrl:isNoneOf', label: 'isNoneOf', description: 'is none of' },
 ];
 
-// ODRL 2.2 left operands (instances of odrl:LeftOperand) — https://www.w3.org/TR/odrl-vocab/#term-LeftOperand
-const ODRL_LEFT_OPERANDS = [
-    { value: 'odrl:absolutePosition', label: 'absolutePosition', description: 'absolute position of the asset' },
-    { value: 'odrl:absoluteSize', label: 'absoluteSize', description: 'absolute size of the asset' },
-    { value: 'odrl:absoluteSpatialPosition', label: 'absoluteSpatialPosition', description: 'absolute spatial position (e.g. pixels)' },
-    { value: 'odrl:absoluteTemporalPosition', label: 'absoluteTemporalPosition', description: 'absolute temporal position in a media stream' },
-    { value: 'odrl:count', label: 'count', description: 'number of times the action may be exercised' },
-    { value: 'odrl:dateTime', label: 'dateTime', description: 'date and time of exercising the action' },
-    { value: 'odrl:delayPeriod', label: 'delayPeriod', description: 'delay before exercising the action' },
-    { value: 'odrl:deliveryChannel', label: 'deliveryChannel', description: 'delivery channel used' },
-    { value: 'odrl:device', label: 'device', description: 'device used (deprecated: use systemDevice)' },
-    { value: 'odrl:elapsedTime', label: 'elapsedTime', description: 'elapsed time of exercising the action' },
-    { value: 'odrl:event', label: 'event', description: 'identified event' },
-    { value: 'odrl:fileFormat', label: 'fileFormat', description: 'file format' },
-    { value: 'odrl:industry', label: 'industry', description: 'industry sector' },
-    { value: 'odrl:language', label: 'language', description: 'natural language' },
-    { value: 'odrl:media', label: 'media', description: 'media type or category' },
-    { value: 'odrl:meteredTime', label: 'meteredTime', description: 'accumulated time of exercising the action' },
-    { value: 'odrl:payAmount', label: 'payAmount', description: 'amount of a financial payment' },
-    { value: 'odrl:percentage', label: 'percentage', description: 'percentage of the asset' },
-    { value: 'odrl:product', label: 'product', description: 'product or service category' },
-    { value: 'odrl:purpose', label: 'purpose', description: 'purpose of exercising the action' },
-    { value: 'odrl:recipient', label: 'recipient', description: 'party receiving the result' },
-    { value: 'odrl:relativePosition', label: 'relativePosition', description: 'relative position within the asset' },
-    { value: 'odrl:relativeSize', label: 'relativeSize', description: 'relative size of the asset' },
-    { value: 'odrl:relativeSpatialPosition', label: 'relativeSpatialPosition', description: 'relative spatial position' },
-    { value: 'odrl:relativeTemporalPosition', label: 'relativeTemporalPosition', description: 'relative temporal position' },
-    { value: 'odrl:resolution', label: 'resolution', description: 'rendering resolution' },
-    { value: 'odrl:spatial', label: 'spatial', description: 'named geospatial area' },
-    { value: 'odrl:spatialCoordinates', label: 'spatialCoordinates', description: 'geospatial coordinates' },
-    { value: 'odrl:system', label: 'system', description: 'system used (deprecated: use systemDevice)' },
-    { value: 'odrl:systemDevice', label: 'systemDevice', description: 'system or device used' },
-    { value: 'odrl:timeInterval', label: 'timeInterval', description: 'recurring period of time' },
-    { value: 'odrl:unitOfCount', label: 'unitOfCount', description: 'unit of measure for count' },
-    { value: 'odrl:version', label: 'version', description: 'version of the asset' },
-    { value: 'odrl:virtualLocation', label: 'virtualLocation', description: 'virtual (IT) location' },
-];
-
 // Defaults for new rules and rows: a new permission starts as "download" for academic research.
-const DEFAULT_PERMISSION_ACTION = 'cv1:download';
-const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // CDIF CV2 cv2:AcademicResearch
+const DEFAULT_PERMISSION_ACTION = 'cdif-access:Download';
+const DEFAULT_PURPOSE = 'dpv:AcademicResearch'; // a DPV purpose (CDIF CV2)
 const newPurposeConstraint = () => ({ title: '', leftOperand: 'oac:Purpose', operator: 'odrl:isA', rightOperand: DEFAULT_PURPOSE });
 
 // Duty actions (CDIF CV4) attached to a permission (odrl:duty). "beforeUse" adds the constraint
 // event lt odrl:policyUsage: the duty must be fulfilled before the permission is exercised.
-const DEFAULT_DUTY_ACTION = 'cv4:completeRegistration';
+const DEFAULT_DUTY_ACTION = 'cdif-access:CompleteRegistration';
 const newDutyAction = () => ({ action: DEFAULT_DUTY_ACTION, beforeUse: true });
 const isBeforeUseConstraint = (c) => {
     const left = c['odrl:leftOperand'] || c['leftOperand'];
@@ -99,22 +62,6 @@ const isBeforeUseConstraint = (c) => {
     return ['odrl:event', 'event'].includes(left) && ['odrl:lt', 'lt'].includes(op)
         && ['odrl:policyUsage', 'policyUsage'].includes(rightId);
 };
-
-// Semantic categories for the ODRL 2.2 left operands in the browse window.
-const LEFT_OPERAND_CATEGORIES = {
-    Time: ['dateTime', 'delayPeriod', 'elapsedTime', 'meteredTime', 'timeInterval'],
-    Location: ['spatial', 'spatialCoordinates', 'virtualLocation'],
-    'Quantity & payment': ['count', 'unitOfCount', 'percentage', 'payAmount'],
-    'Part of the asset': ['absolutePosition', 'absoluteSize', 'absoluteSpatialPosition', 'absoluteTemporalPosition',
-        'relativePosition', 'relativeSize', 'relativeSpatialPosition', 'relativeTemporalPosition'],
-    'Usage context': ['purpose', 'recipient', 'industry', 'language', 'product', 'event', 'deliveryChannel'],
-    Technical: ['fileFormat', 'media', 'resolution', 'systemDevice', 'version', 'device', 'system'],
-};
-const ODRL_LEFT_OPERAND_TERMS = ODRL_LEFT_OPERANDS.map(t => ({
-    ...t,
-    group: Object.keys(LEFT_OPERAND_CATEGORIES).find(k => LEFT_OPERAND_CATEGORIES[k].includes(t.label)) || 'Other',
-    deprecated: t.description.includes('deprecated'),
-}));
 
 // Compact select for ODRL terms: short names in the list, the description as tooltip.
 // Select for vocabulary terms: shows the prefixed term (e.g. odrl:isA), description as tooltip.
@@ -132,16 +79,16 @@ function TermSelect({ value, terms, groups = [], name, placeholder, ...props }) 
             {placeholder && <option value="" disabled>{placeholder}</option>}
             {!selected && value && <option value={value}>{value}</option>}
             {groups.map(g => <optgroup key={g.label} label={g.label}>{g.terms.map(option)}</optgroup>)}
-            {groups.length > 0 ? <optgroup label="ODRL 2.2">{terms.map(option)}</optgroup> : terms.map(option)}
+            {terms.map(option)}
         </select>
     );
 }
 
-// Left operand select with a browse icon that opens the hierarchical browser.
-function LeftOperandSelect({ className, groups = [], onChange, ...props }) {
+// Left operand select (CDIF CV3 from the profile) with a browse icon that opens the browser.
+function LeftOperandSelect({ className, onChange, ...props }) {
     const browse = useBrowse();
     const select = (
-        <TermSelect terms={ODRL_LEFT_OPERANDS} groups={groups} name="Left operand" placeholder="Left Operand"
+        <TermSelect terms={browse?.leftOperandTerms || []} name="Left operand" placeholder="Left Operand"
             onChange={onChange} className={cn(className, browse && 'flex-1 min-w-0')} {...props} />
     );
     if (!browse) return select;
@@ -150,7 +97,7 @@ function LeftOperandSelect({ className, groups = [], onChange, ...props }) {
             {select}
             <BrowseIconButton
                 title="Browse left operands"
-                onClick={() => browse.openLeftOperands({ value: props.value, groups, onSelect: v => onChange({ target: { value: v } }) })}
+                onClick={() => browse.openLeftOperands({ value: props.value, onSelect: v => onChange({ target: { value: v } }) })}
             />
         </div>
     );
@@ -243,6 +190,11 @@ function PurposeSelect({ value, concepts, onChange, className }) {
     );
 }
 
+// Rule types that are not operable yet: their tabs are greyed out and their content is
+// not written to the JSON-LD. Remove a key here to enable it again.
+const RULES_NOT_YET_AVAILABLE = { prohibitions: true, duties: true };
+const NOT_YET_AVAILABLE_TITLE = 'Not available yet: nothing from this tab goes into the JSON-LD';
+
 export default function PolicyBuilder() {
     // Basic Policy Metadata
     const [policyType, setPolicyType] = useState('Offer');
@@ -266,7 +218,7 @@ export default function PolicyBuilder() {
     // Rules
     const [permissions, setPermissions] = useState([
         {
-            action: 'oac:Read',
+            action: DEFAULT_PERMISSION_ACTION,
             refinements: [],
             duties: [],
             constraints: [
@@ -352,51 +304,25 @@ export default function PolicyBuilder() {
     });
     const cdifPurposes = cdifVocab?.purposes?.concepts || [];
     const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
-    // Missing CDIF definitions fall back to the source: the same concept in CV1 (skos:exactMatch),
-    // then the W3C ODRL 2.2 definition when the term is an odrl: action. The note says where it came from.
-    const cv1ByIri = Object.fromEntries((cdifVocab?.actions?.concepts || []).map(c => [c.iri, c]));
-    const withDefinition = (c) => {
-        if (c.definition) return c;
-        const cv1 = (c.exactMatch || []).map(m => cv1ByIri[m]).find(m => m?.definition);
-        if (cv1) return { ...c, definition: cv1.definition, notes: [...(c.notes || []), `Definition from ${cv1.id}.`] };
-        const odrlTerm = (c.value || '').startsWith('odrl:') && c.value.slice(5);
-        const odrl = odrlTerm && (vocabActions?.actions?.[odrlTerm]?.description
-            || ODRL_LEFT_OPERAND_TERMS.find(o => o.value === c.value)?.description);
-        if (odrl) return { ...c, definition: odrl, notes: [...(c.notes || []), 'Definition from W3C ODRL 2.2.'] };
-        return c;
-    };
-
     // CDIF CV4 duty actions ("value" is the ODRL term when the duty maps to one, e.g. odrl:anonymize)
     const cv4DutyTerms = (cdifVocab?.duties?.concepts || []).filter(c => !c.deprecated).map(c => ({
         value: c.value,
         label: (l => l.charAt(0).toUpperCase() + l.slice(1))(humanize(c.label)),
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — '),
     }));
-    // CV3 holds ODRL left operands selected for CDIF ("value" is odrl:<term>, or the cv3 id when
-    // there is no exact ODRL match) plus broader restriction categories; deprecated operands are hidden.
+    // CV3: the left operands of the CDIF access profile; deprecated operands are hidden.
     const cv3Term = (c) => ({
         value: c.value,
         label: c.label,
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
         ...conceptFields(c),
     });
-    const inCollection = (c, label) => (c.collections || []).some(l => l.startsWith(label));
-    const cv3Usable = cdifConstraintTypes.filter(c => !c.deprecated).map(withDefinition);
-    const cv3LeftOperandGroups = [
-        { label: 'CDIF left operands (CV3)', terms: cv3Usable.filter(c => inCollection(c, 'ODRL left operands')).map(cv3Term) },
-        { label: 'CDIF restriction categories (CV3)', terms: cv3Usable.filter(c => inCollection(c, 'Restriction categories')).map(cv3Term) },
-    ].filter(g => g.terms.length > 0);
+    const cv3LeftOperandTerms = cdifConstraintTypes.filter(c => !c.deprecated).map(cv3Term);
 
-    // CV1 actions; "value" is the ODRL/CC term when the CDIF action maps to one, else cv1:<name>
-    const ruleTypesOf = (c) => (c.collections || [])
-        .map(l => (l.match(/ODRL (Duty|Prohibition|Permission)/) || [])[1])
-        .filter(Boolean);
-    const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(withDefinition).map(c => ({
+    // CV1 actions from the CDIF access profile: ODRL/CC terms and cdif-access: terms
+    const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(c => ({
         iri: c.value,
         name: c.label,
-        category: c.deprecated
-            ? 'Deprecated'
-            : (ruleTypesOf(c).join(' / ') || (c.value.startsWith('cv1:') ? 'CDIF extension' : 'ODRL Common')),
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ')
             + (c.replacedBy ? ` Use ${c.replacedBy} instead.` : ''),
         ...conceptFields(c),
@@ -405,47 +331,28 @@ export default function PolicyBuilder() {
         collections: c.collections || []
     }));
 
-    // CV4 concepts for the duty browser (the CV4 sheet has no definitions of its own)
-    const cv4Concepts = (cdifVocab?.duties?.concepts || []).map(withDefinition);
+    const cv4Concepts = cdifVocab?.duties?.concepts || [];
 
-    // Fallback CDIF actions, used only until/if the CV1 vocabulary cannot be loaded
-    const cdifFallbackActions = [
-        { iri: "odrl:read", name: "read", category: "Data Access & Ingestion", description: "Read digital objects or record streams across domain gateways." },
-        { iri: "odrl:use", name: "use", category: "Data Access & Ingestion", description: "General use of digital cross-domain assets." },
-        { iri: "odrl:distribute", name: "distribute", category: "Dissemination & Federation", description: "Distribute or federate records to authenticated nodes." },
-        { iri: "odrl:grantUse", name: "grantUse", category: "Dissemination & Federation", description: "Grant downstream execution rights within federated space." },
-        { iri: "odrl:derive", name: "derive", category: "Transformation & Workflows", description: "Derive new scientific products or models via workflows (CWL)." },
-        { iri: "odrl:aggregate", name: "aggregate", category: "Transformation & Workflows", description: "Cross-domain semantic aggregation and data harmonization." },
-        { iri: "odrl:anonymize", name: "anonymize", category: "Transformation & Workflows", description: "Apply differential privacy or anonymization pipeline." },
-        { iri: "odrl:attribute", name: "attribute", category: "Duties & Governance", description: "Credit cross-domain contributors, PIDs, and funding bodies." },
-        { iri: "odrl:compensate", name: "compensate", category: "Duties & Governance", description: "Cost recovery or tokenized resource compensation." },
-        { iri: "odrl:nextPolicy", name: "nextPolicy", category: "Duties & Governance", description: "Bind downstream consumers to cascading CDIF interoperability policies." },
-        { iri: "odrl:obtainConsent", name: "obtainConsent", category: "Duties & Governance", description: "Verify consent or ethical governance approval prior to processing." },
-        { iri: "odrl:delete", name: "delete", category: "Lifecycle & Governance", description: "Enforce post-computation data hygiene or retention expiry." }
-    ];
+    // Actions in odrl:action fields: CDIF CV1 from the profile only; deprecated actions are hidden
+    // (a loaded policy can still use one, and validation warns about it)
+    const currentActionsList = cdifCv1Actions.filter(a => !a.deprecated);
 
-    // Actions in odrl:action fields come from CDIF CV1 (the fallback list only until it has loaded)
-    const currentActionsList = cdifCv1Actions.length > 0 ? cdifCv1Actions : cdifFallbackActions;
-
-    // Preset loader mutation
-    const loadPresetMutation = useMutation({
-        mutationFn: async (presetName) => {
-            const res = await api.get(`/policy/presets/${presetName}`);
-            return res.data;
-        },
-        onSuccess: (data) => {
-            if (data['@type'] || data['type']) setPolicyType(data['@type'] || data['type']);
-            if (data['odrl:uid'] || data['uid']) setUid(data['odrl:uid'] || data['uid']);
-            if (data['odrl:profile']) setProfile(data['odrl:profile']);
-            if (data['dcterms:description']) setDescription(data['dcterms:description']);
+    // Fill every field of the builder from a policy (preset or stored policy).
+    // Fields the policy does not have are cleared, so nothing from the previous policy is left.
+    const loadPolicy = (data, message) => {
+            const asList = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+            setPolicyType(data['@type'] || data['type'] || 'Set');
+            setUid(data['odrl:uid'] || data['uid'] || data['@id'] || `did:oyd:${crypto.randomUUID()}`);
+            setProfile(data['odrl:profile'] || data['profile'] || '');
+            setDescription(data['dcterms:description'] || data['skos:editorialNote'] || '');
             setCreator(data['dcterms:creator'] || '');
             setPublisher(data['dcterms:publisher'] || '');
             setSource(Array.isArray(data['dcterms:source']) ? data['dcterms:source'].join(', ') : (data['dcterms:source'] || ''));
             setVersionInfo(data['owl:versionInfo'] || '1.0');
             setCreatedDate(data['dcterms:created']?.slice(0, 10) || null);
             setIssuedDate(data['dcterms:issued']?.slice(0, 10) || null);
-            if (data['odrl:target'] || data['target']) setPolicyTarget(data['odrl:target'] || data['target'] || '');
-            if (data['odrl:assigner'] || data['assigner']) setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
+            setPolicyTarget(data['odrl:target'] || data['target'] || '');
+            setPolicyAssigner(data['odrl:assigner'] || data['assigner'] || '');
 
             // Helper to parse action and its refinements
             const parseActionAndRefinements = (rawAction) => {
@@ -468,9 +375,9 @@ export default function PolicyBuilder() {
             };
 
             // Parse Permissions
-            const perms = (data['odrl:permission'] || data['permission'] || []).map(p => {
+            const perms = asList(data['odrl:permission'] || data['permission']).map(p => {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
-                const rawConstraints = (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
+                const rawConstraints = asList(p['odrl:constraint'] || p['constraint']).map(c => ({
                     title: c['dcterms:title'] || c['title'] || '',
                     category: c['dcterms:type']?.['@id'] || c['dcterms:type'] || '',
                     leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
@@ -517,14 +424,14 @@ export default function PolicyBuilder() {
             setPermissions(perms);
 
             // Parse Prohibitions
-            const prohibs = (data['odrl:prohibition'] || data['prohibition'] || []).map(p => {
+            const prohibs = asList(data['odrl:prohibition'] || data['prohibition']).map(p => {
                 const { actionName, refinements } = parseActionAndRefinements(p['odrl:action'] || p['action']);
                 return {
                     target: p['odrl:target'] || p['target'] || '',
                     action: actionName,
                     refinements: refinements,
                     output: p['odrl:output'] || p['output'] || '',
-                    constraints: (p['odrl:constraint'] || p['constraint'] || []).map(c => ({
+                    constraints: asList(p['odrl:constraint'] || p['constraint']).map(c => ({
                         title: c['dcterms:title'] || c['title'] || '',
                         leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                         operator: c['odrl:operator'] || c['operator'] || 'odrl:lt',
@@ -535,7 +442,7 @@ export default function PolicyBuilder() {
             setProhibitions(prohibs);
 
             // Parse Obligations / Duties
-            const rawDuties = data['odrl:obligation'] || data['obligation'] || data['odrl:duty'] || data['duty'] || [];
+            const rawDuties = asList(data['odrl:obligation'] || data['obligation'] || data['odrl:duty'] || data['duty']);
             const parsedDuties = rawDuties.map(d => {
                 const { actionName, refinements } = parseActionAndRefinements(d['odrl:action'] || d['action']);
                 return {
@@ -543,7 +450,7 @@ export default function PolicyBuilder() {
                     target: d['odrl:target'] || d['target'] || '',
                     assignee: d['odrl:assignee'] || d['assignee'] || '',
                     refinements: refinements,
-                    constraints: (d['odrl:constraint'] || d['constraint'] || []).map(c => ({
+                    constraints: asList(d['odrl:constraint'] || d['constraint']).map(c => ({
                         title: c['dcterms:title'] || c['title'] || '',
                         leftOperand: c['odrl:leftOperand'] || c['leftOperand'] || '',
                         operator: c['odrl:operator'] || c['operator'] || 'odrl:eq',
@@ -551,11 +458,17 @@ export default function PolicyBuilder() {
                     }))
                 };
             });
-            if (parsedDuties.length > 0) {
-                setDuties(parsedDuties);
-            }
-            setShaclFeedback({ status: 'info', message: 'Preset loaded successfully!' });
-        }
+            setDuties(parsedDuties);
+            setShaclFeedback({ status: 'info', message });
+    };
+
+    // Preset loader mutation
+    const loadPresetMutation = useMutation({
+        mutationFn: async (presetName) => {
+            const res = await api.get(`/policy/presets/${presetName}`);
+            return res.data;
+        },
+        onSuccess: (data) => loadPolicy(data, 'Preset loaded successfully!'),
     });
 
     // Compile JSON-LD
@@ -570,10 +483,7 @@ export default function PolicyBuilder() {
                     "skos": "http://www.w3.org/2004/02/skos/core#",
                     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
                     "cc": "http://creativecommons.org/ns#",
-                    "cv1": "https://odrl.codata.org/cv1/",
-                    "cv2": "https://odrl.codata.org/cv2/",
-                    "cv3": "https://odrl.codata.org/cv3/",
-                    "cv4": "https://odrl.codata.org/cv4/",
+                    "cdif-access": "https://w3id.org/cdif/access#",
                     "dcterms": "http://purl.org/dc/terms/",
                     "owl": "http://www.w3.org/2002/07/owl#"
                 }
@@ -667,7 +577,7 @@ export default function PolicyBuilder() {
             });
         }
 
-        if (prohibitions.length > 0) {
+        if (!RULES_NOT_YET_AVAILABLE.prohibitions && prohibitions.length > 0) {
             policy["odrl:prohibition"] = prohibitions.map(p => {
                 const rule = {
                     "odrl:target": p.target,
@@ -689,7 +599,7 @@ export default function PolicyBuilder() {
             });
         }
 
-        if (duties.length > 0) {
+        if (!RULES_NOT_YET_AVAILABLE.duties && duties.length > 0) {
             policy["odrl:obligation"] = duties.map(d => {
                 const rule = {
                     "odrl:action": formatAction(d.action, d.refinements)
@@ -953,22 +863,23 @@ export default function PolicyBuilder() {
     const browseApi = {
         openPurposes: ({ value, onSelect, selectLabel = 'Use this purpose' }) => openBrowser({
             title: 'Browse purposes',
-            subtitle: 'CDIF CV2 purpose constraints. A broader purpose includes all purposes under it.',
+            subtitle: 'CDIF CV2: DPV purposes. A broader purpose includes all purposes under it.',
             nodes: purposeTree(cdifPurposes),
             value, selectLabel, onSelect,
         }),
-        openLeftOperands: ({ value, groups = [], onSelect, selectLabel = 'Use this left operand' }) => openBrowser({
+        openLeftOperands: ({ value, onSelect, selectLabel = 'Use this left operand' }) => openBrowser({
             title: 'Browse constraints',
-            subtitle: groups.length ? 'CDIF other constraints (CV3) and ODRL 2.2 left operands.' : 'ODRL 2.2 left operands.',
-            nodes: leftOperandTree(groups, ODRL_LEFT_OPERAND_TERMS),
+            subtitle: 'CDIF CV3: the left operands of the CDIF access profile.',
+            nodes: flatTree(cv3LeftOperandTerms),
             value, selectLabel, onSelect,
         }),
         openDuties: ({ value, onSelect, selectLabel = 'Use this duty action' }) => openBrowser({
             title: 'Browse duty actions',
             subtitle: 'CDIF CV4 duty actions: what the assignee must do to exercise the permission.',
-            nodes: dutyTree(cv4Concepts),
+            nodes: flatTree(cv4Concepts.filter(c => !c.deprecated).map(c => ({ ...c, ...conceptFields(c) }))),
             value, selectLabel, onSelect,
         }),
+        leftOperandTerms: cv3LeftOperandTerms,
     };
     // Handler to apply selected action to the active rule
     const selectActionForTarget = (actionIri) => {
@@ -1062,6 +973,11 @@ export default function PolicyBuilder() {
                 </div>
             </div>
 
+            {/* Search existing policies: picking one fills all fields */}
+            <PolicySearch
+                onSelect={(policy, r) => loadPolicy(policy, `Loaded ${r.source === 'stored' ? 'stored policy' : 'preset'} ${r.uid}`)}
+            />
+
             {/* Validation Feedback Banner */}
             {shaclFeedback && (
                 <div className={cn(
@@ -1110,6 +1026,11 @@ export default function PolicyBuilder() {
                 >
                     <CheckCircle2 size={16} /> Permissions ({permissions.length})
                 </button>
+                {RULES_NOT_YET_AVAILABLE.prohibitions ? (
+                    <button type="button" disabled aria-disabled="true" title={NOT_YET_AVAILABLE_TITLE} className="pb-3 text-sm font-bold border-b-2 border-transparent flex items-center gap-2 text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                        <AlertCircle size={16} /> Prohibitions
+                    </button>
+                ) : (
                 <button
                     onClick={() => setActiveTab('prohibitions')}
                     className={cn(
@@ -1121,6 +1042,12 @@ export default function PolicyBuilder() {
                 >
                     <AlertCircle size={16} /> Prohibitions ({prohibitions.length})
                 </button>
+                )}
+                {RULES_NOT_YET_AVAILABLE.duties ? (
+                    <button type="button" disabled aria-disabled="true" title={NOT_YET_AVAILABLE_TITLE} className="pb-3 text-sm font-bold border-b-2 border-transparent flex items-center gap-2 text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                        <FileCheck size={16} /> Duty
+                    </button>
+                ) : (
                 <button
                     onClick={() => setActiveTab('duodrl')}
                     className={cn(
@@ -1132,6 +1059,7 @@ export default function PolicyBuilder() {
                 >
                     <FileCheck size={16} /> Duty ({duties.length})
                 </button>
+                )}
             </div>
 
             {/* Layout Grid: Tab Content on the Left, Policy Operations on the Right */}
@@ -1594,7 +1522,6 @@ export default function PolicyBuilder() {
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <LeftOperandSelect
                                                             value={c.leftOperand}
-                                                            groups={cv3LeftOperandGroups}
                                                             onChange={(e) => {
                                                                 const next = [...permissions];
                                                                 next[pIdx].otherConstraints[cIdx].leftOperand = e.target.value;
@@ -1640,6 +1567,7 @@ export default function PolicyBuilder() {
                                     <ArrowLeft size={14} />
                                     <span>Previous: Specification</span>
                                 </button>
+                                {!RULES_NOT_YET_AVAILABLE.prohibitions && (
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('prohibitions')}
@@ -1648,12 +1576,13 @@ export default function PolicyBuilder() {
                                     <span>Next: Prohibitions ({prohibitions.length})</span>
                                     <ArrowRight size={14} />
                                 </button>
+                                )}
                             </div>
                         </div>
                     )}
 
                     {/* TAB 3: PROHIBITIONS */}
-                    {activeTab === 'prohibitions' && (
+                    {activeTab === 'prohibitions' && !RULES_NOT_YET_AVAILABLE.prohibitions && (
                         <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/5 pb-3">
                                 <div>
@@ -1943,7 +1872,7 @@ export default function PolicyBuilder() {
                     )}
 
                     {/* TAB 4: DUTIES / OBLIGATIONS */}
-                    {activeTab === 'duodrl' && (
+                    {activeTab === 'duodrl' && !RULES_NOT_YET_AVAILABLE.duties && (
                         <div className="p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/5 pb-3">
                                 <div>
@@ -2011,7 +1940,7 @@ export default function PolicyBuilder() {
                                                 <div className="flex gap-1.5">
                                                     <input
                                                         type="text"
-                                                        placeholder="e.g. odrl:attribute, odrl:compensate"
+                                                        placeholder="e.g. cdif-access:CompleteRegistration"
                                                         value={d.action}
                                                         onChange={(e) => {
                                                             const next = [...duties];
@@ -2021,8 +1950,15 @@ export default function PolicyBuilder() {
                                                         className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
                                                     />
                                                     <BrowseIconButton
-                                                        title="Browse actions"
-                                                        onClick={() => setActionPickerTarget({ type: 'duty', index: dIdx })}
+                                                        title="Browse duty actions"
+                                                        onClick={() => browseApi.openDuties({
+                                                            value: d.action,
+                                                            onSelect: (v) => {
+                                                                const next = [...duties];
+                                                                next[dIdx].action = v;
+                                                                setDuties(next);
+                                                            },
+                                                        })}
                                                     />
                                                 </div>
                                             </div>
@@ -2249,15 +2185,25 @@ export default function PolicyBuilder() {
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Permissions</span>
                             </div>
-                            <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30">
-                                <span className="block text-base font-extrabold text-rose-600 dark:text-rose-400">
-                                    {prohibitions.length}
+                            <div
+                                title={RULES_NOT_YET_AVAILABLE.prohibitions ? NOT_YET_AVAILABLE_TITLE : undefined}
+                                className={cn("p-2 rounded-xl border", RULES_NOT_YET_AVAILABLE.prohibitions
+                                    ? "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60"
+                                    : "bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/30")}
+                            >
+                                <span className={cn("block text-base font-extrabold", RULES_NOT_YET_AVAILABLE.prohibitions ? "text-gray-400 dark:text-gray-500" : "text-rose-600 dark:text-rose-400")}>
+                                    {RULES_NOT_YET_AVAILABLE.prohibitions ? '–' : prohibitions.length}
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Prohibitions</span>
                             </div>
-                            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30">
-                                <span className="block text-base font-extrabold text-amber-600 dark:text-amber-400">
-                                    {duties.length}
+                            <div
+                                title={RULES_NOT_YET_AVAILABLE.duties ? NOT_YET_AVAILABLE_TITLE : undefined}
+                                className={cn("p-2 rounded-xl border", RULES_NOT_YET_AVAILABLE.duties
+                                    ? "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 opacity-60"
+                                    : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30")}
+                            >
+                                <span className={cn("block text-base font-extrabold", RULES_NOT_YET_AVAILABLE.duties ? "text-gray-400 dark:text-gray-500" : "text-amber-600 dark:text-amber-400")}>
+                                    {RULES_NOT_YET_AVAILABLE.duties ? '–' : duties.length}
                                 </span>
                                 <span className="text-[10px] font-bold text-gray-500 uppercase">Duties</span>
                             </div>
@@ -2430,14 +2376,12 @@ export default function PolicyBuilder() {
                 const { type, index } = actionPickerTarget;
                 const rules = { permission: permissions, prohibition: prohibitions, duty: duties }[type] || [];
                 const ruleType = type.charAt(0).toUpperCase() + type.slice(1);
-                const ruleGroup = ruleGroupLabel(ruleType);
                 return (
                     <VocabBrowser
                         title={`Select action for ${ruleType} #${index + 1}`}
-                        subtitle="CDIF CV1 actions, grouped by source and by the rule type they are typically used in."
+                        subtitle="CDIF CV1 actions from the CDIF access profile: CDIF-specific actions and the ODRL Common Vocabulary."
                         nodes={actionTree(currentActionsList)}
                         value={rules[index]?.action}
-                        defaultExpanded={[`/CDIF-specific actions/${ruleGroup}`, `/ODRL Common Vocabulary/${ruleGroup}`]}
                         selectLabel="Use this action"
                         onSelect={selectActionForTarget}
                         onClose={() => setActionPickerTarget(null)}

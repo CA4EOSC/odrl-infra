@@ -83,3 +83,17 @@ uniresolver-plugin/tmp/
 #pytest
 .pytest_cache
 __pycache__
+
+# Local runtime data (Qdrant vector DB volume)
+qdrant_storage/
+
+# OYDID keys and revocation files created by local DID operations (secrets, never commit)
+zQm*_private_key.enc
+zQm*_revocation_key.enc
+zQm*_revocation.json
+
+# Python packaging build output
+*.egg-info/
+
+# Local Claude Code settings
+.claude/

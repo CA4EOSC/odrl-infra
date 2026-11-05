@@ -1,19 +1,20 @@
-PREFIX dpv:     <https://w3id.org/dpv#>
-PREFIX bibo:    <http://purl.org/ontology/bibo/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX foaf:    <http://xmlns.com/foaf/0.1/>
-PREFIX odrl:    <http://www.w3.org/ns/odrl/2/>
-PREFIX owl:     <http://www.w3.org/2002/07/owl#>
-PREFIX profile: <http://www.w3.org/ns/dx/prof/>
-PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX role:    <http://www.w3.org/ns/dx/prof/role/>
-PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
-PREFIX sw:      <http://www.w3.org/2003/06/sw-vocab-status/ns#>
-PREFIX vann:    <http://purl.org/vocab/vann/>
-PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
-PREFIX cc:      <http://creativecommons.org/ns#>
-
+PREFIX dpv-odrl: <https://w3id.org/dpv/mappings/odrl#>
+PREFIX dpv:      <https://w3id.org/dpv#>
+PREFIX bibo:     <http://purl.org/ontology/bibo/>
+PREFIX dcterms:  <http://purl.org/dc/terms/>
+PREFIX foaf:     <http://xmlns.com/foaf/0.1/>
+PREFIX odrl:     <http://www.w3.org/ns/odrl/2/>
+PREFIX owl:      <http://www.w3.org/2002/07/owl#>
+PREFIX profile:  <http://www.w3.org/ns/dx/prof/>
+PREFIX rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX role:     <http://www.w3.org/ns/dx/prof/role/>
+PREFIX skos:     <http://www.w3.org/2004/02/skos/core#>
+PREFIX sw:       <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+PREFIX vann:     <http://purl.org/vocab/vann/>
+PREFIX xsd:      <http://www.w3.org/2001/XMLSchema#>
+PREFIX cc:       <http://creativecommons.org/ns#>
+ 
 PREFIX cdif-access: <https://w3id.org/cdif/access#>
 
 # ------------ Ontology Metadata ------------------ #
@@ -137,13 +138,98 @@ cdif-access:actionsCollection a skos:Collection ;
 	skos:member cdif-access:StoreData ; # why not use http://www.w3.org/ns/odrl/2/archive (Definition: To store the Asset (in a non-transient form))?
 	skos:member cdif-access:SubmitAnalysisOutputsForChecking ;
 	skos:member cdif-access:TakeScreenShot ;
-	skos:member cdif-access:View .
+	skos:member cdif-access:View ;
+	# duty actions
+	skos:member cdif-access:Authenticate ;
+	skos:member odrl:compensate ; # I don't think you need Payment as an action, ODRL already has odrl:compensate
+	skos:member cdif-access:GetEthicsApproval ;
+	skos:member cdif-access:ObtainCompletedAgreement ;
+	skos:member cdif-access:ThirdPartyAuthorization ;
+	skos:member cdif-access:VerifyProjectContext ;
+	skos:member cdif-access:VerifyAccreditation ;
+	skos:member cdif-access:VerifyTraining ;
+	skos:member cdif-access:CompleteRegistration ;
+	skos:member cdif-access:DesignateResponsiblePerson ;
+	skos:member cdif-access:ProvideSecureEnvironment ;
+	skos:member cdif-access:Pseudonymise .
+
+cdif-access:Pseudonymise a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ProvideSecureEnvironment a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:DesignateResponsiblePerson a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:CompleteRegistration a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:CompleteRegistration a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:VerifyTraining a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:VerifyAccreditation a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:VerifyProjectContext a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ThirdPartyAuthorization a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:ObtainCompletedAgreement a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:GetEthicsApproval a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
+
+cdif-access:Authenticate a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
+	rdfs:isDefinedBy cdif-access: ;
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
 
 cdif-access:Download a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 	rdfs:isDefinedBy cdif-access: ;
-	rdfs:label "download"@en ;
-	skos:definition "define download"@en ;
-	skos:note "for usage notes"@en .
+	rdfs:label ""@en ;
+	skos:definition ""@en ;
+	skos:note ""@en .
 
 cdif-access:AccreditedTrainingCompleted a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 	rdfs:isDefinedBy cdif-access: ;
@@ -303,25 +389,54 @@ cdif-access:View a odrl:Action, skos:Concept, rdfs:Class, owl:Class ;
 
 cdif-access:purposeCollection a skos:Collection ;
     skos:prefLabel "ODRL CDIF Access profile - purpose concepts"@en ;
+	skos:scopeNote "Any purposes from the DPV specification (https://w3id.org/dpv) can be used."@en ;
+    skos:member odrl:purpose .
+
+cdif-access:leftOperandsCollection a skos:Collection ;
+    skos:prefLabel "ODRL CDIF Access profile - left operands concepts"@en ;
     skos:scopeNote ""@en ;
-    skos:member odrl:purpose ;
-	skos:member dpv:AcademicResearch ;
-	skos:member dpv:AccountManagement ;
-	skos:member dpv:Advertising ;
-	skos:member dpv:CommercialPurpose;
-	skos:member dpv:CommunicationManagement ;
-	skos:member dpv:CustomerManagement ;
-	skos:member dpv:EnforceSecurity ;
-	skos:member dpv:HumanResourceManagement ;
-	skos:member dpv:Marketing ;
-	skos:member dpv:NonCommercialPurpose ;
-	skos:member dpv:OrganisationGovernance ;
-	skos:member dpv:Personalisation ;
-	skos:member dpv:PublicBenefit ;
-	skos:member dpv:RecordManagement ;
-	skos:member dpv:ResearchAndDevelopment ;
-	skos:member dpv:ServiceProvision ;
-	skos:member dpv:VendorManagement ;
-	skos:member dpv:CommercialResearch ;
-	skos:member dpv:NonCommercialResearch  ;
-	skos:member dpv:ScientificResearch .
+    skos:member odrl:count ;
+    skos:member odrl:dateTime ;
+    skos:member odrl:delayPeriod ;
+    skos:member odrl:deliveryChannel ;
+	skos:member odrl:elapsedTime ;
+	skos:member odrl:event ;
+	skos:member odrl:fileFormat ;
+	skos:member odrl:industry ;
+	skos:member odrl:language ;
+	skos:member odrl:meteredTime ;
+	skos:member odrl:PayAmount ;
+	skos:member odrl:percentage ;
+	skos:member odrl:recipient ;
+	skos:member odrl:resolution ;
+	skos:member odrl:spatial ;
+	skos:member odrl:spatialCoordinates ;
+	skos:member odrl:systemDevice ;
+	skos:member odrl:timeInterval ;
+	skos:member odrl:unitOfCount ;
+	skos:member odrl:version ;
+	skos:member odrl:virtualLocation ;
+	skos:member dpv-odrl:Entity ;
+	skos:member dpv-odrl:Data ;
+	skos:member dpv-odrl:PersonalData ;
+	skos:member dpv-odrl:AISystem ;
+	skos:member dpv-odrl:AIModel ;
+	skos:member dpv-odrl:TechnicalOrganisationalMeasure ;
+	skos:member dpv-odrl:TechnicalMeasure ;
+	skos:member dpv-odrl:OrganisationalMeasure ;
+	skos:member dpv-odrl:LegalMeasure ;
+	skos:member dpv-odrl:PhysicalMeasure ;
+	skos:member dpv-odrl:Location ;
+	skos:member dpv-odrl:Law ;
+	skos:member dpv-odrl:LegalBasis ;
+	skos:member dpv-odrl:Right ;
+	skos:member dpv-odrl:Risk ;
+	skos:member dpv-odrl:DataController ;
+	skos:member dpv-odrl:DataProcessor ;
+	skos:member dpv-odrl:HumanSubject ;
+	skos:member dpv-odrl:DataSubject ;
+	skos:member dpv-odrl:Duration ;
+	skos:member dpv-odrl:Frequency ;
+	skos:member dpv-odrl:Justification ;
+	skos:member dpv-odrl:Technology ;
+	skos:member dpv-odrl:DataSource .

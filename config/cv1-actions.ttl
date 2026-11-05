@@ -1,774 +1,717 @@
 @prefix cc: <http://creativecommons.org/ns#> .
-@prefix cv1: <https://odrl.codata.org/cv1/> .
-@prefix dct: <http://purl.org/dc/terms/> .
+@prefix cdif-access: <https://w3id.org/cdif/access#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix odrl: <http://www.w3.org/ns/odrl/2/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://odrl.codata.org/cv1/collection/cdifExtension> a skos:Collection ;
-    skos:member cv1:accreditedTrainingCompleted,
-        cv1:aiAnalysis,
-        cv1:aiCuration,
-        cv1:aiSearch,
-        cv1:analysisDeviceInstrument,
-        cv1:apiAccess,
-        cv1:associateWithResearchProject,
-        cv1:browse,
-        cv1:citeData,
-        cv1:credentialDisclosure,
-        cv1:depositDerivedDataProduct,
-        cv1:destroyData,
-        cv1:download,
-        cv1:encryptDataLocally,
-        cv1:extractWord,
-        cv1:identifyAnIndividualHouseholdOrOrganisation,
-        cv1:linkToOtherData,
-        cv1:modify,
-        cv1:mutuallyExclusiveAnalysis,
-        cv1:notify,
-        cv1:onlineAnalysis,
-        cv1:procureThirdPartyApproval,
-        cv1:reArchive,
-        cv1:republish,
-        cv1:reshare,
-        cv1:searchInTheContent,
-        cv1:secondaryUse,
-        cv1:secureTransfer,
-        cv1:share,
-        cv1:signAcceptAgreement,
-        cv1:storeData,
-        cv1:submitAnalysisOutputsForChecking,
-        cv1:takeScreenShot,
-        cv1:view ;
+<https://w3id.org/cdif/access/collection/cdif-specific-actions> a skos:Collection ;
+    skos:member cdif-access:AIAnalysis,
+        cdif-access:AICuration,
+        cdif-access:AISearch,
+        cdif-access:APIAccess,
+        cdif-access:AccreditedTrainingCompleted,
+        cdif-access:AnalysisDevice,
+        cdif-access:AssociateWithResearchProject,
+        cdif-access:Browse,
+        cdif-access:CiteData,
+        cdif-access:CredentialDisclosure,
+        cdif-access:DepositDerivedDataProduct,
+        cdif-access:DestroyData,
+        cdif-access:Download,
+        cdif-access:EncryptDataLocally,
+        cdif-access:Identify,
+        cdif-access:Link,
+        cdif-access:MutuallyExclusiveAnalysis,
+        cdif-access:Notify,
+        cdif-access:OnlineAnalysis,
+        cdif-access:ProcureThirdPartyApproval,
+        cdif-access:ReArchive,
+        cdif-access:Republish,
+        cdif-access:Reshare,
+        cdif-access:Search,
+        cdif-access:SecureTransfer,
+        cdif-access:SignAgreement,
+        cdif-access:StoreData,
+        cdif-access:SubmitAnalysisOutputsForChecking,
+        cdif-access:TakeScreenShot,
+        cdif-access:View,
+        cdif-access:secondaryUse ;
     skos:prefLabel "CDIF-specific actions"@en .
 
-<https://odrl.codata.org/cv1/collection/dutyActions> a skos:Collection ;
-    skos:member cv1:accreditedTrainingCompleted,
-        cv1:analysisDeviceInstrument,
-        cv1:associateWithResearchProject,
-        cv1:citeData,
-        cv1:depositDerivedDataProduct,
-        cv1:destroyData,
-        cv1:encryptDataLocally,
-        cv1:notify,
-        cv1:procureThirdPartyApproval,
-        cv1:signAcceptAgreement,
-        cv1:submitAnalysisOutputsForChecking ;
-    skos:prefLabel "Actions typically used in an ODRL Duty"@en .
+<https://w3id.org/cdif/access/collection/odrl-common-vocabulary> a skos:Collection ;
+    skos:member cc:DerivativeWorks,
+        cc:Distribution,
+        cc:Reproduction,
+        odrl:acceptTracking,
+        odrl:adHocShare,
+        odrl:aggregate,
+        odrl:annotate,
+        odrl:anonymize,
+        odrl:append,
+        odrl:archive,
+        odrl:concurrentUse,
+        odrl:copy,
+        odrl:delete,
+        odrl:derive,
+        odrl:digitize,
+        odrl:display,
+        odrl:distribute,
+        odrl:execute,
+        odrl:export,
+        odrl:extract,
+        odrl:extractChar,
+        odrl:extractPage,
+        odrl:extractWord,
+        odrl:give,
+        odrl:grantUse,
+        odrl:include,
+        odrl:index,
+        odrl:inform,
+        odrl:install,
+        odrl:modify,
+        odrl:move,
+        odrl:play,
+        odrl:present,
+        odrl:preview,
+        odrl:print,
+        odrl:read,
+        odrl:reproduce,
+        odrl:reviewPolicy,
+        odrl:sell,
+        odrl:share,
+        odrl:stream,
+        odrl:synchronize,
+        odrl:textToSpeech,
+        odrl:transform,
+        odrl:translate,
+        odrl:watermark,
+        odrl:write,
+        odrl:writeTo ;
+    skos:prefLabel "ODRL Common Vocabulary"@en .
 
-<https://odrl.codata.org/cv1/collection/odrlCommon> a skos:Collection ;
-    skos:member cv1:acceptTracking,
-        cv1:adHocSharing,
-        cv1:aggregate,
-        cv1:annotate,
-        cv1:anonymise,
-        cv1:append,
-        cv1:archive,
-        cv1:concurrentUse,
-        cv1:copy,
-        cv1:delete,
-        cv1:derivativeWorks,
-        cv1:derive,
-        cv1:digitize,
-        cv1:display,
-        cv1:distribute,
-        cv1:distribution,
-        cv1:execute,
-        cv1:export,
-        cv1:extract,
-        cv1:extractChar,
-        cv1:extractPage,
-        cv1:give,
-        cv1:grantUse,
-        cv1:include,
-        cv1:index,
-        cv1:inform,
-        cv1:install,
-        cv1:move,
-        cv1:play,
-        cv1:present,
-        cv1:preview,
-        cv1:print,
-        cv1:read,
-        cv1:reproduce,
-        cv1:reproduction,
-        cv1:reviewPolicy,
-        cv1:sell,
-        cv1:stream,
-        cv1:synchronize,
-        cv1:textToSpeech,
-        cv1:transform,
-        cv1:translate,
-        cv1:watermark,
-        cv1:write,
-        cv1:writeTo ;
-    skos:prefLabel "Actions from the ODRL Common Vocabulary"@en .
+cc:DerivativeWorks a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "Distribution of derivative works."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This term is defined by Creative Commons."@en ;
+    skos:prefLabel "Derivative Works"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-<https://odrl.codata.org/cv1/collection/permissionActions> a skos:Collection ;
-    skos:member cv1:storeData ;
-    skos:prefLabel "Actions typically used in an ODRL Permission"@en .
-
-<https://odrl.codata.org/cv1/collection/prohibitionActions> a skos:Collection ;
-    skos:member cv1:analysisDeviceInstrument,
-        cv1:credentialDisclosure,
-        cv1:identifyAnIndividualHouseholdOrOrganisation,
-        cv1:mutuallyExclusiveAnalysis,
-        cv1:takeScreenShot ;
-    skos:prefLabel "Actions typically used in an ODRL Prohibition"@en .
-
-cv1:acceptTracking a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-acceptTracking> ;
-    skos:exactMatch odrl:acceptTracking ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "AcceptTracking"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:adHocSharing a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-adHocShare> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:adHocShare ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Deprecated, \"The act of sharing the asset to parties in close proximity to the owner\""@en ;
-    skos:prefLabel "Ad-hoc sharing"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:aggregate a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Aggregate> ;
-    skos:exactMatch odrl:aggregate ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "aggregate"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:aiAnalysis a skos:Concept ;
-    skos:definition "The asset can be analysed using AI"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "AI-analysis"@en ;
-    skos:scopeNote "An AI tool can be used to analyse the data, but not to modify it. There is a risk of information of the assets becoming embedded in an AI model that is a result of this action."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:aiCuration a skos:Concept ;
-    skos:definition "The asset or its metadata can be curated using AI"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "AI-curation"@en ;
-    skos:scopeNote "An AI tool can be used to analyse, refine and modify the asset or its metadata. There is a risk of unintended consequences (within the subset of the authorised actions of the user), as well as the information of the assets becoming embedded in an AI model that is a result of this action. Assumes authorisation to actions such as Read or writeTo that can be delegated to an AI solution."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:aiSearch a skos:Concept ;
-    skos:definition "The asset or its metadata can be searched using AI"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "cf. https://w3c.github.io/odrl/ai-vocab/#ai"@en ;
-    skos:prefLabel "AI-search"@en ;
-    skos:scopeNote "An AI tool can be used to search data, typially in combination of diplay, derive or extract actions. The data asset or its medatadata will not be modified. There is a risk of information of the assets becoming embedded in an AI model that is a result of this action."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:annotate a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Annotate> ;
-    skos:exactMatch odrl:annotate ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "annotate"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:anonymise a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-anonymize> ;
-    skos:exactMatch odrl:anonymize ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Constraint? \"For example, to remove identifying particulars for statistical or for other comparable purposes, or to use the Asset without stating the author/source.\""@en ;
-    skos:prefLabel "anonymise"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:apiAccess a skos:Concept ;
-    skos:definition "The asset can be accessed through an API"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "API access"@en ;
-    skos:scopeNote "It is possible to access the asset using a programmable interface. The access method is not exclusive by default, i.e. it is possible to authorise other access actions for the asset (e.g. read, download,..)"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:append a skos:Concept ;
-    dct:isReplacedBy cv1:modify ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-append> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:append ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated by http://www.w3.org/ns/odrl/2/modify"@en ;
-    skos:prefLabel "append"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:archive a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-archive> ;
-    skos:exactMatch odrl:archive ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "archive"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:browse a skos:Concept ;
-    skos:editorialNote "Synonym for ODRL:Play?"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Browse"@en ;
-    skos:scopeNote "ODRL play: To create a sequential and transient rendition of an Asset.\", with a subcategory \"display\" for static content"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:concurrentUse a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-concurrentUse> ;
-    skos:exactMatch odrl:concurrentUse ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "ConcurrentUse"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:copy a skos:Concept ;
-    dct:isReplacedBy cv1:reproduce ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-copy> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:copy ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated by http://www.w3.org/ns/odrl/2/reproduce"@en ;
-    skos:prefLabel "copy"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:delete a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-delete> ;
-    skos:exactMatch odrl:delete ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "delete"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:derivativeWorks a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-DerivativeWorks> ;
-    skos:exactMatch cc:DerivativeWorks ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Distribution of derivative works. Is this actually a contraint?"@en ;
-    skos:prefLabel "DerivativeWorks"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:derive a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-derive> ;
-    skos:exactMatch odrl:derive ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "derive"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:digitize a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-digitize> ;
-    skos:exactMatch odrl:digitize ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "digitize"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:display a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-display> ;
-    skos:exactMatch odrl:display ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "display"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:distribute a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-distribute> ;
-    skos:exactMatch odrl:distribute ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "To supply the Asset to third-parties. Refers to https://www.w3.org/TR/odrl-vocab/#term-nextPolicy"@en ;
-    skos:prefLabel "distribute"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:distribution a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Distribution> ;
-    skos:exactMatch cc:Distribution ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Actually a purpose? You will read, write, transfer etc. data in order to distribute (the tautologic CC definition includes also public display). C.f. distribute"@en ;
+cc:Distribution a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "Distribution, public display, and publicly performance."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This term is defined by Creative Commons."@en ;
     skos:prefLabel "Distribution"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:download a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Download"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:execute a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-execute> ;
-    skos:exactMatch odrl:execute ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "execute"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:export a skos:Concept ;
-    dct:isReplacedBy cv1:transform ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-export> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:export ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated by http://www.w3.org/ns/odrl/2/transform"@en ;
-    skos:prefLabel "export"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:extract a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Extract> ;
-    skos:exactMatch odrl:extract ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "extract"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:extractChar a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-extractChar> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:extractChar ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated"@en ;
-    skos:prefLabel "extractChar"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:extractPage a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-ExtractPage> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:extractPage ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated"@en ;
-    skos:prefLabel "extractPage"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:extractWord a skos:Concept ;
-    skos:editorialNote "Mapping to ODRL added during SKOS conversion; not stated in source sheet."@en ;
-    skos:exactMatch odrl:extractWord ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "extractWord"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:give a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-give> ;
-    skos:exactMatch odrl:give ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Give"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:grantUse a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-grantUse> ;
-    skos:exactMatch odrl:grantUse ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "GrantUse"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:include a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-include> ;
-    skos:exactMatch odrl:include ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Include"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:index a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-index> ;
-    skos:exactMatch odrl:index ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Index"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:inform a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-inform> ;
-    skos:exactMatch odrl:inform ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Inform"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:install a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-install> ;
-    skos:exactMatch odrl:install ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Install"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:linkToOtherData a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Link to other data"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:move a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-move> ;
-    skos:exactMatch odrl:move ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Delete original copy"@en ;
-    skos:prefLabel "Move"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:onlineAnalysis a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Online analysis"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:play a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-play> ;
-    skos:exactMatch odrl:play ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Play"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:present a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-present> ;
-    skos:exactMatch odrl:present ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Present"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:preview a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-preview> ;
-    owl:deprecated true ;
-    skos:exactMatch odrl:preview ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated"@en ;
-    skos:prefLabel "Preview"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:print a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-print> ;
-    skos:exactMatch odrl:print ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Print"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:reArchive a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "ReArchive"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:read a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-read> ;
-    skos:exactMatch odrl:read ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Read"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:reproduction a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Reproduction> ;
-    skos:exactMatch cc:Reproduction ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "do you really need this one given that there is odrl:reproduce?"@en ;
+cc:Reproduction a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "Making multiple copies."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This term is defined by Creative Commons."@en ;
     skos:prefLabel "Reproduction"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:republish a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Republish"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+odrl:acceptTracking a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To accept that the use of the Asset may be tracked."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "The collected information may be tracked by the Assigner, or may link to a Party with the role 'trackingParty' function."@en ;
+    skos:prefLabel "Accept Tracking"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:reshare a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Reshare"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+odrl:adHocShare a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of sharing the asset to parties in close proximity to the owner."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This original term and URI from the OMA specification should be used: http://www.openmobilealliance.com/oma-dd/adhoc-share ."@en ;
+    skos:prefLabel "Ad-hoc sharing"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:reviewPolicy a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-reviewPolicy> ;
-    skos:exactMatch odrl:reviewPolicy ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Escalation step to bring a human into the loop"@en ;
+odrl:aggregate a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To use the Asset or parts of it as part of a composite collection."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Aggregate"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:annotate a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To add explanatory notations/commentaries to the Asset without modifying the Asset in any other way."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Annotate"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:anonymize a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To anonymize all or parts of the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, to remove identifying particulars for statistical or for other comparable purposes, or to use the Asset without stating the author/source."@en ;
+    skos:prefLabel "Anonymize"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:append a skos:Concept ;
+    dcterms:isReplacedBy odrl:modify ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of adding to the end of an asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Append"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:archive a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To store the Asset (in a non-transient form)."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "Temporal constraints may be used for temporal conditions."@en ;
+    skos:prefLabel "Archive"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:concurrentUse a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To create multiple copies of the Asset that are being concurrently used."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Concurrent Use"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:copy a skos:Concept ;
+    dcterms:isReplacedBy odrl:reproduce ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of making an exact reproduction of the asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Copy"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:delete a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To permanently remove all copies of the Asset after it has been used."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "Use a constraint to define under which conditions the Asset must be deleted."@en ;
+    skos:prefLabel "Delete"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:derive a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To create a new derivative Asset from this Asset and to edit or modify the derivative."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "A new asset is created and may have significant overlaps with the original Asset. (Note that the notion of whether or not the change is significant enough to qualify as a new asset is subjective). To the derived Asset a next policy may be applied."@en ;
+    skos:prefLabel "Derive"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:digitize a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To produce a digital copy of (or otherwise digitize) the Asset from its analogue form."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Digitize"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:display a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To create a static and transient rendition of an Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, displaying an image on a screen. If the action is to be performed to a wider audience than just the Assignees, then the Recipient constraint is recommended to be used."@en ;
+    skos:prefLabel "Display"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:distribute a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To supply the Asset to third-parties."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "It is recommended to use nextPolicy to express the allowable usages by third-parties."@en ;
+    skos:prefLabel "Distribute"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:execute a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To run the computer program Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, machine executable code or Java such as a game or application."@en ;
+    skos:prefLabel "Execute"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:export a skos:Concept ;
+    dcterms:isReplacedBy odrl:transform ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of transforming the asset into a new form."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Export"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:extract a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To extract parts of the Asset and to use it as a new Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "A new asset is created and may have very little in common with the original Asset. (Note that the notion of whether or not the change is significant enough to qualify as a new asset is subjective). To the extracted Asset a next policy may be applied."@en ;
+    skos:prefLabel "Extract"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:extractChar a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of extracting (replicating) unchanged characters from the asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This original term and URI from the ONIX specification should be used: http://www.editeur.org/onix-pl/extract-char ."@en ;
+    skos:prefLabel "Extract character"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:extractPage a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of extracting (replicating) unchanged pages from the asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This original term and URI from the ONIX specification should be used: http://www.editeur.org/onix-pl/extract-page ."@en ;
+    skos:prefLabel "Extract page"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:extractWord a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of extracting (replicating) unchanged words from the asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This original term and URI from the ONIX specification should be used: http://www.editeur.org/onix-pl/extract-word ."@en ;
+    skos:prefLabel "Extract word"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:give a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To transfer the ownership of the Asset to a third party without compensation and while deleting the original asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Give"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:grantUse a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To grant the use of the Asset to third parties."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This action enables the assignee to create policies for the use of the Asset for third parties. The nextPolicy is recommended to be agreed with the third party. Use of temporal constraints is recommended."@en ;
+    skos:prefLabel "Grant Use"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:include a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To include other related assets in the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example: bio picture must be included in the attribution. Use of a relation sub-property is required for the related assets."@en ;
+    skos:prefLabel "Include"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:index a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To record the Asset in an index."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, to include a link to the Asset in a search engine database."@en ;
+    skos:prefLabel "Index"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:inform a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To inform that an action has been performed on or in relation to the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "May link to a Party with the role 'informedParty' function."@en ;
+    skos:prefLabel "Inform"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:install a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To load the computer program Asset onto a storage device which allows operating or running the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Install"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:move a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To move the Asset from one digital location to another including deleting the original copy."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "After the Asset has been moved, the original copy must be deleted."@en ;
+    skos:prefLabel "Move"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:play a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To create a sequential and transient rendition of an Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, to play a video or audio track. If the action is to be performed to a wider audience than just the Assignees, then the Recipient constraint is recommended to be used."@en ;
+    skos:prefLabel "Play"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:present a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To publicly perform the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "The asset can be performed (or communicated) in public."@en ;
+    skos:prefLabel "Present"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:preview a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of providing a short preview of the asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "Use a time constraint with the appropriate action."@en ;
+    skos:prefLabel "Preview"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:print a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To create a tangible and permanent rendition of an Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, creating a permanent, fixed (static), and directly perceivable representation of the Asset, such as printing onto paper."@en ;
+    skos:prefLabel "Print"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:read a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To obtain data from the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "For example, the ability to read a record from a database (the Asset)."@en ;
+    skos:prefLabel "Read"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:reviewPolicy a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To review the Policy applicable to the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "Used when human intervention is required to review the Policy. May link to an Asset which represents the full Policy information."@en ;
     skos:prefLabel "Review Policy"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:searchInTheContent a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Search (in the content)"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:secondaryUse a skos:Concept ;
-    owl:deprecated true ;
-    skos:editorialNote "Mapping to ODRL added during SKOS conversion; not stated in source sheet."@en ;
-    skos:exactMatch odrl:secondaryUse ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "The act of using the asset for a purpose other than the purpose it was intended for, deprecated"@en ;
-    skos:prefLabel "secondaryUse"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:secureTransfer a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "Secure Transfer"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:sell a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-sell> ;
-    skos:exactMatch odrl:sell ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "N.B. Assumes the asset is deleted after the sale"@en ;
+odrl:sell a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To transfer the ownership of the Asset to a third party with compensation and while deleting the original asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Sell"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:share a skos:Concept ;
-    skos:editorialNote "Mapping to ODRL added during SKOS conversion; not stated in source sheet."@en ;
-    skos:exactMatch odrl:share ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Decprecated? Explanation \"The act of the non-commercial reproduction and distribution of the asset to third-parties\" from https://www.w3.org/ns/odrl/2/ODRL22.ttl"@en ;
+odrl:share a skos:Concept ;
+    dcterms:isReplacedBy cc:Sharing ;
+    rdfs:isDefinedBy odrl: ;
+    owl:deprecated true ;
+    skos:definition "The act of the non-commercial reproduction and distribution of the asset to third-parties."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Share"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:stream a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-stream> ;
-    skos:exactMatch odrl:stream ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
+odrl:stream a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To deliver the Asset in real-time."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "The Asset maybe utilised in real-time as it is being delivered. If the action is to be performed to a wider audience than just the Assignees, then the Recipient constraint is recommended to be used."@en ;
     skos:prefLabel "Stream"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:synchronize a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-synchronize> ;
-    skos:exactMatch odrl:synchronize ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
+odrl:synchronize a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To use the Asset in timed relations with media (audio/visual) elements of another Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Synchronize"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:textToSpeech a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-textToSpeech> ;
-    skos:exactMatch odrl:textToSpeech ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Subcategory of use instead of \"Transform\"; exemption for accessibility probably applies, too"@en ;
+odrl:textToSpeech a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To have a text Asset read out loud."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "If the action is to be performed to a wider audience than just the Assignees, then the recipient constraint is recommended to be used."@en ;
     skos:prefLabel "Text-to-speech"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:translate a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-translate> ;
-    skos:exactMatch odrl:translate ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "N.B. translation of copyright-protected material requires permission (even for internal use in an organisation)."@en ;
+odrl:translate a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To translate the original natural language of an Asset into another natural language."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "A new derivative Asset is created by that action."@en ;
     skos:prefLabel "Translate"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:view a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:prefLabel "View"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:watermark a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-watermark> ;
-    skos:exactMatch odrl:watermark ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Works directly on the asset? Does not seem to have semantics WRT accessiblity of the original (should not be made accessible, must be made accessible to the owner,...?)"@en ;
+odrl:watermark a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To apply a watermark to the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Watermark"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:write a skos:Concept ;
-    dct:isReplacedBy cv1:modify ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-write> ;
+odrl:write a skos:Concept ;
+    dcterms:isReplacedBy odrl:modify ;
+    rdfs:isDefinedBy odrl: ;
     owl:deprecated true ;
-    skos:exactMatch odrl:write ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated by https://www.w3.org/ns/odrl/2/modify"@en ;
+    skos:definition "The act of writing to the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Write"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:writeTo a skos:Concept ;
-    dct:isReplacedBy cv1:modify ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-writeTo> ;
+odrl:writeTo a skos:Concept ;
+    dcterms:isReplacedBy odrl:modify ;
+    rdfs:isDefinedBy odrl: ;
     owl:deprecated true ;
-    skos:exactMatch odrl:writeTo ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "deprecated by https://www.w3.org/ns/odrl/2/modify"@en ;
-    skos:prefLabel "writeTo"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:definition "The act of adding data to the Asset."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Write to"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:accreditedTrainingCompleted a skos:Concept ;
-    skos:definition "Before performing an action on an asset the user must have completed relevant, accredited training"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty"@en ;
-    skos:prefLabel "AccreditedTrainingCompleted"@en ;
-    skos:scopeNote "The action to be performed on the asset is authorised only for persons who have received appropriate and sufficient training. The training needs can refer to certification frameworks and certificates or proof of completion of a specific course. [how would you define acceptable values for this? Or is this boolean, with the actual test performed elsewhere?]"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:AIAnalysis a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "AI Analysis"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:associateWithResearchProject a skos:Concept ;
-    skos:definition "The access to the resource is limited to specific research projects"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty"@en ;
-    skos:prefLabel "AssociateWithResearchProject"@en ;
-    skos:scopeNote "The user or agent will be granted access to the agent only if the credetials are associated to specific research projects"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:AICuration a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "AI Curation"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:citeData a skos:Concept ;
-    skos:definition "If the asset is used in the project context, the relevant project outputs need to cite the dataset"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty during project"@en ;
-    skos:prefLabel "CiteData"@en ;
-    skos:scopeNote "The project outputs need to cite the dataset in outputs (e.g. papers, derived datasets,...) where it can be reasonably argued that the dataset has contributed to the generation of new intellectual property."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:AISearch a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "AI Search"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:credentialDisclosure a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Prohibition (must not share password)"@en ;
-    skos:prefLabel "CredentialDisclosure"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:APIAccess a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "API Access"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:depositDerivedDataProduct a skos:Concept ;
-    skos:definition "Derived data products need to be deposited in a repository"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty"@en ;
-    skos:prefLabel "DepositDerivedDataProduct"@en ;
-    skos:scopeNote "The derived data products (datasets, publications,...) need to be curated and preserved by depositing them in a repository [do we want to qualify repository? \"A repository with known operational practices and sustainability plans? Do we want to state that the metadata should be accessible to the original authors?]"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:AccreditedTrainingCompleted a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Accredited Training Completed"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:destroyData a skos:Concept ;
-    skos:definition "Any copies or extracted parts of the data assets need to be destroyed after the end of the project"@en ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty at end of project"@en ;
-    skos:prefLabel "DestroyData"@en ;
-    skos:scopeNote "The user needs to commit to deletion of all full or partial copies of the original data asset after the end of the project in a way that fully erases information contained in them. The deletion needs to be completed as soon as technically possible and take into account on- and offline backups on network-accessible or removable media as well as printed copies of the datasets."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:AnalysisDevice a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "AnalysisDevice/Instrument - is this not a constraint?"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Analysis Device"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:encryptDataLocally a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty e.g. must encrypt data on local device"@en ;
-    skos:prefLabel "EncryptDataLocally"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:AssociateWithResearchProject a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Associate With Research Project"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:identifyAnIndividualHouseholdOrOrganisation a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Prohibition"@en ;
-    skos:prefLabel "Identify an individual, household or organisation"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:Browse a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Browse"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:mutuallyExclusiveAnalysis a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Prohibition (e.g. can analyse dataset x but not in conjunction with dataset y)"@en ;
-    skos:prefLabel "MutuallyExclusiveAnalysis"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:CiteData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "I would call it just Cite"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Cite Data"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:notify a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty e.g. of non-compliance or breach"@en ;
+cdif-access:CredentialDisclosure a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Credential Disclosure"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:DepositDerivedDataProduct a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Deposit Derived Data Product"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:DestroyData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "there's odrl:delete, so do you really need this?"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Destroy Data"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Download a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Download"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:EncryptDataLocally a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Encrypt Data Locally"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Identify a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "Identify an individual, household or organisation"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Identify"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Link a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "Link to other data"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Link"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:MutuallyExclusiveAnalysis a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Mutually Exclusive Analysis"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Notify a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "there's http://www.w3.org/ns/odrl/2/inform, do you really need notify?"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Notify"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:procureThirdPartyApproval a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty (refinement specifies who and payload)"@en ;
-    skos:prefLabel "ProcureThirdPartyApproval"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+cdif-access:OnlineAnalysis a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Online Analysis"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:reproduce a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-reproduce> ;
-    skos:exactMatch odrl:reproduce ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "\"ND\" semantics, compared to derive or extract"@en ;
+cdif-access:ProcureThirdPartyApproval a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Procure Third Party Approval"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:ReArchive a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Re Archive"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Republish a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Republish"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Reshare a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Reshare"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:Search a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "(in the content)"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Search"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:SecureTransfer a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Secure Transfer"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:SignAgreement a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "Sign/AcceptAgreement"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Sign Agreement"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:StoreData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "why not use http://www.w3.org/ns/odrl/2/archive (Definition: To store the Asset (in a non-transient form))?"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Store Data"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:SubmitAnalysisOutputsForChecking a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Submit Analysis Outputs For Checking"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:TakeScreenShot a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Take Screen Shot"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:View a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "View"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+cdif-access:secondaryUse a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:editorialNote "secondary use is just using for a different purpose, so I would not define it as a separate action"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:prefLabel "Secondary Use"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
+
+odrl:reproduce a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To make duplicate copies the Asset in any material form."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
     skos:prefLabel "Reproduce"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:signAcceptAgreement a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty (generalised, as refinement would specify specific form for example)"@en ;
-    skos:prefLabel "Sign/AcceptAgreement"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:storeData a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Permission with common geospatial, temporal and environmental constraints"@en ;
-    skos:prefLabel "StoreData"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:submitAnalysisOutputsForChecking a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty"@en ;
-    skos:prefLabel "SubmitAnalysisOutputsForChecking"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:takeScreenShot a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Prohibition"@en ;
-    skos:prefLabel "TakeScreenShot"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:transform a skos:Concept ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-transform> ;
-    skos:exactMatch odrl:transform ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Format conversion, N.B. usually legal without permission for accessibiltiy purposes (equal access to a resource)"@en ;
+odrl:transform a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To convert the Asset into a different format."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "Typically used to convert the Asset into a different format for consumption on/transfer to a third party system."@en ;
     skos:prefLabel "Transform"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-cv1:analysisDeviceInstrument a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "Duty/Prohibition (q. for Beatriz - is whitelist or blacklist approach better)"@en ;
-    skos:prefLabel "AnalysisDevice/Instrument"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
-
-cv1:modify a skos:Concept ;
-    skos:editorialNote "Mapping to ODRL added during SKOS conversion; not stated in source sheet."@en ;
-    skos:exactMatch odrl:modify ;
-    skos:inScheme <https://odrl.codata.org/cv1> ;
-    skos:note "C.f. derive and extract; versioning semantics?"@en ;
+odrl:modify a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To change existing content of the Asset. A new asset is not created by this action."@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv1> ;
+    skos:note "This action will modify an asset which is typically updated from time to time without creating a new asset. If the result from modifying the asset should be a new asset the actions derive or extract should be used. (Note that the notion of whether or not the change is significant enough to qualify as a new asset is subjective)."@en ;
     skos:prefLabel "Modify"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv1> .
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv1> .
 
-<https://odrl.codata.org/cv1> a skos:ConceptScheme ;
-    dct:created "2026-11-04"^^xsd:date ;
-    dct:description "Actions that can be permitted, prohibited or required (duties) in CDIF access policies. Re-uses the ODRL Common Vocabulary where possible."@en ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#actionsCommon> ;
-    dct:title "CDIF Actions (CV1)"@en ;
-    skos:hasTopConcept cv1:acceptTracking,
-        cv1:accreditedTrainingCompleted,
-        cv1:adHocSharing,
-        cv1:aggregate,
-        cv1:aiAnalysis,
-        cv1:aiCuration,
-        cv1:aiSearch,
-        cv1:analysisDeviceInstrument,
-        cv1:annotate,
-        cv1:anonymise,
-        cv1:apiAccess,
-        cv1:append,
-        cv1:archive,
-        cv1:associateWithResearchProject,
-        cv1:browse,
-        cv1:citeData,
-        cv1:concurrentUse,
-        cv1:copy,
-        cv1:credentialDisclosure,
-        cv1:delete,
-        cv1:depositDerivedDataProduct,
-        cv1:derivativeWorks,
-        cv1:derive,
-        cv1:destroyData,
-        cv1:digitize,
-        cv1:display,
-        cv1:distribute,
-        cv1:distribution,
-        cv1:download,
-        cv1:encryptDataLocally,
-        cv1:execute,
-        cv1:export,
-        cv1:extract,
-        cv1:extractChar,
-        cv1:extractPage,
-        cv1:extractWord,
-        cv1:give,
-        cv1:grantUse,
-        cv1:identifyAnIndividualHouseholdOrOrganisation,
-        cv1:include,
-        cv1:index,
-        cv1:inform,
-        cv1:install,
-        cv1:linkToOtherData,
-        cv1:modify,
-        cv1:move,
-        cv1:mutuallyExclusiveAnalysis,
-        cv1:notify,
-        cv1:onlineAnalysis,
-        cv1:play,
-        cv1:present,
-        cv1:preview,
-        cv1:print,
-        cv1:procureThirdPartyApproval,
-        cv1:reArchive,
-        cv1:read,
-        cv1:reproduce,
-        cv1:reproduction,
-        cv1:republish,
-        cv1:reshare,
-        cv1:reviewPolicy,
-        cv1:searchInTheContent,
-        cv1:secondaryUse,
-        cv1:secureTransfer,
-        cv1:sell,
-        cv1:share,
-        cv1:signAcceptAgreement,
-        cv1:storeData,
-        cv1:stream,
-        cv1:submitAnalysisOutputsForChecking,
-        cv1:synchronize,
-        cv1:takeScreenShot,
-        cv1:textToSpeech,
-        cv1:transform,
-        cv1:translate,
-        cv1:view,
-        cv1:watermark,
-        cv1:write,
-        cv1:writeTo .
+<https://w3id.org/cdif/access/cv1> a skos:ConceptScheme ;
+    dcterms:description "Actions of the CDIF access profile (cdif-access:actionsCollection, before the duty actions)."@en ;
+    dcterms:source <https://w3id.org/cdif/access> ;
+    skos:prefLabel "CDIF Actions (CV1)"@en .
 

@@ -69,7 +69,7 @@ for multi-line text). Use this shape and drop sections that have nothing in them
 ```
 
 **Checked**
-- <tests: command and result, e.g. tests/test_cdif_vocab.py: 9 passed>
+- <tests: command and result, e.g. `./test_all.script`: 29 passed, frontend build OK>
 - <UI: what was clicked and what was seen>
 
 **Known issues**
