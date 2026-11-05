@@ -20,3 +20,4 @@ def test_theme_config_env_override(monkeypatch):
     assert res.status_code == 200
     data = res.json()
     assert data["logo_url"] == test_logo
+

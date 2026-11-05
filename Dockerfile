@@ -7,9 +7,11 @@ COPY frontend ./
 ARG VITE_GOOGLE_CLIENT_ID
 ARG VITE_REDIRECT_URI
 ARG VITE_ORCID_CLIENT_ID
+ARG VITE_LOGO_URL
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 ENV VITE_REDIRECT_URI=$VITE_REDIRECT_URI
 ENV VITE_ORCID_CLIENT_ID=$VITE_ORCID_CLIENT_ID
+ENV VITE_LOGO_URL=$VITE_LOGO_URL
 RUN npm run build
 
 # Stage 2: Backend & Runtime
@@ -41,6 +43,7 @@ COPY tests /usr/src/app/tests
 COPY app /usr/src/app/app
 COPY cli /usr/src/app/cli
 COPY config /usr/src/app/config
+COPY templates /usr/src/app/templates
 
 # Copy Frontend Build Artifacts
 # Copy to a location outside /usr/src/app to avoid volume masking

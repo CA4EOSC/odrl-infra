@@ -47,3 +47,4 @@ async def get_theme_config():
         "footer_html": footer_html,
         "templates_dir": TEMPLATES_DIR,
     }
+

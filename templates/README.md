@@ -11,3 +11,4 @@ This folder contains customizable HTML and text templates for theming the ODRL I
 ## Environment Variables:
 
 - `LOGO_URL`: URL to the logo image (defaults to `https://cdif4eosc.eu/wp-content/uploads/2026/10/logo-2x.png` or `VITE_LOGO_URL`).
+
