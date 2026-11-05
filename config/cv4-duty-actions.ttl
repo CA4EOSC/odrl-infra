@@ -1,116 +1,105 @@
-@prefix cv1: <https://odrl.codata.org/cv1/> .
-@prefix cv4: <https://odrl.codata.org/cv4/> .
-@prefix dct: <http://purl.org/dc/terms/> .
+@prefix cdif-access: <https://w3id.org/cdif/access#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-cv4:anonymise a skos:Concept ;
-    skos:exactMatch odrl:anonymize,
-        cv1:anonymise ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "anonymise"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+<https://w3id.org/cdif/access/collection/cdif-specific-actions> a skos:Collection ;
+    skos:member cdif-access:Authenticate,
+        cdif-access:CompleteRegistration,
+        cdif-access:DesignateResponsiblePerson,
+        cdif-access:GetEthicsApproval,
+        cdif-access:ObtainCompletedAgreement,
+        cdif-access:ProvideSecureEnvironment,
+        cdif-access:Pseudonymise,
+        cdif-access:ThirdPartyAuthorization,
+        cdif-access:VerifyAccreditation,
+        cdif-access:VerifyProjectContext,
+        cdif-access:VerifyTraining ;
+    skos:prefLabel "CDIF-specific actions"@en .
 
-cv4:authenticate a skos:Concept ;
-    skos:definition "Use an accepted authentication method to prove the identity"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
+<https://w3id.org/cdif/access/collection/odrl-common-vocabulary> a skos:Collection ;
+    skos:member odrl:compensate ;
+    skos:prefLabel "ODRL Common Vocabulary"@en .
+
+odrl:compensate a skos:Concept ;
+    rdfs:isDefinedBy odrl: ;
+    skos:definition "To compensate by transfer of some amount of value, if defined, for using or selling the Asset."@en ;
+    skos:editorialNote "I don't think you need Payment as an action, ODRL already has odrl:compensate"@en ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:note "The compensation may use different types of things with a value: (i) the thing is expressed by the value (term) of the Constraint name; (b) the value is expressed by operator, rightOperand, dataType and unit. Typically the assignee will compensate the assigner, but other compensation party roles may be used."@en ;
+    skos:prefLabel "Compensate"@en ;
+    skos:scopeNote "Non-Normative"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
+
+cdif-access:Authenticate a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
     skos:prefLabel "Authenticate"@en ;
-    skos:scopeNote "The set of accepted authentication methods will depend on the requirements of the asset owner and the possible constraints imposed by the nature of the asset (e.g. multi-factor authentication required for clinical data). The authentication process should allow verifying membership in project teams, organisations and groups of users holding specific rights based on their role [C.f. odrl:Party?]."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:compensation a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "Compensation"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:CompleteRegistration a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Complete Registration"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:completeRegistration a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "CompleteRegistration"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:DesignateResponsiblePerson a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Designate Responsible Person"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:designateResponsiblePerson a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "designateResponsiblePerson"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:GetEthicsApproval a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Get Ethics Approval"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:getEthicsApproval a skos:Concept ;
-    skos:definition "Any action on the asset requires a proof of ethics approval"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "GetEthicsApproval"@en ;
-    skos:scopeNote "Performing the action on the asset needs to be linked to an ethics approval using methods that fulfill the relevant legal and governance requirements that are relevant to the asset and the legal entity controlling the access to the asset. [typically the ethics approval is reviewed by the asset controller and linked to the user's account? C.f. odrl:reviewPolicy?]"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:ObtainCompletedAgreement a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Obtain Completed Agreement"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:obtainCompletedAgreement a skos:Concept ;
-    skos:definition "The action requires an agreement with all involved parties"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:note "e,g, EUL (refinement will specify what form, what signature type etc.)"@en ;
-    skos:prefLabel "ObtainCompletedAgreement"@en ;
-    skos:scopeNote "The action on an asset requires verifiable consent of all relevant stakeholders, e.g. signature of an End User Agreement or agreements needed for secure transfer of data into a trusted research environment."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:ProvideSecureEnvironment a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Provide Secure Environment"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:payment a skos:Concept ;
-    skos:definition "Any action on the asset requires a payment"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "Payment"@en ;
-    skos:scopeNote "Performing an action on the asset requires a fee and a commitment to pay linked to the access request. The legal entity controlling the access determines the modalities of acceptable payment modalities (e.g. proof of payment required before the access, post-access invoicing or using credits assigned to the project or organisation the requesting party belongs to)."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:Pseudonymise a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Pseudonymise"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:provisionSecureEnvironment a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "provisionSecureEnvironment"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:ThirdPartyAuthorization a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Third Party Authorization"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:pseudonymise a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "pseudonymise"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:VerifyAccreditation a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Verify Accreditation"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:thirdPartyAuthorization a skos:Concept ;
-    skos:definition "The action on an asset requires an additional authorisation from a third party"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:note "e.g. GetApproval from DataOwner"@en ;
-    skos:prefLabel "ThirdPartyAuthorization"@en ;
-    skos:scopeNote "The action on an asset requires an authorisation from a third party (or third parties); for example, GetApproval from the data owner [c.f. odrl:obtainConsent? GetApproval hanging reference?]"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:VerifyProjectContext a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Verify Project Context"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:verifyAccreditation a skos:Concept ;
-    skos:definition "The action requires verification of accreditation"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "VerifyAccreditation"@en ;
-    skos:scopeNote "Performing the action on the asset requires verification of an accreditation (certification, membership in a skills- or competence-based organisation or professional body)."@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
+cdif-access:VerifyTraining a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/cdif/access> ;
+    skos:inScheme <https://w3id.org/cdif/access/cv4> ;
+    skos:prefLabel "Verify Training"@en ;
+    skos:topConceptOf <https://w3id.org/cdif/access/cv4> .
 
-cv4:verifyProjectContext a skos:Concept ;
-    skos:definition "The action requires verification of the project"@en ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:note "Submit a project description or research protocol"@en ;
-    skos:prefLabel "VerifyProjectContext"@en ;
-    skos:scopeNote "The action requires review of the project context, e.g. analysis of the project description or research protocol. Typically this will create a new role or set of roles that can be used in the authentication context"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
-
-cv4:verifyTraining a skos:Concept ;
-    skos:inScheme <https://odrl.codata.org/cv4> ;
-    skos:prefLabel "VerifyTraining"@en ;
-    skos:topConceptOf <https://odrl.codata.org/cv4> .
-
-<https://odrl.codata.org/cv4> a skos:ConceptScheme ;
-    dct:created "2026-11-04"^^xsd:date ;
-    dct:description "Actions that an assignee must perform (ODRL duties) before or while exercising a permission in a CDIF access policy."@en ;
-    dct:source <https://www.w3.org/TR/odrl-vocab/#term-Duty> ;
-    dct:title "CDIF Duty Actions (CV4)"@en ;
-    skos:hasTopConcept cv4:anonymise,
-        cv4:authenticate,
-        cv4:compensation,
-        cv4:completeRegistration,
-        cv4:designateResponsiblePerson,
-        cv4:getEthicsApproval,
-        cv4:obtainCompletedAgreement,
-        cv4:payment,
-        cv4:provisionSecureEnvironment,
-        cv4:pseudonymise,
-        cv4:thirdPartyAuthorization,
-        cv4:verifyAccreditation,
-        cv4:verifyProjectContext,
-        cv4:verifyTraining .
+<https://w3id.org/cdif/access/cv4> a skos:ConceptScheme ;
+    dcterms:description "Duty actions of the CDIF access profile (cdif-access:actionsCollection, '# duty actions')."@en ;
+    dcterms:source <https://w3id.org/cdif/access> ;
+    skos:prefLabel "CDIF Duty Actions (CV4)"@en .
 
