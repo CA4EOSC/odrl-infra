@@ -1,3 +1,8 @@
+export const THEME_CONFIG = {
+    defaultLogoUrl: import.meta.env.VITE_LOGO_URL || "https://cdif4eosc.eu/wp-content/uploads/2026/10/logo-2x.png",
+    defaultFooterText: "The project “CDIF4EOSC: Developing and implementing the Cross-Domain Interoperability Framework for EOSC” is funded by the European Union under Grant Agreement 101292473."
+};
+
 export const OAUTH_CONFIG = {
     google: {
         clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",

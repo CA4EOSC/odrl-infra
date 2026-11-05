@@ -19,6 +19,7 @@ services:
     environment:
       - QDRANT_HOST=qdrant
       - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+      - LOGO_URL=${LOGO_URL}
     depends_on:
       - qdrant
     command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
