@@ -13,6 +13,7 @@ else
   export VITE_GIT_DIRTY=false
 fi
 
-echo "Building ${VITE_GIT_SHA:0:7} (${VITE_GIT_BRANCH}${VITE_GIT_DIRTY/#true/, uncommitted changes}${VITE_GIT_DIRTY/#false/})"
+note=""; [ "$VITE_GIT_DIRTY" = true ] && note=", with uncommitted changes"
+echo "Building ${VITE_GIT_SHA:0:7} (${VITE_GIT_BRANCH}${note})"
 docker compose build
 docker compose up -d "$@"
