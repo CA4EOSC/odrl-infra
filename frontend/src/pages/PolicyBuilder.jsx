@@ -26,7 +26,7 @@ import {
 import api from '../services/api';
 import { cn } from '../lib/utils';
 import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
-import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, dutyTree, ruleGroupLabel } from '../lib/vocabTree';
+import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, dutyTree, ruleGroupLabel, conceptFields } from '../lib/vocabTree';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
 const ODRL_OPERATORS = [
@@ -316,7 +316,6 @@ export default function PolicyBuilder() {
 
     const [copied, setCopied] = useState(false);
     // Action Vocabulary Profile Selection: W3C ODRL 2.2 vs CDIF ODRL v2.3
-    const [actionVocabProfile, setActionVocabProfile] = useState('https://www.w3.org/TR/odrl-vocab/#actionConcepts');
     const [actionPickerTarget, setActionPickerTarget] = useState(null); // { type: 'permission'|'prohibition'|'duty', index: number } | null
     // Hierarchical browse window for purposes / left operands: { title, subtitle, nodes, value, selectLabel, onSelect } | null
     const [browser, setBrowser] = useState(null);
@@ -353,6 +352,20 @@ export default function PolicyBuilder() {
     });
     const cdifPurposes = cdifVocab?.purposes?.concepts || [];
     const cdifConstraintTypes = cdifVocab?.constraints?.concepts || [];
+    // Missing CDIF definitions fall back to the source: the same concept in CV1 (skos:exactMatch),
+    // then the W3C ODRL 2.2 definition when the term is an odrl: action. The note says where it came from.
+    const cv1ByIri = Object.fromEntries((cdifVocab?.actions?.concepts || []).map(c => [c.iri, c]));
+    const withDefinition = (c) => {
+        if (c.definition) return c;
+        const cv1 = (c.exactMatch || []).map(m => cv1ByIri[m]).find(m => m?.definition);
+        if (cv1) return { ...c, definition: cv1.definition, notes: [...(c.notes || []), `Definition from ${cv1.id}.`] };
+        const odrlTerm = (c.value || '').startsWith('odrl:') && c.value.slice(5);
+        const odrl = odrlTerm && (vocabActions?.actions?.[odrlTerm]?.description
+            || ODRL_LEFT_OPERAND_TERMS.find(o => o.value === c.value)?.description);
+        if (odrl) return { ...c, definition: odrl, notes: [...(c.notes || []), 'Definition from W3C ODRL 2.2.'] };
+        return c;
+    };
+
     // CDIF CV4 duty actions ("value" is the ODRL term when the duty maps to one, e.g. odrl:anonymize)
     const cv4DutyTerms = (cdifVocab?.duties?.concepts || []).filter(c => !c.deprecated).map(c => ({
         value: c.value,
@@ -363,10 +376,12 @@ export default function PolicyBuilder() {
     // there is no exact ODRL match) plus broader restriction categories; deprecated operands are hidden.
     const cv3Term = (c) => ({
         value: c.value,
+        label: c.label,
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
+        ...conceptFields(c),
     });
     const inCollection = (c, label) => (c.collections || []).some(l => l.startsWith(label));
-    const cv3Usable = cdifConstraintTypes.filter(c => !c.deprecated);
+    const cv3Usable = cdifConstraintTypes.filter(c => !c.deprecated).map(withDefinition);
     const cv3LeftOperandGroups = [
         { label: 'CDIF left operands (CV3)', terms: cv3Usable.filter(c => inCollection(c, 'ODRL left operands')).map(cv3Term) },
         { label: 'CDIF restriction categories (CV3)', terms: cv3Usable.filter(c => inCollection(c, 'Restriction categories')).map(cv3Term) },
@@ -376,7 +391,7 @@ export default function PolicyBuilder() {
     const ruleTypesOf = (c) => (c.collections || [])
         .map(l => (l.match(/ODRL (Duty|Prohibition|Permission)/) || [])[1])
         .filter(Boolean);
-    const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(c => ({
+    const cdifCv1Actions = (cdifVocab?.actions?.concepts || []).map(withDefinition).map(c => ({
         iri: c.value,
         name: c.label,
         category: c.deprecated
@@ -384,10 +399,14 @@ export default function PolicyBuilder() {
             : (ruleTypesOf(c).join(' / ') || (c.value.startsWith('cv1:') ? 'CDIF extension' : 'ODRL Common')),
         description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ')
             + (c.replacedBy ? ` Use ${c.replacedBy} instead.` : ''),
+        ...conceptFields(c),
         deprecated: c.deprecated,
         id: c.id,
         collections: c.collections || []
     }));
+
+    // CV4 concepts for the duty browser (the CV4 sheet has no definitions of its own)
+    const cv4Concepts = (cdifVocab?.duties?.concepts || []).map(withDefinition);
 
     // Fallback CDIF actions, used only until/if the CV1 vocabulary cannot be loaded
     const cdifFallbackActions = [
@@ -405,15 +424,8 @@ export default function PolicyBuilder() {
         { iri: "odrl:delete", name: "delete", category: "Lifecycle & Governance", description: "Enforce post-computation data hygiene or retention expiry." }
     ];
 
-    // Selected action options depending on active profile
-    const currentActionsList = actionVocabProfile.includes('cdif.codata.org')
-        ? (cdifCv1Actions.length > 0 ? cdifCv1Actions : cdifFallbackActions)
-        : (vocabActions?.actions ? Object.entries(vocabActions.actions).map(([k, v]) => ({
-            iri: `odrl:${k}`,
-            name: k,
-            category: v.category,
-            description: v.description
-        })) : []);
+    // Actions in odrl:action fields come from CDIF CV1 (the fallback list only until it has loaded)
+    const currentActionsList = cdifCv1Actions.length > 0 ? cdifCv1Actions : cdifFallbackActions;
 
     // Preset loader mutation
     const loadPresetMutation = useMutation({
@@ -954,7 +966,7 @@ export default function PolicyBuilder() {
         openDuties: ({ value, onSelect, selectLabel = 'Use this duty action' }) => openBrowser({
             title: 'Browse duty actions',
             subtitle: 'CDIF CV4 duty actions: what the assignee must do to exercise the permission.',
-            nodes: dutyTree(cdifVocab?.duties?.concepts || []),
+            nodes: dutyTree(cv4Concepts),
             value, selectLabel, onSelect,
         }),
     };
@@ -1120,31 +1132,6 @@ export default function PolicyBuilder() {
                 >
                     <FileCheck size={16} /> Duty ({duties.length})
                 </button>
-            </div>
-
-            {/* Action Concepts Vocabulary Profile Selector Banner */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-white/[0.03] border border-indigo-100 dark:border-white/10 text-xs">
-                <div className="flex items-center gap-2.5">
-                    <BookOpen size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <div>
-                        <span className="font-bold text-gray-900 dark:text-white mr-1.5">Action Concepts Vocabulary Profile:</span>
-                        <span className="text-gray-500 dark:text-gray-400">Controls available actions in Action (odrl:action) fields.</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <select
-                        value={actionVocabProfile}
-                        onChange={(e) => setActionVocabProfile(e.target.value)}
-                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">
-                            W3C ODRL 2.2 Core (https://www.w3.org/TR/odrl-vocab/#actionConcepts)
-                        </option>
-                        <option value="https://cdif.codata.org/odrl/v2.3">
-                            CDIF CV1 Actions (https://odrl.codata.org/cv1/)
-                        </option>
-                    </select>
-                </div>
             </div>
 
             {/* Layout Grid: Tab Content on the Left, Policy Operations on the Right */}
@@ -2444,31 +2431,16 @@ export default function PolicyBuilder() {
                 const rules = { permission: permissions, prohibition: prohibitions, duty: duties }[type] || [];
                 const ruleType = type.charAt(0).toUpperCase() + type.slice(1);
                 const ruleGroup = ruleGroupLabel(ruleType);
-                const isCdif = actionVocabProfile.includes('cdif');
                 return (
                     <VocabBrowser
-                        key={actionVocabProfile}
                         title={`Select action for ${ruleType} #${index + 1}`}
-                        subtitle={isCdif
-                            ? 'CDIF CV1 actions, grouped by source and by the rule type they are typically used in.'
-                            : 'W3C ODRL 2.2 Core actions, grouped by category.'}
+                        subtitle="CDIF CV1 actions, grouped by source and by the rule type they are typically used in."
                         nodes={actionTree(currentActionsList)}
                         value={rules[index]?.action}
-                        defaultExpanded={isCdif ? [`/CDIF-specific actions/${ruleGroup}`, `/ODRL Common Vocabulary/${ruleGroup}`] : []}
+                        defaultExpanded={[`/CDIF-specific actions/${ruleGroup}`, `/ODRL Common Vocabulary/${ruleGroup}`]}
                         selectLabel="Use this action"
                         onSelect={selectActionForTarget}
                         onClose={() => setActionPickerTarget(null)}
-                        toolbar={
-                            <select
-                                value={actionVocabProfile}
-                                onChange={(e) => setActionVocabProfile(e.target.value)}
-                                title="Action vocabulary profile"
-                                className="px-2 py-2 rounded-xl bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            >
-                                <option value="https://www.w3.org/TR/odrl-vocab/#actionConcepts">W3C ODRL 2.2</option>
-                                <option value="https://cdif.codata.org/odrl/v2.3">CDIF CV1 Actions</option>
-                            </select>
-                        }
                     />
                 );
             })()}

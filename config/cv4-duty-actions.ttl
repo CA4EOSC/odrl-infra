@@ -13,8 +13,10 @@ cv4:anonymise a skos:Concept ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:authenticate a skos:Concept ;
+    skos:definition "Use an accepted authentication method to prove the identity"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "Authenticate"@en ;
+    skos:scopeNote "The set of accepted authentication methods will depend on the requirements of the asset owner and the possible constraints imposed by the nature of the asset (e.g. multi-factor authentication required for clinical data). The authentication process should allow verifying membership in project teams, organisations and groups of users holding specific rights based on their role [C.f. odrl:Party?]."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:compensation a skos:Concept ;
@@ -33,19 +35,25 @@ cv4:designateResponsiblePerson a skos:Concept ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:getEthicsApproval a skos:Concept ;
+    skos:definition "Any action on the asset requires a proof of ethics approval"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "GetEthicsApproval"@en ;
+    skos:scopeNote "Performing the action on the asset needs to be linked to an ethics approval using methods that fulfill the relevant legal and governance requirements that are relevant to the asset and the legal entity controlling the access to the asset. [typically the ethics approval is reviewed by the asset controller and linked to the user's account? C.f. odrl:reviewPolicy?]"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:obtainCompletedAgreement a skos:Concept ;
+    skos:definition "The action requires an agreement with all involved parties"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "e,g, EUL (refinement will specify what form, what signature type etc.)"@en ;
     skos:prefLabel "ObtainCompletedAgreement"@en ;
-    skos:scopeNote "e,g, EUL (refinement will specify what form, what signature type etc.)"@en ;
+    skos:scopeNote "The action on an asset requires verifiable consent of all relevant stakeholders, e.g. signature of an End User Agreement or agreements needed for secure transfer of data into a trusted research environment."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:payment a skos:Concept ;
+    skos:definition "Any action on the asset requires a payment"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "Payment"@en ;
+    skos:scopeNote "Performing an action on the asset requires a fee and a commitment to pay linked to the access request. The legal entity controlling the access determines the modalities of acceptable payment modalities (e.g. proof of payment required before the access, post-access invoicing or using credits assigned to the project or organisation the requesting party belongs to)."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:provisionSecureEnvironment a skos:Concept ;
@@ -59,20 +67,26 @@ cv4:pseudonymise a skos:Concept ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:thirdPartyAuthorization a skos:Concept ;
+    skos:definition "The action on an asset requires an additional authorisation from a third party"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "e.g. GetApproval from DataOwner"@en ;
     skos:prefLabel "ThirdPartyAuthorization"@en ;
-    skos:scopeNote "e.g. GetApproval from DataOwner"@en ;
+    skos:scopeNote "The action on an asset requires an authorisation from a third party (or third parties); for example, GetApproval from the data owner [c.f. odrl:obtainConsent? GetApproval hanging reference?]"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:verifyAccreditation a skos:Concept ;
+    skos:definition "The action requires verification of accreditation"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
     skos:prefLabel "VerifyAccreditation"@en ;
+    skos:scopeNote "Performing the action on the asset requires verification of an accreditation (certification, membership in a skills- or competence-based organisation or professional body)."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:verifyProjectContext a skos:Concept ;
+    skos:definition "The action requires verification of the project"@en ;
     skos:inScheme <https://odrl.codata.org/cv4> ;
+    skos:note "Submit a project description or research protocol"@en ;
     skos:prefLabel "VerifyProjectContext"@en ;
-    skos:scopeNote "Submit a project description or research protocol"@en ;
+    skos:scopeNote "The action requires review of the project context, e.g. analysis of the project description or research protocol. Typically this will create a new role or set of roles that can be used in the authentication context"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv4> .
 
 cv4:verifyTraining a skos:Concept ;

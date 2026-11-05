@@ -592,13 +592,15 @@ cv1:depositDerivedDataProduct a skos:Concept ;
     skos:inScheme <https://odrl.codata.org/cv1> ;
     skos:note "Duty"@en ;
     skos:prefLabel "DepositDerivedDataProduct"@en ;
-    skos:scopeNote "The derived datasets need to be curated and preserved by depositing them in a repository."@en ;
+    skos:scopeNote "The derived data products (datasets, publications,...) need to be curated and preserved by depositing them in a repository [do we want to qualify repository? \"A repository with known operational practices and sustainability plans? Do we want to state that the metadata should be accessible to the original authors?]"@en ;
     skos:topConceptOf <https://odrl.codata.org/cv1> .
 
 cv1:destroyData a skos:Concept ;
+    skos:definition "Any copies or extracted parts of the data assets need to be destroyed after the end of the project"@en ;
     skos:inScheme <https://odrl.codata.org/cv1> ;
     skos:note "Duty at end of project"@en ;
     skos:prefLabel "DestroyData"@en ;
+    skos:scopeNote "The user needs to commit to deletion of all full or partial copies of the original data asset after the end of the project in a way that fully erases information contained in them. The deletion needs to be completed as soon as technically possible and take into account on- and offline backups on network-accessible or removable media as well as printed copies of the datasets."@en ;
     skos:topConceptOf <https://odrl.codata.org/cv1> .
 
 cv1:encryptDataLocally a skos:Concept ;
