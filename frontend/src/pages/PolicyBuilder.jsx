@@ -26,7 +26,7 @@ import {
 import api from '../services/api';
 import { cn } from '../lib/utils';
 import { VocabBrowser, BrowseIconButton } from '../components/VocabBrowser';
-import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, ruleGroupLabel } from '../lib/vocabTree';
+import { BrowseContext, useBrowse, humanize, purposeTree, leftOperandTree, actionTree, dutyTree, ruleGroupLabel } from '../lib/vocabTree';
 
 // ODRL 2.2 operators (instances of odrl:Operator) — https://www.w3.org/TR/odrl-vocab/#term-Operator
 const ODRL_OPERATORS = [
@@ -356,8 +356,8 @@ export default function PolicyBuilder() {
     // CDIF CV4 duty actions ("value" is the ODRL term when the duty maps to one, e.g. odrl:anonymize)
     const cv4DutyTerms = (cdifVocab?.duties?.concepts || []).filter(c => !c.deprecated).map(c => ({
         value: c.value,
-        label: humanize(c.label),
-        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — ') || humanize(c.label),
+        label: (l => l.charAt(0).toUpperCase() + l.slice(1))(humanize(c.label)),
+        description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — '),
     }));
     // CV3 holds ODRL left operands selected for CDIF ("value" is odrl:<term>, or the cv3 id when
     // there is no exact ODRL match) plus broader restriction categories; deprecated operands are hidden.
@@ -951,6 +951,12 @@ export default function PolicyBuilder() {
             nodes: leftOperandTree(groups, ODRL_LEFT_OPERAND_TERMS),
             value, selectLabel, onSelect,
         }),
+        openDuties: ({ value, onSelect, selectLabel = 'Use this duty action' }) => openBrowser({
+            title: 'Browse duty actions',
+            subtitle: 'CDIF CV4 duty actions: what the assignee must do to exercise the permission.',
+            nodes: dutyTree(cdifVocab?.duties?.concepts || []),
+            value, selectLabel, onSelect,
+        }),
     };
     // Handler to apply selected action to the active rule
     const selectActionForTarget = (actionIri) => {
@@ -1386,7 +1392,7 @@ export default function PolicyBuilder() {
                                                     <label className="block text-[11px] font-bold text-gray-500 uppercase">
                                                         Action (odrl:action)
                                                     </label>
-                                                    <div className="flex items-center gap-2">
+                                                    {!(p.duties && p.duties.length > 0) && (
                                                         <button
                                                             type="button"
                                                             onClick={() => addPermissionDuty(pIdx)}
@@ -1394,7 +1400,7 @@ export default function PolicyBuilder() {
                                                         >
                                                             <Plus size={11} /> Add duty action
                                                         </button>
-                                                    </div>
+                                                    )}
                                                 </div>
                                                 <div className="flex gap-1.5">
                                                     <input
@@ -1435,50 +1441,58 @@ export default function PolicyBuilder() {
                                                     What the assignee must do to exercise this permission (CDIF CV4 duty actions).
                                                 </p>
 
+                                                <div className="space-y-2">
                                                 {p.duties.map((d, dIdx) => {
                                                     const term = cv4DutyTerms.find(t => t.value === d.action);
+                                                    const openDutyBrowser = () => browseApi.openDuties({
+                                                        value: d.action,
+                                                        onSelect: (v) => updatePermissionDuty(pIdx, dIdx, 'action', v),
+                                                    });
                                                     return (
-                                                        <div key={dIdx} className="p-2 mb-2 rounded-lg bg-white dark:bg-black/30 border border-indigo-100 dark:border-indigo-900/40 text-xs space-y-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <select
+                                                        <div key={dIdx}>
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <label className="block text-[11px] font-bold text-gray-500 uppercase">
+                                                                    Duty action #{dIdx + 1}{term ? ` · ${term.label}` : ''}
+                                                                </label>
+                                                                <div className="flex items-center gap-3">
+                                                                    <label
+                                                                        className="flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300 whitespace-nowrap cursor-pointer"
+                                                                        title="Adds the constraint odrl:event odrl:lt odrl:policyUsage"
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={!!d.beforeUse}
+                                                                            onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'beforeUse', e.target.checked)}
+                                                                        />
+                                                                        Before use
+                                                                    </label>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removePermissionDuty(pIdx, dIdx)}
+                                                                        className="text-rose-500 hover:text-rose-700"
+                                                                        title="Remove duty action"
+                                                                    >
+                                                                        <Trash2 size={12} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-1.5">
+                                                                <input
+                                                                    type="text"
                                                                     value={d.action || ''}
                                                                     title={term ? `${term.value} — ${term.description}` : d.action}
                                                                     onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'action', e.target.value)}
-                                                                    className="flex-1 min-w-0 px-2 py-1 rounded bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs font-mono"
-                                                                >
-                                                                    {!term && d.action && <option value={d.action}>{d.action}</option>}
-                                                                    {cv4DutyTerms.map(t => (
-                                                                        <option key={t.value} value={t.value} title={t.description}>
-                                                                            {t.label} ({t.value})
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                                <label
-                                                                    className="flex items-center gap-1 text-[11px] text-gray-600 dark:text-gray-300 whitespace-nowrap"
-                                                                    title="Adds the constraint odrl:event odrl:lt odrl:policyUsage"
-                                                                >
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={!!d.beforeUse}
-                                                                        onChange={(e) => updatePermissionDuty(pIdx, dIdx, 'beforeUse', e.target.checked)}
-                                                                    />
-                                                                    Before use
-                                                                </label>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removePermissionDuty(pIdx, dIdx)}
-                                                                    className="text-rose-500 hover:text-rose-700"
-                                                                    title="Remove duty action"
-                                                                >
-                                                                    <Trash2 size={12} />
-                                                                </button>
+                                                                    className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-xs font-mono flex-1 min-w-0"
+                                                                />
+                                                                <BrowseIconButton title="Browse duty actions" onClick={openDutyBrowser} />
                                                             </div>
-                                                            {term && term.description !== term.label && (
-                                                                <p className="text-[11px] text-gray-500 dark:text-gray-400">{term.description}</p>
+                                                            {term?.description && (
+                                                                <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{term.description}</p>
                                                             )}
                                                         </div>
                                                     );
                                                 })}
+                                                </div>
                                             </div>
                                         )}
 

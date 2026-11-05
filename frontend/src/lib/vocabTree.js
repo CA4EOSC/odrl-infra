@@ -135,3 +135,23 @@ export function actionTree(actions) {
         },
     });
 }
+
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// Duty actions (CDIF CV4). The scheme is flat, so terms are grouped by whether they map to an
+// ODRL 2.2 action (value odrl:<term>) or are CDIF-specific (value cv4:<term>).
+export function dutyTree(concepts) {
+    return groupedTree(concepts.filter(c => !c.deprecated), {
+        pathsOf: (c) => [[(c.value || '').startsWith('odrl:') ? 'ODRL 2.2 actions' : 'CDIF-specific duty actions']],
+        nodeOf: (c) => ({
+            value: c.value,
+            label: capitalize(humanize(c.label)),
+            description: [c.definition, ...(c.notes || [])].filter(Boolean).join(' — '),
+            meta: [
+                ...(c.id !== c.value ? [['CDIF concept', c.id]] : []),
+                ['IRI', c.iri],
+            ],
+        }),
+        order: { 'CDIF-specific duty actions': 0, 'ODRL 2.2 actions': 1 },
+    });
+}
